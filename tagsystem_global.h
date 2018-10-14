@@ -1,0 +1,12 @@
+#ifndef TAGSYSTEM_GLOBAL_H
+#define TAGSYSTEM_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(TAGSYSTEM_LIBRARY)
+#  define TAGSYSTEMSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define TAGSYSTEMSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // TAGSYSTEM_GLOBAL_H
