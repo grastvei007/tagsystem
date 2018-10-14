@@ -19,7 +19,7 @@ DEFINES += TAGSYSTEM_LIBRARY
 release: TARGET = tagsystem
 debug: TARGET = tagsystemd
 
-DESTDIR = /home/steini/Develop/lib
+DESTDIR = $$(DEV_LIBS)
 
 release: BUILDDIR = build/release
 debug:   BUILDDIR = build/debug
