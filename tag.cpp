@@ -155,3 +155,46 @@ Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
 
     return tag;
 }
+
+
+/**
+ * @brief Tag::toMessage
+ *
+ * Convert a tag name and its value to binary representation.
+ *
+ * @return Binary representation of a name/value pair.
+ */
+QByteArray Tag::toMessage()
+{
+    QByteArray ba;
+    ba.append(mName);
+    if(mType == eDouble)
+    {
+        ba.append(":f");
+        union U{
+           float f;
+           unsigned char byte[4];
+        }u;
+        u.f = (float)mDoubleValue;
+        ba.append(u.byte, 4);
+    }
+    else if(mType == eInt)
+    {
+        ba.append(":i");
+        union U{
+            int i;
+            unsigned char byte[4];
+        }u;
+        u.i = mIntValue;
+        ba.append(u.byte, 4);
+    }
+    else if(mType == eBool)
+    {
+        ba.append(":b");
+        ba.append( mBoolValue ? char(1) : char(0) );
+    }
+    else
+        Q_UNREACHABLE();
+
+    return ba;
+}

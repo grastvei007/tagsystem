@@ -16,6 +16,8 @@ public:
 
     int getNumberOfTagSockets() const;
 
+    TagSocket* getTagSocketByIndex(int aIndex);
+
     bool addTagSocket(TagSocket *aTagSocket);
     void removeTagSocket(TagSocket *aTagSocket);
 

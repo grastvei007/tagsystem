@@ -49,7 +49,9 @@ SOURCES += \
     taglisttablemodel.cpp \
     tagselectview.cpp \
     tagsocket.cpp \
-    tagsocketlist.cpp
+    tagsocketlist.cpp \
+    tagsocketlisttablemodel.cpp \
+    tagsocketlistview.cpp
 
 HEADERS += \
         tagsystem.h \
@@ -60,7 +62,9 @@ HEADERS += \
     taglisttablemodel.h \
     tagselectview.h \
     tagsocket.h \
-    tagsocketlist.h
+    tagsocketlist.h \
+    tagsocketlisttablemodel.h \
+    tagsocketlistview.h
 
 unix {
     target.path = /usr/lib

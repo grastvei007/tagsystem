@@ -25,6 +25,9 @@ public:
     QString getFullName() const;
     QString getSubSystem() const;
     QString getName() const;
+    QString getTypeStr() const;
+    Type getType() const;
+    Tag* getTag() const;
 
     void writeValue(double aValue);
     void writeValue(bool aValue);

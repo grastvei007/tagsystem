@@ -34,6 +34,29 @@ QString TagSocket::getName() const
     return mName;
 }
 
+
+QString TagSocket::getTypeStr() const
+{
+    if(mType == eDouble)
+        return QString("Double");
+    else if(mType == eInt)
+        return QString("Int");
+    else if(mType == eBool)
+        return QString("Bool");
+    else
+        Q_UNREACHABLE;
+}
+
+TagSocket::Type TagSocket::getType() const
+{
+    return mType;
+}
+
+Tag* TagSocket::getTag() const
+{
+    return mTag;
+}
+
 bool TagSocket::hookupTag(Tag *aTag)
 {
     if(!aTag)

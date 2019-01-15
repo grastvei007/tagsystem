@@ -24,3 +24,12 @@ void TagSocketList::removeTagSocket(TagSocket *aTagSocket)
     mTagSocketList.removeAll(aTagSocket);
     emit tagSocketRemoved();
 }
+
+
+TagSocket* TagSocketList::getTagSocketByIndex(int aIndex)
+{
+    if(aIndex < 0 || aIndex > mTagSocketList.size())
+        return nullptr;
+
+    return mTagSocketList.at(aIndex);
+}

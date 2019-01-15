@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QByteArray>
 
 class QXmlStreamReader;
 class QXmlStreamWriter;
@@ -37,6 +38,7 @@ public:
 
     void writeToXml(QXmlStreamWriter &aStream);
     static Tag* createFromXml(const QXmlStreamReader &aReader);
+    QByteArray toMessage();
 signals:
     void valueChanged(Tag*);
 public slots:
