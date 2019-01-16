@@ -8,7 +8,7 @@ QT       -= gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QT += xml websockets
+QT += core xml websockets
 
 TARGET = tagsystem
 TEMPLATE = lib

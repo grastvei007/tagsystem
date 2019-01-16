@@ -173,7 +173,7 @@ QByteArray Tag::toMessage()
         ba.append(":f");
         union U{
            float f;
-           unsigned char byte[4];
+           char byte[4];
         }u;
         u.f = (float)mDoubleValue;
         ba.append(u.byte, 4);
@@ -183,7 +183,7 @@ QByteArray Tag::toMessage()
         ba.append(":i");
         union U{
             int i;
-            unsigned char byte[4];
+            char byte[4];
         }u;
         u.i = mIntValue;
         ba.append(u.byte, 4);

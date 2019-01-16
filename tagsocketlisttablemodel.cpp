@@ -5,7 +5,7 @@
 #include "tag.h"
 
 
-TagSocketListTableModel::TagSocketListTableModel(QObject *parent) : QObject(parent)
+TagSocketListTableModel::TagSocketListTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
     connect(&TagSocketList::sGetInstance(),&TagSocketList::tagSocketAdded, this, &TagSocketListTableModel::onTagSocketCreated);
     connect(&TagSocketList::sGetInstance(), &TagSocketList::tagSocketRemoved, this, &TagSocketListTableModel::onTagSocketRemoved);
@@ -53,7 +53,7 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
                 return tagsocket->getTypeStr();
             }
             default:
-                Q_UNREACHABLE;
+                Q_UNREACHABLE();
         }
     }
 

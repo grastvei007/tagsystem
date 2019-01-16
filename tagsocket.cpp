@@ -44,7 +44,7 @@ QString TagSocket::getTypeStr() const
     else if(mType == eBool)
         return QString("Bool");
     else
-        Q_UNREACHABLE;
+        Q_UNREACHABLE();
 }
 
 TagSocket::Type TagSocket::getType() const
