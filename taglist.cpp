@@ -5,6 +5,8 @@
 #include <QWebSocket>
 #include <QTimer>
 
+#include "clientinformation.h"
+
 TagList& TagList::sGetInstance()
 {
     static TagList sTagList;
@@ -89,6 +91,9 @@ void TagList::toXml(QByteArray &rXml, bool aCreate) const
 
 void TagList::connectToServer(const QString &aAdress, qint16 aPort)
 {
+    if(mClientName.isEmpty())
+        qFatal("Set client name before connecting to server..");
+
     QUrl url(QString("ws://%1:%2").arg(aAdress).arg(QString::number(aPort)));
     qDebug() << "Connect to: " << url;
     mWebSocket = new QWebSocket;
@@ -98,6 +103,10 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
     mWebSocket->open(url);
 }
 
+void TagList::setClientName(const QString &aName)
+{
+    mClientName = aName;
+}
 
 void TagList::onError()
 {
@@ -138,6 +147,9 @@ void TagList::onError()
 
 void TagList::onConnected()
 {
+    ClientInformation cl(mClientName);
+    mWebSocket->sendTextMessage(cl.getInfo());
+
     connect(mWebSocket, &QWebSocket::binaryMessageReceived, this, &TagList::onBinaryDataRecieved);
    // QByteArray data;
    // toXml(data);

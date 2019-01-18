@@ -30,6 +30,7 @@ public:
 
     void freeRide(bool aOn);
     void connectToServer(const QString &aAdress, qint16 aPort);
+    void setClientName(const QString &aName);
 signals:
     void valueChanged();
     void tagCreated();
@@ -57,6 +58,8 @@ private:
     QVector<Tag*> mTagsCreateQueue;
     QVector<Tag*> mTagUpdateQueue;
     QTimer *mTagSyncTimer;
+
+    QString mClientName; ///< the name that identify this client when connected to a server.
 };
 
 #endif // TAGLIST_H
