@@ -16,7 +16,8 @@ public:
     enum Type{
         eDouble,
         eInt,
-        eBool
+        eBool,
+        eString
     };
     explicit Tag(QObject *parent = nullptr);
 
@@ -25,6 +26,7 @@ public:
     void setValue(double aValue);
     void setValue(int aValue);
     void setValue(bool aValue);
+    void setValue(QString aValue);
 
     Type getType() const;
     QString getTypeStr() const;
@@ -35,6 +37,7 @@ public:
     double getDoubleValue() const;
     int getIntValue() const;
     bool getBoolValue() const;
+    QString getStringValue() const;
 
     void writeToXml(QXmlStreamWriter &aStream);
     static Tag* createFromXml(const QXmlStreamReader &aReader);
@@ -51,6 +54,7 @@ private:
     double mDoubleValue;
     int mIntValue;
     bool mBoolValue;
+    QString mStringValue;
 };
 
 

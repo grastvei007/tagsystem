@@ -8,7 +8,8 @@ Tag::Tag(QObject *parent) : QObject(parent),
   mDoubleValue(0.0),
   mIntValue(0),
   mBoolValue(false),
-    mType(Tag::eDouble)
+  mType(Tag::eDouble),
+  mStringValue()
 {
 
 }
@@ -20,6 +21,7 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
     mType(aType),
     mDoubleValue(0.0),
     mIntValue(0),
+    mStringValue(),
     mBoolValue(false)
 {
 
@@ -50,6 +52,16 @@ void Tag::setValue(bool aValue)
     if(aValue == mBoolValue)
         return;
     mBoolValue = aValue;
+    emit valueChanged(this);
+}
+
+
+void Tag::setValue(QString aValue)
+{
+    if(mStringValue == aValue)
+        return;
+
+    mStringValue = aValue;
     emit valueChanged(this);
 }
 
@@ -84,6 +96,8 @@ QString Tag::getTypeStr() const
         return "Int";
     case eBool:
         return "Bool";
+    case eString:
+        return "String";
     }
 
     Q_UNREACHABLE();
@@ -108,6 +122,11 @@ bool Tag::getBoolValue() const
 }
 
 
+QString Tag::getStringValue() const
+{
+    return mStringValue;
+}
+
 void Tag::writeToXml(QXmlStreamWriter &aStream)
 {
     aStream.writeStartElement("tag");
@@ -120,6 +139,8 @@ void Tag::writeToXml(QXmlStreamWriter &aStream)
         aStream.writeAttribute("value", QString::number(mIntValue));
     else if(mType == eBool)
         aStream.writeAttribute("value", (mBoolValue) ? "1" : "0");
+    else if(mType == eString)
+        aStream.writeAttribute("value", mStringValue);
     else
         Q_UNREACHABLE(); ///< unhandled tag type.
 
@@ -148,6 +169,11 @@ Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
     {
         tag = new Tag(sub,name, eBool);
         tag->setValue( (val.toInt() == 1) ? true : false );
+    }
+    else if(type == "String")
+    {
+        tag = new Tag(sub, name, eString);
+        tag->setValue(val);
     }
 
     aReader.attributes().value("value");

@@ -41,6 +41,9 @@ bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value,
         case Tag::eBool:
             tag->setValue(value.toBool());
             return true;
+        case Tag::eString:
+            tag->setValue(value.toString());
+            return true;
         }
     }
 
@@ -78,6 +81,8 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
                 return tag->getIntValue();
             else if(tag->getType() == Tag::eBool)
                 return tag->getBoolValue();
+            else if(tag->getType() == Tag::eString)
+                return tag->getStringValue();
         }
 
         default:

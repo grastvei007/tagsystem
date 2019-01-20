@@ -13,7 +13,8 @@ public:
     enum Type{
         eDouble,
         eInt,
-        eBool
+        eBool,
+        eString
     };
     TagSocket(QString aSubSystem, QString aName, Type aType);
     ~TagSocket();
@@ -32,14 +33,18 @@ public:
     void writeValue(double aValue);
     void writeValue(bool aValue);
     void writeValue(int aValue);
+    void writeValue(QString aValue);
 
     bool readValue(double &rValue);
     bool readValue(bool &rValue);
     bool readValue(int &rValue);
+    bool readValue(QString &rValue);
 signals:
     void valueChanged(double);
     void valueChanged(bool);
     void valueChanged(int);
+    void valueChanged(QString);
+    void valueChanged(TagSocket*);
 
 private slots:
     void onTagValueChanged(Tag* aTag);

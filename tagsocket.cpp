@@ -43,6 +43,8 @@ QString TagSocket::getTypeStr() const
         return QString("Int");
     else if(mType == eBool)
         return QString("Bool");
+    else if(mType == eString)
+        return QString("String");
     else
         Q_UNREACHABLE();
 }
@@ -77,6 +79,12 @@ bool TagSocket::hookupTag(Tag *aTag)
     else if(mType == eInt)
     {
         if(aTag->getType()  != Tag::eInt)
+            return false;
+        mTag = aTag;
+    }
+    else if(mType == eString)
+    {
+        if(aTag->getType() != Tag::eString)
             return false;
         mTag = aTag;
     }
@@ -129,6 +137,13 @@ void TagSocket::writeValue(int aValue)
 }
 
 
+void TagSocket::writeValue(QString aValue)
+{
+    if(mTag)
+        mTag->setValue(aValue);
+}
+
+
 bool TagSocket::readValue(double &rValue)
 {
     if(!mTag)
@@ -156,6 +171,14 @@ bool TagSocket::readValue(int &rValue)
 }
 
 
+bool TagSocket::readValue(QString &rValue)
+{
+    if(!mTag)
+        return false;
+    rValue = mTag->getStringValue();
+    return true;
+}
+
 void TagSocket::onTagValueChanged(Tag* aTag)
 {
     if(mType == eDouble)
@@ -170,8 +193,12 @@ void TagSocket::onTagValueChanged(Tag* aTag)
     {
         emit valueChanged(aTag->getIntValue());
     }
+    else if(mType == eString)
+        emit valueChanged(aTag->getStringValue());
     else
         Q_UNREACHABLE();
+
+    emit valueChanged(this);
 }
 
 void TagSocket::onTagCreated()
