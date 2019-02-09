@@ -1,8 +1,11 @@
 #include "tagsocketlisttablemodel.h"
 
+#include <QColor>
+
 #include "tagsocket.h"
 #include "tagsocketlist.h"
 #include "tag.h"
+#include "taglist.h"
 
 
 TagSocketListTableModel::TagSocketListTableModel(QObject *parent) : QAbstractTableModel(parent)
@@ -35,6 +38,8 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
     if(role == Qt::DisplayRole)
     {
         TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByIndex(index.row());
+        if(!tagsocket)
+            return QVariant(QVariant::Invalid);
         switch(index.column())
         {
             case eTagSocketName:
@@ -55,6 +60,16 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
             default:
                 Q_UNREACHABLE();
         }
+    }
+    else if(role == Qt::BackgroundColorRole)
+    {
+        TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByIndex(index.row());
+        if(!tagsocket)
+            return QVariant(QVariant::Invalid);
+        if(tagsocket->isHookedUp())
+            return QColor(Qt::green);
+        else
+            return QColor(Qt::gray);
     }
 
     return QVariant(QVariant::Invalid);
@@ -91,7 +106,22 @@ QVariant TagSocketListTableModel::headerData(int section, Qt::Orientation orient
 
 bool TagSocketListTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    //TODO: allow to change tag from gui.
+    if(role == Qt::EditRole)
+    {
+        if(index.column() == eTagName)
+        {
+            Tag *tag = TagList::sGetInstance().findByTagName(value.toString());
+            if(!tag)
+                return false;
+
+            TagSocket *tagsocet = TagSocketList::sGetInstance().getTagSocketByIndex(index.row());
+            if(!tagsocet)
+                return false;
+
+            tagsocet->hookupTag(tag);
+            return true;
+        }
+    }
     return false;
 }
 

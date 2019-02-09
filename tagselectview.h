@@ -36,14 +36,4 @@ private:
 };
 
 
-class TableView : public QTableView
-{
-    Q_OBJECT
-public:
-    TableView(QWidget *aParent = nullptr);
-    ~TableView();
-
-    Tag* getSelectedTag();
-};
-
 #endif // TAGSELECTVIEW_H

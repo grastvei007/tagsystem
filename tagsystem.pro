@@ -74,4 +74,5 @@ unix {
 }
 
 FORMS += \
-    tagselectview.ui
+    tagselectview.ui \
+    tagsocketlistview.ui
