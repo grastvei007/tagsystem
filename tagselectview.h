@@ -5,6 +5,9 @@
 #include <QDialog>
 #include <memory>
 #include <QTableView>
+#include <QItemSelectionModel>
+
+
 
 class TagListTableModel;
 class Tag;
@@ -23,6 +26,7 @@ public:
     ~TagSelectView();
 
     Tag* getSelectedTag() const;
+
 private slots:
     void onCancelClicked(bool);
     void onSelectClicked(bool);
@@ -31,8 +35,21 @@ private:
     Ui::TagSelectView *ui;
 
     std::unique_ptr<TagListTableModel> mTagListTableModel;
-    std::unique_ptr<TableView> mTableView;
     Tag *mSelectedTag;
+    std::unique_ptr<QItemSelectionModel> mItemSelectionModel;
+   // std::unique_ptr<TableView> mTableView;
+};
+
+
+class TableView : public QTableView
+{
+    Q_OBJECT
+public:
+    TableView(QWidget *parent=nullptr);
+    virtual ~TableView();
+
+    Tag* getSelectedTag();
+
 };
 
 

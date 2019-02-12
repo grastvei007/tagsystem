@@ -2,6 +2,8 @@
 #include "ui_tagselectview.h"
 
 #include <QTableView>
+#include <QResizeEvent>
+#include <QSize>
 
 #include "taglisttablemodel.h"
 #include "tag.h"
@@ -15,12 +17,14 @@ TagSelectView::TagSelectView(QWidget *parent) :
     ui->setupUi(this);
 
     mTagListTableModel.reset(new TagListTableModel());
+    mItemSelectionModel.reset(new QItemSelectionModel());
 
-    ui->mTableView->setModel(mTagListTableModel.get());
-    ui->mTableView->setSelectionMode(QAbstractItemView::SingleSelection);
-
+    ui->mTableview->setModel(mTagListTableModel.get());
     connect(ui->mCancel, &QPushButton::clicked, this, &TagSelectView::onCancelClicked);
     connect(ui->mSelect, &QPushButton::clicked, this, &TagSelectView::onSelectClicked);
+
+
+  //  connect( ui->mTableView, &QTableView::selectionChanged, this, &TagSelectView::onCurrentRowChanged);
 }
 
 TagSelectView::~TagSelectView()
@@ -37,26 +41,48 @@ void TagSelectView::onCancelClicked(bool)
 
 void TagSelectView::onSelectClicked(bool)
 {
-    QModelIndexList list = ui->mTableView->selectedIndexes();
-    if(!list.isEmpty())
+    mSelectedTag = ui->mTableview->getSelectedTag();
+
+   // QModelIndex idx = mItemSelectionModel->currentIndex();
+   /* if(!list.isEmpty())
     {
         QModelIndex idx = list.first();
         mSelectedTag = TagList::sGetInstance().getTagByIndex(idx.row());
 
+    }*/
 
-        emit accepted();
-    }
-
-  /*  mSelectedTag = mTableView->getSelectedTag();
     if(mSelectedTag)
         emit accept();
     else    // nothing selected.
-        emit reject();*/
+        emit reject();
 }
 
 
 Tag* TagSelectView::getSelectedTag() const
 {
     return mSelectedTag;
+}
+
+
+TableView::TableView(QWidget *parent) : QTableView(parent)
+{
+    setSelectionMode(QAbstractItemView::SingleSelection);
+}
+
+TableView::~TableView()
+{
+
+}
+
+Tag* TableView::getSelectedTag()
+{
+    Tag* tag = nullptr;
+    auto idx = currentIndex();
+    if(idx.isValid())
+    {
+        tag = TagList::sGetInstance().getTagByIndex(idx.row());
+    }
+
+    return tag;
 }
 
