@@ -44,7 +44,7 @@ int TagSocketListTableModel::rowCount(const QModelIndex &parent) const
 
 int TagSocketListTableModel::columnCount(const QModelIndex &parent) const
 {
-    return 3;
+    return 4;
 }
 
 
@@ -63,14 +63,41 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
             }
             case eTagName:
             {
-                Tag *tag = tagsocket->getTag();
-                if(tag)
-                    return tag->getFullName();
-                break;
+               return tagsocket->getTagName();
             }
             case eType:
             {
                 return tagsocket->getTypeStr();
+            }
+            case eValue:
+            {
+                if(tagsocket->getType() == TagSocket::eBool)
+                {
+                    bool b;
+                    tagsocket->readValue(b);
+                    return QVariant(b);
+                }
+                else if(tagsocket->getType() == TagSocket::eDouble)
+                {
+                    double d;
+                    tagsocket->readValue(d);
+                    return QVariant(d);
+                }
+                else if(tagsocket->getType() == TagSocket::eInt)
+                {
+                    int i;
+                    tagsocket->readValue(i);
+                    return QVariant(i);
+                }
+                else if(tagsocket->getType() == TagSocket::eString)
+                {
+                    QString str;
+                    tagsocket->readValue(str);
+                    return str;
+                }
+                else {
+                   Q_UNREACHABLE();
+                }
             }
             default:
                 Q_UNREACHABLE();
@@ -83,6 +110,8 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
             return QVariant(QVariant::Invalid);
         if(tagsocket->isHookedUp())
             return QColor(Qt::green);
+        else if(!tagsocket->isHookedUp() && !tagsocket->getTagName().isEmpty())
+            return QColor(Qt::red);
         else
             return QColor(Qt::gray);
     }
@@ -105,6 +134,8 @@ QVariant TagSocketListTableModel::headerData(int section, Qt::Orientation orient
                     return "Tag Name";
                 case eType:
                     return "Type";
+                case eValue:
+                    return "Value";
                 default:
                     break;
             }
@@ -157,4 +188,11 @@ void TagSocketListTableModel::onTagSocketRemoved()
 {
     emit layoutAboutToBeChanged();
     emit layoutChanged();
+}
+
+
+
+void TagSocketListTableModel::saveTagSocketBindings()
+{
+    TagSocketList::sGetInstance().saveBindingList();
 }

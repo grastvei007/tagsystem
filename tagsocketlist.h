@@ -32,9 +32,15 @@ public:
     int getNumberOfTagSockets() const;
 
     TagSocket* getTagSocketByIndex(int aIndex);
+    TagSocket* getTagSocketByName(QString aName);
 
     bool addTagSocket(TagSocket *aTagSocket);
     void removeTagSocket(TagSocket *aTagSocket);
+
+    void saveBindingList();
+    void loadBindingList();
+
+    void setApplicationName(QString aName); ///< set the appplication name, used in path for config files.
 
 signals:
     void tagSocketAdded();
@@ -45,6 +51,8 @@ public slots:
 private:
     QMap<QString, TagSocket*> mTagSocketByName;
     QVector<TagSocket*> mTagSocketList;
+
+    QString mApplicationName;
 };
 
 #endif // TAGSOCKETLIST_H

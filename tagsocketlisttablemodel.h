@@ -26,7 +26,8 @@ public:
     {
         eTagSocketName,
         eTagName,
-        eType
+        eType,
+        eValue
     };
 
     TagSocketListTableModel(QObject *parent = 0);
@@ -39,6 +40,10 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
     Qt::ItemFlags flags(const QModelIndex &index) const;
+
+public slots:
+    void saveTagSocketBindings();
+
 signals:
 
 private slots:

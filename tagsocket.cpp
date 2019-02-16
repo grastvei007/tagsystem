@@ -18,11 +18,24 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "taglist.h"
 #include "tagsocketlist.h"
 
+
+TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, Type aType)
+{
+    QString fullname = QString("%1.%2").arg(aSubSystem).arg(aName);
+    TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByName(fullname);
+    if(tagsocket)
+        return tagsocket;
+    tagsocket = new TagSocket(aSubSystem, aName, aType);
+    return tagsocket;
+}
+
+
 TagSocket::TagSocket(QString aSubSystem, QString aName, Type aType) :
     mSubSystem(aSubSystem),
     mName(aName),
     mType(aType),
-    mTag(nullptr)
+    mTag(nullptr),
+    mTagName()
 {
     TagSocketList::sGetInstance().addTagSocket(this);
 }
@@ -62,6 +75,12 @@ QString TagSocket::getTypeStr() const
         return QString("String");
     else
         Q_UNREACHABLE();
+}
+
+
+QString TagSocket::getTagName() const
+{
+    return mTagName;
 }
 
 TagSocket::Type TagSocket::getType() const
@@ -108,6 +127,7 @@ bool TagSocket::hookupTag(Tag *aTag)
     {
         connect(mTag, &Tag::valueChanged, this, &TagSocket::onTagValueChanged);
         onTagValueChanged(mTag); // get an update
+        mTagName = mTag->getFullName();
         return true;
     }
 

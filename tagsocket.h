@@ -31,7 +31,10 @@ public:
         eBool,
         eString
     };
-    TagSocket(QString aSubSystem, QString aName, Type aType);
+    ///< construct a new tagsocket.
+    static TagSocket* createTagSocket(QString aSubSystem, QString aName, Type aType);
+
+
     ~TagSocket();
 
     bool hookupTag(Tag *aTag);
@@ -42,6 +45,7 @@ public:
     QString getSubSystem() const;
     QString getName() const;
     QString getTypeStr() const;
+    QString getTagName() const;
     Type getType() const;
     Tag* getTag() const;
 
@@ -64,6 +68,9 @@ signals:
 private slots:
     void onTagValueChanged(Tag* aTag);
     void onTagCreated();
+
+private:
+    TagSocket(QString aSubSystem, QString aName, Type aType);
 
 private:
     Tag *mTag;

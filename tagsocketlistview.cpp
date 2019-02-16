@@ -35,6 +35,9 @@ TagSocketListView::TagSocketListView(QWidget *parent) : QWidget(parent),
 
     connect(mUi->mTable, &QTableView::doubleClicked, this, &TagSocketListView::onDoubleClick);
 
+    connect(mUi->mClose, &QPushButton::clicked, this, &TagSocketListView::onCloseClicked);
+    connect(mUi->mOk, &QPushButton::clicked, this, &TagSocketListView::onOkClicked);
+    connect(mUi->mSave, &QPushButton::clicked, this, &TagSocketListView::onSaveClicked);
 }
 
 
@@ -54,3 +57,21 @@ void TagSocketListView::onDoubleClick(const QModelIndex &aIndex)
     }
 
  }
+
+
+void TagSocketListView::onCloseClicked(bool aChecked)
+{
+
+}
+
+
+void TagSocketListView::onOkClicked(bool aChecked)
+{
+
+}
+
+
+void TagSocketListView::onSaveClicked(bool aCkecked)
+{
+    mTagSocketListTableModel->saveTagSocketBindings();
+}

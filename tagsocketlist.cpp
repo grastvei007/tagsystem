@@ -15,6 +15,12 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "tagsocketlist.h"
 
+#include <QString>
+#include <QDir>
+#include <QDebug>
+#include <QXmlStreamWriter>
+#include <QXmlStreamReader>
+
 TagSocketList& TagSocketList::sGetInstance()
 {
     static TagSocketList sTagSocketList;
@@ -47,4 +53,144 @@ TagSocket* TagSocketList::getTagSocketByIndex(int aIndex)
         return nullptr;
 
     return mTagSocketList.at(aIndex);
+}
+
+
+TagSocket* TagSocketList::getTagSocketByName(QString aName)
+{
+    if(mTagSocketByName.contains(aName))
+    {
+        return mTagSocketByName[aName];
+    }
+    return nullptr;
+}
+
+
+void TagSocketList::setApplicationName(QString aName)
+{
+    mApplicationName = aName;
+}
+
+
+void TagSocketList::saveBindingList()
+{
+
+    QString path = QDir::homePath() + QDir::separator() + ".config" + QDir::separator() + "june";
+    if(mApplicationName.isEmpty())
+    {
+        qDebug() << __FUNCTION__ << "Set application name";
+
+    }
+    else
+        path += QDir::separator() + mApplicationName;
+
+
+    QDir dir(path);
+    if(!dir.exists())
+        QDir().mkpath(path);
+
+    path.append(QDir::separator());
+    path.append("tagsocketbindings.xml");
+    QFile file(path);
+    if(!file.open(QIODevice::WriteOnly))
+        qDebug() << __FUNCTION__ << "Error opening file, " << path;
+
+    QXmlStreamWriter stream(&file);
+    stream.setAutoFormatting(true);
+    stream.writeStartDocument();
+    stream.writeStartElement("bindings");
+
+    for(int i=0; i<TagSocketList::sGetInstance().getNumberOfTagSockets(); ++i)
+    {
+        TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByIndex(i);
+        stream.writeStartElement("tagsocket");
+        stream.writeAttribute("subsystem", tagsocket->getSubSystem());
+        stream.writeAttribute("name", tagsocket->getName());
+        stream.writeAttribute("type", tagsocket->getTypeStr());
+        if(tagsocket->isHookedUp())
+        {
+            stream.writeAttribute("hookedup", "1");
+            Tag *tag = tagsocket->getTag();
+            stream.writeAttribute("tagsubsystem", tag->getSubsystem());
+            stream.writeAttribute("tagname", tag->getName());
+        }
+        else
+        {
+           stream.writeAttribute("hookedup", "0");
+        }
+        stream.writeEndElement();
+    }
+
+    stream.writeEndElement();
+    stream.writeEndDocument();
+
+    file.close();
+}
+
+
+void TagSocketList::loadBindingList()
+{
+    QString path = QDir::homePath() + QDir::separator() + ".config" + QDir::separator() + "june";
+    if(mApplicationName.isEmpty())
+    {
+        qDebug() << __FUNCTION__ << "Set application name";
+
+    }
+    else
+        path += QDir::separator() + mApplicationName;
+
+    path.append(QDir::separator());
+    path.append("tagsocketbindings.xml");
+    QFile file(path);
+    if(!file.exists())
+    {
+        qDebug() << __FUNCTION__ << "File does not exist, " << path;
+        return;
+    }
+
+    file.open(QIODevice::ReadOnly);
+    QXmlStreamReader stream(&file);
+
+    while(!stream.atEnd() && !stream.hasError())
+    {
+        QXmlStreamReader::TokenType token = stream.readNext();
+        if(token == QXmlStreamReader::StartDocument)
+            continue;
+        if(token == QXmlStreamReader::StartElement)
+        {
+            if(stream.name() == "bindings")
+                continue;
+            if(stream.name() == "tagsocket")
+            {
+                QString subsytem = stream.attributes().value("subsystem").toString();
+                QString name = stream.attributes().value("name").toString();
+                QString type = stream.attributes().value("type").toString();
+                TagSocket::Type t;
+                if(type == "Bool")
+                    t = TagSocket::eBool;
+                else if(type == "Int")
+                    t = TagSocket::eInt;
+                else if(type == "Double")
+                    t = TagSocket::eDouble;
+                else if(type == "String")
+                    t = TagSocket::eString;
+                else
+                    Q_UNREACHABLE();
+
+                TagSocket *tagsocket = TagSocket::createTagSocket(subsytem, name, t);
+                if(stream.attributes().value("hookedup").toInt() == 1)
+                {
+                    QString tagsubsystem = stream.attributes().value("tagsubsystem").toString();
+                    QString tagname = stream.attributes().value("tagname").toString();
+                    tagsocket->hookupTag(tagsubsystem, tagname);
+                }
+            }
+        }
+    }
+    if(stream.hasError())
+    {
+        qDebug() << __FUNCTION__ << stream.errorString();
+    }
+
+    file.close();
 }
