@@ -65,7 +65,14 @@ TagSocket* TagSocketList::getTagSocketByName(QString aName)
     return nullptr;
 }
 
-
+/**
+ * @brief TagSocketList::setApplicationName
+ * @param aName
+ *
+ * Set the application name.
+ * The name is used in the path for save and load tagsocket
+ * binding list.
+ */
 void TagSocketList::setApplicationName(QString aName)
 {
     mApplicationName = aName;
