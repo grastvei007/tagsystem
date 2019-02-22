@@ -58,6 +58,7 @@ Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
     mTagByName[tag->getFullName()] = tag;
     mTags.push_back(tag);
     connect(tag, &Tag::valueChanged, this, &TagList::valueChanged);
+    connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
     if(mWebSocket)
         mTagsCreateQueue.push_back(tag);

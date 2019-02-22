@@ -47,6 +47,7 @@ public:
     void connectToServer(const QString &aAdress, qint16 aPort);
     void setClientName(const QString &aName);
 signals:
+    void tagValueChanged(Tag*);
     void valueChanged();
     void tagCreated();
 

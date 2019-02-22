@@ -19,7 +19,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tagsocketlist.h"
 
 
-TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, Type aType)
+TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, TagSocket::Type aType)
 {
     QString fullname = QString("%1.%2").arg(aSubSystem).arg(aName);
     TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByName(fullname);

@@ -34,7 +34,6 @@ public:
     ///< construct a new tagsocket.
     static TagSocket* createTagSocket(QString aSubSystem, QString aName, Type aType);
 
-
     ~TagSocket();
 
     bool hookupTag(Tag *aTag);

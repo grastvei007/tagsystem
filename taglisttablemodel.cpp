@@ -43,22 +43,25 @@ int TagListTableModel::columnCount(const QModelIndex &parent) const
 
 bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if(index.column() == eValue)
+    if(role == Qt::EditRole)
     {
-        Tag *tag = TagList::sGetInstance().getTagByIndex(index.row());
-        switch (tag->getType()) {
-        case Tag::eDouble:
-            tag->setValue(value.toDouble());
-            return true;
-        case Tag::eInt:
-            tag->setValue(value.toInt());
-            return true;
-        case Tag::eBool:
-            tag->setValue(value.toBool());
-            return true;
-        case Tag::eString:
-            tag->setValue(value.toString());
-            return true;
+        if(index.column() == eValue)
+        {
+            Tag *tag = TagList::sGetInstance().getTagByIndex(index.row());
+            switch (tag->getType()) {
+            case Tag::eDouble:
+                tag->setValue(value.toDouble());
+                return true;
+            case Tag::eInt:
+                tag->setValue(value.toInt());
+                return true;
+            case Tag::eBool:
+                tag->setValue(value.toBool());
+                return true;
+            case Tag::eString:
+                tag->setValue(value.toString());
+                return true;
+            }
         }
     }
 
@@ -149,7 +152,7 @@ void TagListTableModel::onTagCreated()
 
 void TagListTableModel::onTagValueChanged()
 {
-  //  beginResetModel();
+    //beginResetModel();
     QModelIndex top = index(0, eValue);
     QModelIndex bottom = index(rowCount(), eValue);
     emit dataChanged(top, bottom);
