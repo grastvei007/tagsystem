@@ -336,6 +336,10 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     {
         tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
     }
+    else if(tag->getType() == Tag::eString)
+    {
+        tag->setValue(attribs.value("value").toString());
+    }
     else
         Q_UNREACHABLE();
 
