@@ -49,6 +49,7 @@ signals:
 private slots:
     void onTagSocketCreated();
     void onTagSocketRemoved();
+    void onTagSocketValueChanged();
 };
 
 #endif // TAGSOCKETLISTTABLEMODEL_H

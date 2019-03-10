@@ -36,6 +36,7 @@ bool TagSocketList::addTagSocket(TagSocket *aTagSocket)
 {
     mTagSocketList.push_back(aTagSocket);
     mTagSocketByName[aTagSocket->getFullName()] = aTagSocket;
+    connect(aTagSocket, qOverload<TagSocket*>(&TagSocket::valueChanged), this, &TagSocketList::tagSocketValueChanged);
     emit tagSocketAdded();
 }
 

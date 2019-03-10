@@ -27,6 +27,7 @@ TagSocketListTableModel::TagSocketListTableModel(QObject *parent) : QAbstractTab
 {
     connect(&TagSocketList::sGetInstance(),&TagSocketList::tagSocketAdded, this, &TagSocketListTableModel::onTagSocketCreated);
     connect(&TagSocketList::sGetInstance(), &TagSocketList::tagSocketRemoved, this, &TagSocketListTableModel::onTagSocketRemoved);
+    connect(&TagSocketList::sGetInstance(), &TagSocketList::tagSocketValueChanged, this, &TagSocketListTableModel::onTagSocketValueChanged);
 }
 
 
@@ -195,4 +196,12 @@ void TagSocketListTableModel::onTagSocketRemoved()
 void TagSocketListTableModel::saveTagSocketBindings()
 {
     TagSocketList::sGetInstance().saveBindingList();
+}
+
+
+void TagSocketListTableModel::onTagSocketValueChanged()
+{
+    QModelIndex top = index(0, eValue);
+    QModelIndex bottom = index(rowCount(), eValue);
+    emit dataChanged(top, bottom);
 }

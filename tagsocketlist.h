@@ -45,6 +45,7 @@ public:
 signals:
     void tagSocketAdded();
     void tagSocketRemoved();
+    void tagSocketValueChanged();
 
 public slots:
 
