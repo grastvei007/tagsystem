@@ -52,7 +52,8 @@ SOURCES += \
     tagsocketlist.cpp \
     tagsocketlisttablemodel.cpp \
     tagsocketlistview.cpp \
-    clientinformation.cpp
+    clientinformation.cpp \
+    serverconnectwidget.cpp
 
 HEADERS += \
         tagsystem.h \
@@ -66,7 +67,8 @@ HEADERS += \
     tagsocketlist.h \
     tagsocketlisttablemodel.h \
     tagsocketlistview.h \
-    clientinformation.h
+    clientinformation.h \
+    serverconnectwidget.h
 
 unix {
     target.path = /usr/lib
@@ -75,4 +77,5 @@ unix {
 
 FORMS += \
     tagselectview.ui \
-    tagsocketlistview.ui
+    tagsocketlistview.ui \
+    serverconnectwidget.ui

@@ -194,7 +194,7 @@ void TagList::onDisconnected()
  */
 void TagList::onBinaryDataRecieved(QByteArray aMsg)
 {
-    qDebug() << __FUNCTION__ << aMsg;
+    //qDebug() << __FUNCTION__ << aMsg;
     QXmlStreamReader stream(aMsg);
 
     while(!stream.atEnd() && !stream.hasError())
@@ -308,7 +308,7 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
         tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eBool);
         tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
     }
-
+    emit tagCreated();
     return tag;
 }
 
