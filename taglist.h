@@ -23,6 +23,8 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tag.h"
 
 class QWebSocket;
+class QUdpSocket;
+
 
 class QTimer;
 
@@ -46,10 +48,13 @@ public:
     void freeRide(bool aOn);
     void connectToServer(const QString &aAdress, qint16 aPort);
     void setClientName(const QString &aName);
+
+    void setAutoconnectOnBroadcast(bool aAutoconnect);
 signals:
     void tagValueChanged(Tag*);
     void valueChanged();
     void tagCreated();
+
 
 private slots:
     void onConnected();
@@ -60,6 +65,8 @@ private slots:
     void syncTags();
 
     void onError();
+
+    void onRecieveDatagrams(); ///< recieve brodcast message.
 private:
     TagList();
 
@@ -68,6 +75,7 @@ private:
     QVector<Tag*> mTags;
 
     QWebSocket *mWebSocket;
+    QUdpSocket *mUdpSocket;
 
     bool mFreeRideFlag;
     // Tags to sync with server if connected.
@@ -76,6 +84,9 @@ private:
     QTimer *mTagSyncTimer;
 
     QString mClientName; ///< the name that identify this client when connected to a server.
+
+    bool mAutoconnectOnBroadcastFlag;
+    bool mIsConnected;
 };
 
 #endif // TAGLIST_H
