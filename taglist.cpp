@@ -18,6 +18,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 #include <QWebSocket>
+#include <QtNetwork>
 #include <QTimer>
 
 #include "clientinformation.h"
@@ -31,9 +32,13 @@ TagList& TagList::sGetInstance()
 TagList::TagList() :
     mWebSocket(nullptr),
     mTagSyncTimer(nullptr),
-    mFreeRideFlag(false)
+    mFreeRideFlag(false),
+    mAutoconnectOnBroadcastFlag(false),
+    mIsConnected(false)
 {
-
+    mUdpSocket = new QUdpSocket(this);
+    mUdpSocket->bind(45454, QUdpSocket::ShareAddress);
+    connect(mUdpSocket, &QUdpSocket::readyRead, this, &TagList::onRecieveDatagrams);
 }
 
 void TagList::freeRide(bool aOn)
@@ -177,12 +182,13 @@ void TagList::onConnected()
         connect(mTagSyncTimer, &QTimer::timeout, this, &TagList::syncTags);
         mTagSyncTimer->start();
     }
+    mIsConnected = true;
 }
 
 
 void TagList::onDisconnected()
 {
-
+    mIsConnected = false;
 }
 
 
@@ -364,4 +370,33 @@ void TagList::onTagValueChanged(Tag *aTag)
 
     if(mFreeRideFlag)
         syncTags();
+}
+
+
+void TagList::onRecieveDatagrams()
+{
+    QByteArray datagram;
+    while(mUdpSocket->hasPendingDatagrams())
+    {
+        datagram.resize(int(mUdpSocket->pendingDatagramSize()));
+        mUdpSocket->readDatagram(datagram.data(), datagram.size());
+    }
+
+    qDebug() << __FUNCTION__ << "datagram: " << datagram;
+    if(mIsConnected)
+        return;
+    if(!mAutoconnectOnBroadcastFlag)
+        return;
+
+    QString msg(datagram);
+    QStringList list = msg.split(":");
+    if(list.size() < 1)
+        return;
+    connectToServer(list[1], 5000);
+}
+
+
+void TagList::setAutoconnectOnBroadcast(bool aAutoconnect)
+{
+    mAutoconnectOnBroadcastFlag = aAutoconnect;
 }
