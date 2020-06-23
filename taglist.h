@@ -16,6 +16,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #ifndef TAGLIST_H
 #define TAGLIST_H
 
+#include "tagsystem_global.h"
 #include <QObject>
 #include <QMap>
 #include <QVector>
@@ -28,7 +29,7 @@ class QUdpSocket;
 
 class QTimer;
 
-class TagList : public QObject
+class TAGSYSTEMSHARED_EXPORT TagList : public QObject
 {
     Q_OBJECT
 public:

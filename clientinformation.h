@@ -16,10 +16,11 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #ifndef CLIENTINFORMATION_H
 #define CLIENTINFORMATION_H
 
+#include "tagsystem_global.h"
 #include <QObject>
 #include <QString>
 
-class ClientInformation
+class TAGSYSTEMSHARED_EXPORT ClientInformation
 {
 public:
     ClientInformation(const QString &mName);

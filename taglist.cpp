@@ -20,6 +20,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QWebSocket>
 #include <QtNetwork>
 #include <QTimer>
+#include <QDebug>
 
 #include "clientinformation.h"
 
@@ -328,23 +329,34 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
 
     Tag *tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
     if(!tag)
+    {
+        qDebug() << "Local tag do not exist: " << QString("%1.%2").arg(subsystem).arg(name);
         return nullptr;
+    }
 
     if(tag->getType() == Tag::eDouble)
     {
-        tag->setValue(attribs.value("value").toDouble());
+        double value = attribs.value("value").toDouble();
+        tag->setValue(value);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eInt)
     {
-        tag->setValue(attribs.value("value").toInt());
+        int value = attribs.value("value").toInt();
+        tag->setValue(value);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eBool)
     {
-        tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
+        bool value = attribs.value("value").toInt() == 1 ? true : false;
+        tag->setValue(value);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eString)
     {
-        tag->setValue(attribs.value("value").toString());
+        QString value = attribs.value("value").toString();
+        tag->setValue(value);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else
         Q_UNREACHABLE();
