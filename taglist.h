@@ -49,6 +49,7 @@ public:
     void freeRide(bool aOn);
     void connectToServer(const QString &aAdress, qint16 aPort);
     void setClientName(const QString &aName);
+    void reconnect();
 
     void setAutoconnectOnBroadcast(bool aAutoconnect);
 signals:
@@ -56,6 +57,8 @@ signals:
     void valueChanged();
     void tagCreated();
 
+    void error(const QString aError);
+    void disconnected();
 
 private slots:
     void onConnected();
@@ -74,6 +77,8 @@ private:
 private:
     QMap<QString, Tag*> mTagByName;
     QVector<Tag*> mTags;
+    QString mAdress;
+    qint16 mPort;
 
     QWebSocket *mWebSocket;
     QUdpSocket *mUdpSocket;

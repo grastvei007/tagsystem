@@ -115,7 +115,8 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
 {
     if(mClientName.isEmpty())
         qFatal("Set client name before connecting to server..");
-
+    mAdress = aAdress;
+    mPort = aPort;
     QUrl url(QString("ws://%1:%2").arg(aAdress).arg(QString::number(aPort)));
     qDebug() << "Connect to: " << url;
     mWebSocket = new QWebSocket;
@@ -125,6 +126,13 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
     mWebSocket->open(url);
 }
 
+
+void TagList::reconnect()
+{
+    connectToServer(mAdress, mPort);
+}
+
+
 void TagList::setClientName(const QString &aName)
 {
     mClientName = aName;
@@ -132,7 +140,9 @@ void TagList::setClientName(const QString &aName)
 
 void TagList::onError()
 {
-    qDebug() << mWebSocket->errorString();
+    QString errorStr = mWebSocket->errorString();
+    qDebug() << errorStr;
+    emit error(errorStr);
     switch (mWebSocket->error())
     {
         case QAbstractSocket::ConnectionRefusedError:
@@ -190,6 +200,7 @@ void TagList::onConnected()
 void TagList::onDisconnected()
 {
     mIsConnected = false;
+    emit disconnect();
 }
 
 
