@@ -16,13 +16,22 @@ TEMPLATE = lib
 DEFINES += TAGSYSTEM_LIBRARY
 
 
-release: TARGET = tagsystem
-debug: TARGET = tagsystemd
+if(debug){
+TARGET = tagsystemd
+}
+else{
+TARGET = tagsystem
+}
 
 DESTDIR = $$(DEV_LIBS)
 
-release: BUILDDIR = build/release
-debug:   BUILDDIR = build/debug
+
+if(debug){
+BUILDDIR = build/debug
+}
+else{
+BUILDDIR = build/release
+}
 
 OBJECTS_DIR = $$BUILDDIR/.obj
 MOC_DIR = $$BUILDDIR/.moc
