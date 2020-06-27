@@ -16,6 +16,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #ifndef TAG_H
 #define TAG_H
 
+#include "tagsystem_global.h"
 #include <QObject>
 #include <QString>
 #include <QByteArray>
@@ -24,7 +25,7 @@ class QXmlStreamReader;
 class QXmlStreamWriter;
 
 
-class Tag : public QObject
+class TAGSYSTEMSHARED_EXPORT Tag : public QObject
 {
     Q_OBJECT
 public:

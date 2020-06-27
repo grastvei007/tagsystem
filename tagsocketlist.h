@@ -16,6 +16,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #ifndef TAGSOCKETLIST_H
 #define TAGSOCKETLIST_H
 
+#include "tagsystem_global.h"
 #include <QObject>
 #include <QVector>
 #include <QMap>
@@ -23,7 +24,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tagsocket.h"
 
 
-class TagSocketList : public QObject
+class TAGSYSTEMSHARED_EXPORT TagSocketList : public QObject
 {
     Q_OBJECT
 public:

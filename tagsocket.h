@@ -16,12 +16,13 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #ifndef TAGSOCKET_H
 #define TAGSOCKET_H
 
+#include "tagsystem_global.h"
 #include <QObject>
 #include <QString>
 
 #include "tag.h"
 
-class TagSocket : public QObject
+class TAGSYSTEMSHARED_EXPORT TagSocket : public QObject
 {
     Q_OBJECT
 public:

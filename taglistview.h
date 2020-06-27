@@ -16,13 +16,14 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #ifndef TAGLISTVIEW_H
 #define TAGLISTVIEW_H
 
+#include "tagsystem_global.h"
 #include <QWidget>
 #include <memory>
 #include <QTableView>
 
 class TagListTableModel;
 
-class TagListView : public QWidget
+class TAGSYSTEMSHARED_EXPORT TagListView : public QWidget
 {
     Q_OBJECT
 public:

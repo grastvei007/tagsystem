@@ -16,6 +16,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #ifndef TAGLIST_H
 #define TAGLIST_H
 
+#include "tagsystem_global.h"
 #include <QObject>
 #include <QMap>
 #include <QVector>
@@ -28,7 +29,7 @@ class QUdpSocket;
 
 class QTimer;
 
-class TagList : public QObject
+class TAGSYSTEMSHARED_EXPORT TagList : public QObject
 {
     Q_OBJECT
 public:
@@ -48,6 +49,7 @@ public:
     void freeRide(bool aOn);
     void connectToServer(const QString &aAdress, qint16 aPort);
     void setClientName(const QString &aName);
+    void reconnect();
 
     void setAutoconnectOnBroadcast(bool aAutoconnect);
 signals:
@@ -55,6 +57,8 @@ signals:
     void valueChanged();
     void tagCreated();
 
+    void error(const QString aError);
+    void disconnected();
 
 private slots:
     void onConnected();
@@ -73,6 +77,8 @@ private:
 private:
     QMap<QString, Tag*> mTagByName;
     QVector<Tag*> mTags;
+    QString mAdress;
+    qint16 mPort;
 
     QWebSocket *mWebSocket;
     QUdpSocket *mUdpSocket;

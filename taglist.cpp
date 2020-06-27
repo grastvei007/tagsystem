@@ -20,6 +20,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QWebSocket>
 #include <QtNetwork>
 #include <QTimer>
+#include <QDebug>
 
 #include "clientinformation.h"
 
@@ -114,7 +115,8 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
 {
     if(mClientName.isEmpty())
         qFatal("Set client name before connecting to server..");
-
+    mAdress = aAdress;
+    mPort = aPort;
     QUrl url(QString("ws://%1:%2").arg(aAdress).arg(QString::number(aPort)));
     qDebug() << "Connect to: " << url;
     mWebSocket = new QWebSocket;
@@ -124,6 +126,13 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
     mWebSocket->open(url);
 }
 
+
+void TagList::reconnect()
+{
+    connectToServer(mAdress, mPort);
+}
+
+
 void TagList::setClientName(const QString &aName)
 {
     mClientName = aName;
@@ -131,7 +140,9 @@ void TagList::setClientName(const QString &aName)
 
 void TagList::onError()
 {
-    qDebug() << mWebSocket->errorString();
+    QString errorStr = mWebSocket->errorString();
+    qDebug() << errorStr;
+    emit error(errorStr);
     switch (mWebSocket->error())
     {
         case QAbstractSocket::ConnectionRefusedError:
@@ -189,6 +200,7 @@ void TagList::onConnected()
 void TagList::onDisconnected()
 {
     mIsConnected = false;
+    emit disconnect();
 }
 
 
@@ -328,23 +340,34 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
 
     Tag *tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
     if(!tag)
+    {
+        qDebug() << "Local tag do not exist: " << QString("%1.%2").arg(subsystem).arg(name);
         return nullptr;
+    }
 
     if(tag->getType() == Tag::eDouble)
     {
-        tag->setValue(attribs.value("value").toDouble());
+        double value = attribs.value("value").toDouble();
+        tag->setValue(value);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eInt)
     {
-        tag->setValue(attribs.value("value").toInt());
+        int value = attribs.value("value").toInt();
+        tag->setValue(value);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eBool)
     {
-        tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
+        bool value = attribs.value("value").toInt() == 1 ? true : false;
+        tag->setValue(value);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eString)
     {
-        tag->setValue(attribs.value("value").toString());
+        QString value = attribs.value("value").toString();
+        tag->setValue(value);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else
         Q_UNREACHABLE();

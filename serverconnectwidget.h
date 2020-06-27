@@ -1,13 +1,14 @@
 #ifndef SERVERCONNECTWIDGET_H
 #define SERVERCONNECTWIDGET_H
 
+#include "tagsystem_global.h"
 #include <QWidget>
 
 namespace Ui {
 class ServerConnectWidget;
 }
 
-class ServerConnectWidget : public QWidget
+class TAGSYSTEMSHARED_EXPORT ServerConnectWidget : public QWidget
 {
     Q_OBJECT
 
