@@ -57,7 +57,7 @@ signals:
     void valueChanged();
     void tagCreated();
 
-    void error(const QString aError);
+    void error(QString aError);
     void disconnected();
 
 private slots:
