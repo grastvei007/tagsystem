@@ -142,38 +142,56 @@ void TagList::onError()
 {
     QString errorStr = mWebSocket->errorString();
     qDebug() << errorStr;
-    emit error(errorStr);
     switch (mWebSocket->error())
     {
         case QAbstractSocket::ConnectionRefusedError:
-        {
+            if(!mAdress.isEmpty() && mPort > 1024)
+            {
+                QTimer::singleShot(1000*60, [this](){
+                    qDebug() << "Reconnect..";
+                    connectToServer(mAdress, mPort);});
+                return;
+            }
+            break;
 
-        }
+        case QAbstractSocket::RemoteHostClosedError:
+            if(!mAdress.isEmpty() && mPort > 1024)
+            {
+                QTimer::singleShot(1000*30, [this](){
+                    connectToServer(mAdress, mPort);});
+                return;
+            }
+            break;
+        case QAbstractSocket::HostNotFoundError:
+        case QAbstractSocket::SocketAccessError:
+        case QAbstractSocket::SocketResourceError:
+        case QAbstractSocket::SocketTimeoutError:
+        case QAbstractSocket::DatagramTooLargeError:
+        case QAbstractSocket::NetworkError:
+        case QAbstractSocket::AddressInUseError:
+        case QAbstractSocket::SocketAddressNotAvailableError:
+        case QAbstractSocket::UnsupportedSocketOperationError:
+        case QAbstractSocket::ProxyAuthenticationRequiredError:
+        case QAbstractSocket::SslHandshakeFailedError:
+        case QAbstractSocket::UnfinishedSocketOperationError:
+        case QAbstractSocket::ProxyConnectionRefusedError:
+        case QAbstractSocket::ProxyConnectionClosedError:
+        case QAbstractSocket::ProxyConnectionTimeoutError:
+        case QAbstractSocket::ProxyNotFoundError:
+        case QAbstractSocket::ProxyProtocolError:
+        case QAbstractSocket::OperationError:
+        case QAbstractSocket::SslInternalError:
+        case QAbstractSocket::SslInvalidUserDataError:
+        case QAbstractSocket::TemporaryError:
+        case QAbstractSocket::UnknownSocketError:
+            break;
+
+        default:
+            Q_UNREACHABLE();
     }
 
-    /*QAbstractSocket::RemoteHostClosedError
-    QAbstractSocket::HostNotFoundError
-    QAbstractSocket::SocketAccessError
-    QAbstractSocket::SocketResourceError
-    QAbstractSocket::SocketTimeoutError
-    QAbstractSocket::DatagramTooLargeError
-    QAbstractSocket::NetworkError
-    QAbstractSocket::AddressInUseError
-    QAbstractSocket::SocketAddressNotAvailableError
-    QAbstractSocket::UnsupportedSocketOperationError
-    QAbstractSocket::ProxyAuthenticationRequiredError
-    QAbstractSocket::SslHandshakeFailedError
-    QAbstractSocket::UnfinishedSocketOperationError
-    QAbstractSocket::ProxyConnectionRefusedError
-    QAbstractSocket::ProxyConnectionClosedError
-    QAbstractSocket::ProxyConnectionTimeoutError
-    QAbstractSocket::ProxyNotFoundError
-    QAbstractSocket::ProxyProtocolError
-    QAbstractSocket::OperationError
-    QAbstractSocket::SslInternalError
-    QAbstractSocket::SslInvalidUserDataError
-    QAbstractSocket::TemporaryError
-    QAbstractSocket::UnknownSocketError*/
+    emit error(errorStr); // emit error if it is not handled.
+
 }
 
 
@@ -194,6 +212,7 @@ void TagList::onConnected()
         mTagSyncTimer->start();
     }
     mIsConnected = true;
+    emit connected();
 }
 
 

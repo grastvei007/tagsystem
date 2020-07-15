@@ -59,6 +59,7 @@ signals:
 
     void error(QString aError);
     void disconnected();
+    void connected();
 
 private slots:
     void onConnected();
