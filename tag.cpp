@@ -197,6 +197,20 @@ Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
     return tag;
 }
 
+Tag::Type Tag::typeFromString(const QString &aTypeString)
+{
+    if(aTypeString == "Int")
+        return eInt;
+    else if(aTypeString == "Bool")
+        return eBool;
+    else if(aTypeString == "Double")
+        return eDouble;
+    else if(aTypeString == "String")
+        return eString;
+    else
+        Q_UNREACHABLE();
+}
+
 
 /**
  * @brief Tag::toMessage

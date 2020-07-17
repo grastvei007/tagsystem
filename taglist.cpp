@@ -360,8 +360,8 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     Tag *tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
     if(!tag)
     {
-        qDebug() << "Local tag do not exist: " << QString("%1.%2").arg(subsystem).arg(name);
-        return nullptr;
+        tag = createTag(subsystem, name, Tag::typeFromString(type));
+        qDebug() << "Local tag do not exist, create tag:" << QString("%1.%2").arg(subsystem).arg(name);
     }
 
     if(tag->getType() == Tag::eDouble)
