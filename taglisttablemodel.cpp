@@ -38,7 +38,7 @@ int TagListTableModel::rowCount(const QModelIndex &parent) const
 
 int TagListTableModel::columnCount(const QModelIndex &parent) const
 {
-    return 3;
+    return 4;
 }
 
 bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -101,7 +101,11 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
                 return tag->getBoolValue();
             else if(tag->getType() == Tag::eString)
                 return tag->getStringValue();
+            else
+                Q_UNREACHABLE();
         }
+        case eTimeStamp:
+            return tag->getTimeStamp();
 
         default:
             break;
@@ -121,13 +125,12 @@ QVariant TagListTableModel::headerData(int section, Qt::Orientation orientation,
             switch (section) {
             case eTagName:
                 return "Tag Name";
-                break;
             case eType:
                 return "Type";
             case eValue:
                 return "Value";
-
-
+            case eTimeStamp:
+                return "TimeStamp";
             default:
                 break;
             }

@@ -20,6 +20,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QObject>
 #include <QString>
 #include <QByteArray>
+#include <QDateTime>
 
 class QXmlStreamReader;
 class QXmlStreamWriter;
@@ -49,6 +50,8 @@ public:
     QString getFullName() const;
     QString getSubsystem() const;
     QString getName() const;
+    QString getTimeStamp() const;
+    const QString& getTimeStampFormat() const;
 
     double getDoubleValue() const;
     int getIntValue() const;
@@ -67,11 +70,13 @@ private:
     QString mSubSystem;
     QString mName;
     Type mType;
+    QDateTime mTimeStamp;
 
     double mDoubleValue;
     int mIntValue;
     bool mBoolValue;
     QString mStringValue;
+    QString mTimeStampFormat;
 };
 
 

@@ -28,7 +28,8 @@ public:
     {
         eTagName,
         eType,
-        eValue
+        eValue,
+        eTimeStamp
     };
 
     TagListTableModel(QObject *aParent = nullptr);

@@ -24,7 +24,9 @@ Tag::Tag(QObject *parent) : QObject(parent),
   mIntValue(0),
   mBoolValue(false),
   mType(Tag::eDouble),
-  mStringValue()
+  mStringValue(),
+  mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
+  mTimeStamp(QDateTime::currentDateTime())
 {
 
 }
@@ -37,7 +39,9 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
     mDoubleValue(0.0),
     mIntValue(0),
     mStringValue(),
-    mBoolValue(false)
+    mBoolValue(false),
+    mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
+    mTimeStamp(QDateTime::currentDateTime())
 {
 
 }
@@ -48,6 +52,7 @@ void Tag::setValue(double aValue)
         return;
 
     mDoubleValue = aValue;
+    mTimeStamp = QDateTime::currentDateTime();
     emit valueChanged(this);
 }
 
@@ -58,6 +63,7 @@ void Tag::setValue(int aValue)
         return;
 
     mIntValue = aValue;
+    mTimeStamp = QDateTime::currentDateTime();
     emit valueChanged(this);
 }
 
@@ -66,7 +72,9 @@ void Tag::setValue(bool aValue)
 {
     if(aValue == mBoolValue)
         return;
+
     mBoolValue = aValue;
+    mTimeStamp = QDateTime::currentDateTime();
     emit valueChanged(this);
 }
 
@@ -76,6 +84,7 @@ void Tag::setValue(QString aValue)
     if(mStringValue == aValue)
         return;
 
+    mTimeStamp = QDateTime::currentDateTime();
     mStringValue = aValue;
     emit valueChanged(this);
 }
@@ -94,6 +103,16 @@ QString Tag::getSubsystem() const
 QString Tag::getName() const
 {
     return mName;
+}
+
+QString Tag::getTimeStamp() const
+{
+    return mTimeStamp.toString(mTimeStampFormat);
+}
+
+const QString &Tag::getTimeStampFormat() const
+{
+    return mTimeStampFormat;
 }
 
 
@@ -158,6 +177,8 @@ void Tag::writeToXml(QXmlStreamWriter &aStream)
         aStream.writeAttribute("value", mStringValue);
     else
         Q_UNREACHABLE(); ///< unhandled tag type.
+
+    aStream.writeAttribute("timestamp", mTimeStamp.toString(getTimeStampFormat()));
 
     aStream.writeEndElement();
 }

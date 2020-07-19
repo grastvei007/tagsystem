@@ -431,10 +431,13 @@ void TagList::onRecieveDatagrams()
         return;
 
     QString msg(datagram);
-    QStringList list = msg.split(":");
-    if(list.size() < 1)
-        return;
-    connectToServer(list[1], 5000);
+    if(msg.startsWith("juneserveronline"))
+    {
+        QStringList list = msg.split(":");
+        if(list.size() < 1)
+            return;
+        connectToServer(list[1], 5000);
+    }
 }
 
 
