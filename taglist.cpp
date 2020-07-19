@@ -345,6 +345,14 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
         tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eBool);
         tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
     }
+    else if(tag->getType() == Tag::eString)
+    {
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eString);
+        tag->setValue(attribs.value("value").toString());
+    }
+    else
+        Q_UNREACHABLE();
+
     emit tagCreated();
     return tag;
 }
