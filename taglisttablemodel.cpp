@@ -64,6 +64,13 @@ bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value,
             }
         }
     }
+    else if(role == Qt::BackgroundRole)
+    {
+        if(index.row() == 0)
+            return false;
+        else if((index.row() % 2) == 1)
+            return Qt::gray;
+    }
 
     return false;
 }
