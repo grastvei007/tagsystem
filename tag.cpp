@@ -232,6 +232,23 @@ Tag::Type Tag::typeFromString(const QString &aTypeString)
         Q_UNREACHABLE();
 }
 
+QString Tag::toString(Tag::Type aType)
+{
+    switch (aType) {
+        case eInt:
+            return "Int";
+        case eBool:
+            return "Bool";
+        case eDouble:
+            return "Double";
+        case eString:
+            return "String";
+        default:
+            break;
+    }
+    Q_UNREACHABLE();
+}
+
 
 /**
  * @brief Tag::toMessage

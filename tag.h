@@ -61,6 +61,7 @@ public:
     void writeToXml(QXmlStreamWriter &aStream);
     static Tag* createFromXml(const QXmlStreamReader &aReader);
     static Type typeFromString(const QString &aTypeString);
+    static QString toString(Type aType);
     QByteArray toMessage();
 signals:
     void valueChanged(Tag*);
