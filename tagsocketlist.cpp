@@ -82,7 +82,7 @@ void TagSocketList::setApplicationName(QString aName)
 
 void TagSocketList::saveBindingList()
 {
-
+#ifdef __linux__
     QString path = QDir::homePath() + QDir::separator() + ".config" + QDir::separator() + "june";
     if(mApplicationName.isEmpty())
     {
@@ -91,7 +91,9 @@ void TagSocketList::saveBindingList()
     }
     else
         path += QDir::separator() + mApplicationName;
-
+#else
+    QString path = qApp->applicationDirPath();
+#endif
 
     QDir dir(path);
     if(!dir.exists())
@@ -138,6 +140,7 @@ void TagSocketList::saveBindingList()
 
 void TagSocketList::loadBindingList()
 {
+#ifdef __linux__
     QString path = QDir::homePath() + QDir::separator() + ".config" + QDir::separator() + "june";
     if(mApplicationName.isEmpty())
     {
@@ -146,7 +149,9 @@ void TagSocketList::loadBindingList()
     }
     else
         path += QDir::separator() + mApplicationName;
-
+#else
+  QString path = qApp->applicationDirPath();
+#endif
     path.append(QDir::separator());
     path.append("tagsocketbindings.xml");
     QFile file(path);
