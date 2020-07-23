@@ -32,6 +32,7 @@ TagSocketListView::TagSocketListView(QWidget *parent) : QWidget(parent),
     mTagSocketListTableModel = new TagSocketListTableModel();
     mUi->mTable->setModel(mTagSocketListTableModel);
     mUi->mTable->horizontalHeader()->setStretchLastSection(true);
+    mUi->mTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     connect(mUi->mTable, &QTableView::doubleClicked, this, &TagSocketListView::onDoubleClick);
 

@@ -26,6 +26,7 @@ TagListView::TagListView(QWidget *parent) : QWidget(parent)
     mTableView.reset(new QTableView(this));
     mTableView->setSortingEnabled(true);
     mTableView->horizontalHeader()->setSectionsClickable(true);
+    mTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     QGridLayout *grid = new QGridLayout(this);
     grid->addWidget(mTableView.get());
