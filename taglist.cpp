@@ -364,6 +364,7 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     QString subsystem = attribs.value("subsystem").toString();
     QString name = attribs.value("name").toString();
     QString type = attribs.value("type").toString();
+    QString timestamp = attribs.value("timestamp").toString();
 
     Tag *tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
     if(!tag)
@@ -375,25 +376,25 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     if(tag->getType() == Tag::eDouble)
     {
         double value = attribs.value("value").toDouble();
-        tag->setValue(value);
+        tag->setValue(value, timestamp);
         qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eInt)
     {
         int value = attribs.value("value").toInt();
-        tag->setValue(value);
+        tag->setValue(value, timestamp);
         qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eBool)
     {
         bool value = attribs.value("value").toInt() == 1 ? true : false;
-        tag->setValue(value);
+        tag->setValue(value, timestamp);
         qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eString)
     {
         QString value = attribs.value("value").toString();
-        tag->setValue(value);
+        tag->setValue(value, timestamp);
         qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else

@@ -40,10 +40,10 @@ public:
 
     Tag(QString aSubSystem, QString aName, Type aType);
 
-    void setValue(double aValue);
-    void setValue(int aValue);
-    void setValue(bool aValue);
-    void setValue(QString aValue);
+    void setValue(double aValue, const QString &timestamp=QString());
+    void setValue(int aValue, const QString &timestamp=QString());
+    void setValue(bool aValue, const QString &timestamp=QString());
+    void setValue(QString aValue, const QString &timestamp=QString());
 
     Type getType() const;
     QString getTypeStr() const;

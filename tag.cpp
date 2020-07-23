@@ -46,45 +46,57 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
 
 }
 
-void Tag::setValue(double aValue)
+void Tag::setValue(double aValue, const QString &timestamp)
 {
     if(qFuzzyCompare(aValue, mDoubleValue))
         return;
 
     mDoubleValue = aValue;
-    mTimeStamp = QDateTime::currentDateTime();
+    if(timestamp.isEmpty())
+        mTimeStamp = QDateTime::currentDateTime();
+    else
+        mTimeStamp = QDateTime::fromString(timestamp, mTimeStampFormat);
     emit valueChanged(this);
 }
 
 
-void Tag::setValue(int aValue)
+void Tag::setValue(int aValue, const QString &timestamp)
 {
     if(aValue == mIntValue)
         return;
 
     mIntValue = aValue;
-    mTimeStamp = QDateTime::currentDateTime();
+    if(timestamp.isEmpty())
+        mTimeStamp = QDateTime::currentDateTime();
+    else
+        mTimeStamp = QDateTime::fromString(timestamp, mTimeStampFormat);
     emit valueChanged(this);
 }
 
 
-void Tag::setValue(bool aValue)
+void Tag::setValue(bool aValue, const QString &timestamp)
 {
     if(aValue == mBoolValue)
         return;
 
     mBoolValue = aValue;
-    mTimeStamp = QDateTime::currentDateTime();
+    if(timestamp.isEmpty())
+        mTimeStamp = QDateTime::currentDateTime();
+    else
+        mTimeStamp = QDateTime::fromString(timestamp, mTimeStampFormat);
     emit valueChanged(this);
 }
 
 
-void Tag::setValue(QString aValue)
+void Tag::setValue(QString aValue, const QString &timestamp)
 {
     if(mStringValue == aValue)
         return;
 
-    mTimeStamp = QDateTime::currentDateTime();
+    if(timestamp.isEmpty())
+        mTimeStamp = QDateTime::currentDateTime();
+    else
+        mTimeStamp = QDateTime::fromString(timestamp, mTimeStampFormat);
     mStringValue = aValue;
     emit valueChanged(this);
 }
@@ -166,6 +178,7 @@ void Tag::writeToXml(QXmlStreamWriter &aStream)
     aStream.writeStartElement("tag");
     aStream.writeAttribute("subsystem", mSubSystem);
     aStream.writeAttribute("name", mName);
+    aStream.writeAttribute("timestamp", mTimeStamp.toString(mTimeStampFormat));
     aStream.writeAttribute("type", getTypeStr());
     if(mType == eDouble)
         aStream.writeAttribute("value", QString::number(mDoubleValue));
