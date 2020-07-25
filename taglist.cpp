@@ -364,7 +364,9 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     QString subsystem = attribs.value("subsystem").toString();
     QString name = attribs.value("name").toString();
     QString type = attribs.value("type").toString();
-    QString timestamp = attribs.value("timestamp").toString();
+    qint64 timestamp = -1;
+    if(attribs.hasAttribute("timestamp"))
+        timestamp = attribs.value("timestamp").toLongLong();
 
     Tag *tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
     if(!tag)

@@ -26,7 +26,7 @@ Tag::Tag(QObject *parent) : QObject(parent),
   mType(Tag::eDouble),
   mStringValue(),
   mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
-  mTimeStamp(QDateTime::currentDateTime())
+  mTimeStamp(QDateTime::currentMSecsSinceEpoch())
 {
 
 }
@@ -41,62 +41,62 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
     mStringValue(),
     mBoolValue(false),
     mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
-    mTimeStamp(QDateTime::currentDateTime())
+    mTimeStamp(QDateTime::currentMSecsSinceEpoch())
 {
 
 }
 
-void Tag::setValue(double aValue, const QString &timestamp)
+void Tag::setValue(double aValue, qint64 msSinceEpoc)
 {
     if(qFuzzyCompare(aValue, mDoubleValue))
         return;
 
     mDoubleValue = aValue;
-    if(timestamp.isEmpty())
-        mTimeStamp = QDateTime::currentDateTime();
+    if(msSinceEpoc < 0)
+        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
     else
-        mTimeStamp = QDateTime::fromString(timestamp, mTimeStampFormat);
+        mTimeStamp = msSinceEpoc;
     emit valueChanged(this);
 }
 
 
-void Tag::setValue(int aValue, const QString &timestamp)
+void Tag::setValue(int aValue, qint64 msSinceEpoc)
 {
     if(aValue == mIntValue)
         return;
 
     mIntValue = aValue;
-    if(timestamp.isEmpty())
-        mTimeStamp = QDateTime::currentDateTime();
+    if(msSinceEpoc < 0)
+        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
     else
-        mTimeStamp = QDateTime::fromString(timestamp, mTimeStampFormat);
+        mTimeStamp = msSinceEpoc;
     emit valueChanged(this);
 }
 
 
-void Tag::setValue(bool aValue, const QString &timestamp)
+void Tag::setValue(bool aValue, qint64 msSinceEpoc)
 {
     if(aValue == mBoolValue)
         return;
 
     mBoolValue = aValue;
-    if(timestamp.isEmpty())
-        mTimeStamp = QDateTime::currentDateTime();
+    if(msSinceEpoc < 0)
+        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
     else
-        mTimeStamp = QDateTime::fromString(timestamp, mTimeStampFormat);
+        mTimeStamp = msSinceEpoc;
     emit valueChanged(this);
 }
 
 
-void Tag::setValue(QString aValue, const QString &timestamp)
+void Tag::setValue(QString aValue, qint64 msSinceEpoc)
 {
     if(mStringValue == aValue)
         return;
 
-    if(timestamp.isEmpty())
-        mTimeStamp = QDateTime::currentDateTime();
+    if(msSinceEpoc < 0)
+        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
     else
-        mTimeStamp = QDateTime::fromString(timestamp, mTimeStampFormat);
+        mTimeStamp = msSinceEpoc;
     mStringValue = aValue;
     emit valueChanged(this);
 }
@@ -119,7 +119,7 @@ QString Tag::getName() const
 
 QString Tag::getTimeStamp() const
 {
-    return mTimeStamp.toString(mTimeStampFormat);
+    return QDateTime::fromMSecsSinceEpoch(mTimeStamp).toString(mTimeStampFormat);
 }
 
 const QString &Tag::getTimeStampFormat() const
@@ -178,7 +178,7 @@ void Tag::writeToXml(QXmlStreamWriter &aStream)
     aStream.writeStartElement("tag");
     aStream.writeAttribute("subsystem", mSubSystem);
     aStream.writeAttribute("name", mName);
-    aStream.writeAttribute("timestamp", mTimeStamp.toString(mTimeStampFormat));
+    aStream.writeAttribute("timestamp", QString::number(mTimeStamp));
     aStream.writeAttribute("type", getTypeStr());
     if(mType == eDouble)
         aStream.writeAttribute("value", QString::number(mDoubleValue));
@@ -190,8 +190,6 @@ void Tag::writeToXml(QXmlStreamWriter &aStream)
         aStream.writeAttribute("value", mStringValue);
     else
         Q_UNREACHABLE(); ///< unhandled tag type.
-
-    aStream.writeAttribute("timestamp", mTimeStamp.toString(getTimeStampFormat()));
 
     aStream.writeEndElement();
 }

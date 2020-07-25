@@ -40,10 +40,10 @@ public:
 
     Tag(QString aSubSystem, QString aName, Type aType);
 
-    void setValue(double aValue, const QString &timestamp=QString());
-    void setValue(int aValue, const QString &timestamp=QString());
-    void setValue(bool aValue, const QString &timestamp=QString());
-    void setValue(QString aValue, const QString &timestamp=QString());
+    void setValue(double aValue, qint64 msSinceEpoc=-1);
+    void setValue(int aValue, qint64 msSinceEpoc=-1);
+    void setValue(bool aValue, qint64 msSinceEpoc=-1);
+    void setValue(QString aValue, qint64 msSinceEpoc=-1);
 
     Type getType() const;
     QString getTypeStr() const;
@@ -71,7 +71,7 @@ private:
     QString mSubSystem;
     QString mName;
     Type mType;
-    QDateTime mTimeStamp;
+    qint64 mTimeStamp; ///< msSinceEpoc
 
     double mDoubleValue;
     int mIntValue;
