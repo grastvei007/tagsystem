@@ -15,6 +15,8 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "taglisttablemodel.h"
 
+#include <QColor>
+
 #include "taglist.h"
 #include "tag.h"
 
@@ -64,13 +66,6 @@ bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value,
             }
         }
     }
-    else if(role == Qt::BackgroundRole)
-    {
-        if(index.row() == 0)
-            return false;
-        else if((index.row() % 2) == 1)
-            return Qt::gray;
-    }
 
     return false;
 }
@@ -118,6 +113,13 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
             break;
         }
     }
+    else if(role == Qt::BackgroundRole)
+    {
+        if(index.row() == 0)
+            return false;
+        else if((index.row() % 2) == 1)
+            return QColor(Qt::gray);
+    }
 
     return QVariant(QVariant::Invalid);
 }
@@ -164,7 +166,7 @@ void TagListTableModel::onTagValueChanged()
 {
     //beginResetModel();
     QModelIndex top = index(0, eValue);
-    QModelIndex bottom = index(rowCount(), eValue);
+    QModelIndex bottom = index(rowCount(), eTimeStamp);
     emit dataChanged(top, bottom);
    // endResetModel();
 }
