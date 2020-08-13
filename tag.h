@@ -52,6 +52,7 @@ public:
     QString getName() const;
     QString getTimeStamp() const;
     const QString& getTimeStampFormat() const;
+    qint64 getMsSinceEpoc() const;
 
     double getDoubleValue() const;
     int getIntValue() const;

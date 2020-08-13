@@ -58,6 +58,8 @@ public:
     bool readValue(bool &rValue);
     bool readValue(int &rValue);
     bool readValue(QString &rValue);
+
+    static Type typeFromString(const QString &aTypeString);
 signals:
     void valueChanged(double);
     void valueChanged(bool);

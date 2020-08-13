@@ -127,6 +127,11 @@ const QString &Tag::getTimeStampFormat() const
     return mTimeStampFormat;
 }
 
+qint64 Tag::getMsSinceEpoc() const
+{
+    return mTimeStamp;
+}
+
 
 Tag::Type Tag::getType() const
 {
