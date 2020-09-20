@@ -21,6 +21,10 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
+#ifndef __linux__
+    #include <QCoreApplication>
+#endif
+
 TagSocketList& TagSocketList::sGetInstance()
 {
     static TagSocketList sTagSocketList;
