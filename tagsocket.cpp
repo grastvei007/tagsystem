@@ -73,6 +73,8 @@ QString TagSocket::getTypeStr() const
         return QString("Bool");
     else if(mType == eString)
         return QString("String");
+    else if(mType == eTime)
+        return QString("Time");
     else
         Q_UNREACHABLE();
 }
@@ -178,6 +180,12 @@ void TagSocket::writeValue(QString aValue)
         mTag->setValue(aValue);
 }
 
+void TagSocket::writeValue(QDateTime aValue)
+{
+    if(mTag)
+        mTag->setValue(aValue);
+}
+
 
 bool TagSocket::readValue(double &rValue)
 {
@@ -214,6 +222,14 @@ bool TagSocket::readValue(QString &rValue)
     return true;
 }
 
+bool TagSocket::readValue(QDateTime &rValue)
+{
+    if(!mTag)
+        return false;
+    rValue = mTag->getTimeValue();
+    return true;
+}
+
 TagSocket::Type TagSocket::typeFromString(const QString &aTypeString)
 {
     if(aTypeString == "Int")
@@ -224,6 +240,8 @@ TagSocket::Type TagSocket::typeFromString(const QString &aTypeString)
         return eDouble;
     else if(aTypeString == "String")
         return eString;
+    else if(aTypeString == "Time")
+        return eTime;
     else
         Q_UNREACHABLE();
 }
@@ -244,6 +262,8 @@ void TagSocket::onTagValueChanged(Tag* aTag)
     }
     else if(mType == eString)
         emit valueChanged(aTag->getStringValue());
+    else if(mType == eTime)
+        emit valueChanged(mTag->getTimeValue());
     else
         Q_UNREACHABLE();
 

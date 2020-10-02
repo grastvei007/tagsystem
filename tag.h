@@ -34,7 +34,8 @@ public:
         eDouble,
         eInt,
         eBool,
-        eString
+        eString,
+        eTime
     };
     explicit Tag(QObject *parent = nullptr);
 
@@ -44,6 +45,7 @@ public:
     void setValue(int aValue, qint64 msSinceEpoc=-1);
     void setValue(bool aValue, qint64 msSinceEpoc=-1);
     void setValue(QString aValue, qint64 msSinceEpoc=-1);
+    void setValue(QDateTime aValue, qint64 msSinceEpoc=-1);
 
     Type getType() const;
     QString getTypeStr() const;
@@ -58,6 +60,8 @@ public:
     int getIntValue() const;
     bool getBoolValue() const;
     QString getStringValue() const;
+    QDateTime getTimeValue() const;
+
 
     void writeToXml(QXmlStreamWriter &aStream);
     static Tag* createFromXml(const QXmlStreamReader &aReader);
@@ -77,6 +81,7 @@ private:
     double mDoubleValue;
     int mIntValue;
     bool mBoolValue;
+    qint64 mTimeValue = 0; ///< value for tag type time
     QString mStringValue;
     QString mTimeStampFormat;
 };
