@@ -24,7 +24,9 @@ Tag::Tag(QObject *parent) : QObject(parent),
   mIntValue(0),
   mBoolValue(false),
   mType(Tag::eDouble),
-  mStringValue()
+  mStringValue(),
+  mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
+  mTimeStamp(QDateTime::currentMSecsSinceEpoch())
 {
 
 }
@@ -37,45 +39,64 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
     mDoubleValue(0.0),
     mIntValue(0),
     mStringValue(),
-    mBoolValue(false)
+    mBoolValue(false),
+    mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
+    mTimeStamp(QDateTime::currentMSecsSinceEpoch())
 {
 
 }
 
-void Tag::setValue(double aValue)
+void Tag::setValue(double aValue, qint64 msSinceEpoc)
 {
     if(qFuzzyCompare(aValue, mDoubleValue))
         return;
 
     mDoubleValue = aValue;
+    if(msSinceEpoc < 0)
+        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+    else
+        mTimeStamp = msSinceEpoc;
     emit valueChanged(this);
 }
 
 
-void Tag::setValue(int aValue)
+void Tag::setValue(int aValue, qint64 msSinceEpoc)
 {
     if(aValue == mIntValue)
         return;
 
     mIntValue = aValue;
+    if(msSinceEpoc < 0)
+        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+    else
+        mTimeStamp = msSinceEpoc;
     emit valueChanged(this);
 }
 
 
-void Tag::setValue(bool aValue)
+void Tag::setValue(bool aValue, qint64 msSinceEpoc)
 {
     if(aValue == mBoolValue)
         return;
+
     mBoolValue = aValue;
+    if(msSinceEpoc < 0)
+        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+    else
+        mTimeStamp = msSinceEpoc;
     emit valueChanged(this);
 }
 
 
-void Tag::setValue(QString aValue)
+void Tag::setValue(QString aValue, qint64 msSinceEpoc)
 {
     if(mStringValue == aValue)
         return;
 
+    if(msSinceEpoc < 0)
+        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+    else
+        mTimeStamp = msSinceEpoc;
     mStringValue = aValue;
     emit valueChanged(this);
 }
@@ -94,6 +115,21 @@ QString Tag::getSubsystem() const
 QString Tag::getName() const
 {
     return mName;
+}
+
+QString Tag::getTimeStamp() const
+{
+    return QDateTime::fromMSecsSinceEpoch(mTimeStamp).toString(mTimeStampFormat);
+}
+
+const QString &Tag::getTimeStampFormat() const
+{
+    return mTimeStampFormat;
+}
+
+qint64 Tag::getMsSinceEpoc() const
+{
+    return mTimeStamp;
 }
 
 
@@ -147,6 +183,7 @@ void Tag::writeToXml(QXmlStreamWriter &aStream)
     aStream.writeStartElement("tag");
     aStream.writeAttribute("subsystem", mSubSystem);
     aStream.writeAttribute("name", mName);
+    aStream.writeAttribute("timestamp", QString::number(mTimeStamp));
     aStream.writeAttribute("type", getTypeStr());
     if(mType == eDouble)
         aStream.writeAttribute("value", QString::number(mDoubleValue));
@@ -195,6 +232,37 @@ Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
 
 
     return tag;
+}
+
+Tag::Type Tag::typeFromString(const QString &aTypeString)
+{
+    if(aTypeString == "Int")
+        return eInt;
+    else if(aTypeString == "Bool")
+        return eBool;
+    else if(aTypeString == "Double")
+        return eDouble;
+    else if(aTypeString == "String")
+        return eString;
+    else
+        Q_UNREACHABLE();
+}
+
+QString Tag::toString(Tag::Type aType)
+{
+    switch (aType) {
+        case eInt:
+            return "Int";
+        case eBool:
+            return "Bool";
+        case eDouble:
+            return "Double";
+        case eString:
+            return "String";
+        default:
+            break;
+    }
+    Q_UNREACHABLE();
 }
 
 

@@ -20,6 +20,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QWebSocket>
 #include <QtNetwork>
 #include <QTimer>
+#include <QDebug>
 
 #include "clientinformation.h"
 
@@ -114,7 +115,8 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
 {
     if(mClientName.isEmpty())
         qFatal("Set client name before connecting to server..");
-
+    mAdress = aAdress;
+    mPort = aPort;
     QUrl url(QString("ws://%1:%2").arg(aAdress).arg(QString::number(aPort)));
     qDebug() << "Connect to: " << url;
     mWebSocket = new QWebSocket;
@@ -124,6 +126,13 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
     mWebSocket->open(url);
 }
 
+
+void TagList::reconnect()
+{
+    connectToServer(mAdress, mPort);
+}
+
+
 void TagList::setClientName(const QString &aName)
 {
     mClientName = aName;
@@ -131,38 +140,58 @@ void TagList::setClientName(const QString &aName)
 
 void TagList::onError()
 {
-    qDebug() << mWebSocket->errorString();
+    QString errorStr = mWebSocket->errorString();
+    qDebug() << errorStr;
     switch (mWebSocket->error())
     {
         case QAbstractSocket::ConnectionRefusedError:
-        {
+            if(!mAdress.isEmpty() && mPort > 1024)
+            {
+                QTimer::singleShot(1000*60, [this](){
+                    qDebug() << "Reconnect..";
+                    connectToServer(mAdress, mPort);});
+                return;
+            }
+            break;
 
-        }
+        case QAbstractSocket::RemoteHostClosedError:
+            if(!mAdress.isEmpty() && mPort > 1024)
+            {
+                QTimer::singleShot(1000*30, [this](){
+                    connectToServer(mAdress, mPort);});
+                return;
+            }
+            break;
+        case QAbstractSocket::HostNotFoundError:
+        case QAbstractSocket::SocketAccessError:
+        case QAbstractSocket::SocketResourceError:
+        case QAbstractSocket::SocketTimeoutError:
+        case QAbstractSocket::DatagramTooLargeError:
+        case QAbstractSocket::NetworkError:
+        case QAbstractSocket::AddressInUseError:
+        case QAbstractSocket::SocketAddressNotAvailableError:
+        case QAbstractSocket::UnsupportedSocketOperationError:
+        case QAbstractSocket::ProxyAuthenticationRequiredError:
+        case QAbstractSocket::SslHandshakeFailedError:
+        case QAbstractSocket::UnfinishedSocketOperationError:
+        case QAbstractSocket::ProxyConnectionRefusedError:
+        case QAbstractSocket::ProxyConnectionClosedError:
+        case QAbstractSocket::ProxyConnectionTimeoutError:
+        case QAbstractSocket::ProxyNotFoundError:
+        case QAbstractSocket::ProxyProtocolError:
+        case QAbstractSocket::OperationError:
+        case QAbstractSocket::SslInternalError:
+        case QAbstractSocket::SslInvalidUserDataError:
+        case QAbstractSocket::TemporaryError:
+        case QAbstractSocket::UnknownSocketError:
+            break;
+
+        default:
+            Q_UNREACHABLE();
     }
 
-    /*QAbstractSocket::RemoteHostClosedError
-    QAbstractSocket::HostNotFoundError
-    QAbstractSocket::SocketAccessError
-    QAbstractSocket::SocketResourceError
-    QAbstractSocket::SocketTimeoutError
-    QAbstractSocket::DatagramTooLargeError
-    QAbstractSocket::NetworkError
-    QAbstractSocket::AddressInUseError
-    QAbstractSocket::SocketAddressNotAvailableError
-    QAbstractSocket::UnsupportedSocketOperationError
-    QAbstractSocket::ProxyAuthenticationRequiredError
-    QAbstractSocket::SslHandshakeFailedError
-    QAbstractSocket::UnfinishedSocketOperationError
-    QAbstractSocket::ProxyConnectionRefusedError
-    QAbstractSocket::ProxyConnectionClosedError
-    QAbstractSocket::ProxyConnectionTimeoutError
-    QAbstractSocket::ProxyNotFoundError
-    QAbstractSocket::ProxyProtocolError
-    QAbstractSocket::OperationError
-    QAbstractSocket::SslInternalError
-    QAbstractSocket::SslInvalidUserDataError
-    QAbstractSocket::TemporaryError
-    QAbstractSocket::UnknownSocketError*/
+    emit error(errorStr); // emit error if it is not handled.
+
 }
 
 
@@ -183,12 +212,14 @@ void TagList::onConnected()
         mTagSyncTimer->start();
     }
     mIsConnected = true;
+    emit connected();
 }
 
 
 void TagList::onDisconnected()
 {
     mIsConnected = false;
+    emit disconnect();
 }
 
 
@@ -314,6 +345,14 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
         tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eBool);
         tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
     }
+    else if(type == Tag::toString(Tag::eString))
+    {
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eString);
+        tag->setValue(attribs.value("value").toString());
+    }
+    else
+        Q_UNREACHABLE();
+
     emit tagCreated();
     return tag;
 }
@@ -325,26 +364,40 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     QString subsystem = attribs.value("subsystem").toString();
     QString name = attribs.value("name").toString();
     QString type = attribs.value("type").toString();
+    qint64 timestamp = -1;
+    if(attribs.hasAttribute("timestamp"))
+        timestamp = attribs.value("timestamp").toLongLong();
 
     Tag *tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
     if(!tag)
-        return nullptr;
+    {
+        tag = createTag(subsystem, name, Tag::typeFromString(type));
+        qDebug() << "Local tag do not exist, create tag:" << QString("%1.%2").arg(subsystem).arg(name);
+    }
 
     if(tag->getType() == Tag::eDouble)
     {
-        tag->setValue(attribs.value("value").toDouble());
+        double value = attribs.value("value").toDouble();
+        tag->setValue(value, timestamp);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eInt)
     {
-        tag->setValue(attribs.value("value").toInt());
+        int value = attribs.value("value").toInt();
+        tag->setValue(value, timestamp);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eBool)
     {
-        tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
+        bool value = attribs.value("value").toInt() == 1 ? true : false;
+        tag->setValue(value, timestamp);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eString)
     {
-        tag->setValue(attribs.value("value").toString());
+        QString value = attribs.value("value").toString();
+        tag->setValue(value, timestamp);
+        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else
         Q_UNREACHABLE();
@@ -389,10 +442,13 @@ void TagList::onRecieveDatagrams()
         return;
 
     QString msg(datagram);
-    QStringList list = msg.split(":");
-    if(list.size() < 1)
-        return;
-    connectToServer(list[1], 5000);
+    if(msg.startsWith("juneserveronline"))
+    {
+        QStringList list = msg.split(":");
+        if(list.size() < 1)
+            return;
+        connectToServer(list[1], 5000);
+    }
 }
 
 

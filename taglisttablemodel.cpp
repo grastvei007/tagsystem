@@ -15,6 +15,8 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "taglisttablemodel.h"
 
+#include <QColor>
+
 #include "taglist.h"
 #include "tag.h"
 
@@ -38,7 +40,7 @@ int TagListTableModel::rowCount(const QModelIndex &parent) const
 
 int TagListTableModel::columnCount(const QModelIndex &parent) const
 {
-    return 3;
+    return 4;
 }
 
 bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -101,11 +103,22 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
                 return tag->getBoolValue();
             else if(tag->getType() == Tag::eString)
                 return tag->getStringValue();
+            else
+                Q_UNREACHABLE();
         }
+        case eTimeStamp:
+            return tag->getTimeStamp();
 
         default:
             break;
         }
+    }
+    else if(role == Qt::BackgroundRole)
+    {
+        if(index.row() == 0)
+            return false;
+        else if((index.row() % 2) == 1)
+            return QColor(Qt::gray);
     }
 
     return QVariant(QVariant::Invalid);
@@ -121,13 +134,12 @@ QVariant TagListTableModel::headerData(int section, Qt::Orientation orientation,
             switch (section) {
             case eTagName:
                 return "Tag Name";
-                break;
             case eType:
                 return "Type";
             case eValue:
                 return "Value";
-
-
+            case eTimeStamp:
+                return "TimeStamp";
             default:
                 break;
             }
@@ -154,7 +166,7 @@ void TagListTableModel::onTagValueChanged()
 {
     //beginResetModel();
     QModelIndex top = index(0, eValue);
-    QModelIndex bottom = index(rowCount(), eValue);
+    QModelIndex bottom = index(rowCount(), eTimeStamp);
     emit dataChanged(top, bottom);
    // endResetModel();
 }

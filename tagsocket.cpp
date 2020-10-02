@@ -214,6 +214,20 @@ bool TagSocket::readValue(QString &rValue)
     return true;
 }
 
+TagSocket::Type TagSocket::typeFromString(const QString &aTypeString)
+{
+    if(aTypeString == "Int")
+        return eInt;
+    else if(aTypeString == "Bool")
+        return eBool;
+    else if(aTypeString == "Double")
+        return eDouble;
+    else if(aTypeString == "String")
+        return eString;
+    else
+        Q_UNREACHABLE();
+}
+
 void TagSocket::onTagValueChanged(Tag* aTag)
 {
     if(mType == eDouble)

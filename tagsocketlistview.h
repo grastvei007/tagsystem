@@ -16,6 +16,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #ifndef TAGSOCKETLISTVIEW_H
 #define TAGSOCKETLISTVIEW_H
 
+#include "tagsystem_global.h"
 #include <QWidget>
 #include <QTableView>
 #include <QModelIndex>
@@ -27,7 +28,7 @@ class TagSocketListView;
 
 class TagSocketListTableModel;
 
-class TagSocketListView : public QWidget
+class TAGSYSTEMSHARED_EXPORT TagSocketListView : public QWidget
 {
     Q_OBJECT
 public:

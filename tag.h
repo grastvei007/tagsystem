@@ -16,15 +16,17 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #ifndef TAG_H
 #define TAG_H
 
+#include "tagsystem_global.h"
 #include <QObject>
 #include <QString>
 #include <QByteArray>
+#include <QDateTime>
 
 class QXmlStreamReader;
 class QXmlStreamWriter;
 
 
-class Tag : public QObject
+class TAGSYSTEMSHARED_EXPORT Tag : public QObject
 {
     Q_OBJECT
 public:
@@ -38,16 +40,19 @@ public:
 
     Tag(QString aSubSystem, QString aName, Type aType);
 
-    void setValue(double aValue);
-    void setValue(int aValue);
-    void setValue(bool aValue);
-    void setValue(QString aValue);
+    void setValue(double aValue, qint64 msSinceEpoc=-1);
+    void setValue(int aValue, qint64 msSinceEpoc=-1);
+    void setValue(bool aValue, qint64 msSinceEpoc=-1);
+    void setValue(QString aValue, qint64 msSinceEpoc=-1);
 
     Type getType() const;
     QString getTypeStr() const;
     QString getFullName() const;
     QString getSubsystem() const;
     QString getName() const;
+    QString getTimeStamp() const;
+    const QString& getTimeStampFormat() const;
+    qint64 getMsSinceEpoc() const;
 
     double getDoubleValue() const;
     int getIntValue() const;
@@ -56,6 +61,8 @@ public:
 
     void writeToXml(QXmlStreamWriter &aStream);
     static Tag* createFromXml(const QXmlStreamReader &aReader);
+    static Type typeFromString(const QString &aTypeString);
+    static QString toString(Type aType);
     QByteArray toMessage();
 signals:
     void valueChanged(Tag*);
@@ -65,11 +72,13 @@ private:
     QString mSubSystem;
     QString mName;
     Type mType;
+    qint64 mTimeStamp; ///< msSinceEpoc
 
     double mDoubleValue;
     int mIntValue;
     bool mBoolValue;
     QString mStringValue;
+    QString mTimeStampFormat;
 };
 
 

@@ -18,11 +18,15 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "taglisttablemodel.h"
 
 #include <QGridLayout>
+#include <QHeaderView>
 
 TagListView::TagListView(QWidget *parent) : QWidget(parent)
 {
 
     mTableView.reset(new QTableView(this));
+    mTableView->setSortingEnabled(true);
+    mTableView->horizontalHeader()->setSectionsClickable(true);
+    mTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     QGridLayout *grid = new QGridLayout(this);
     grid->addWidget(mTableView.get());

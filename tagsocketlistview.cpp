@@ -22,7 +22,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tag.h"
 
 #include "tagsocketlisttablemodel.h"
-#include "ui_tagsocketlistview.h".h"
+#include "ui_tagsocketlistview.h"
 
 TagSocketListView::TagSocketListView(QWidget *parent) : QWidget(parent),
     mUi(new Ui::TagSocketListView)
@@ -32,6 +32,7 @@ TagSocketListView::TagSocketListView(QWidget *parent) : QWidget(parent),
     mTagSocketListTableModel = new TagSocketListTableModel();
     mUi->mTable->setModel(mTagSocketListTableModel);
     mUi->mTable->horizontalHeader()->setStretchLastSection(true);
+    mUi->mTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     connect(mUi->mTable, &QTableView::doubleClicked, this, &TagSocketListView::onDoubleClick);
 
@@ -49,6 +50,7 @@ void TagSocketListView::onDoubleClick(const QModelIndex &aIndex)
         return;
 
     TagSelectView tagSelect;
+    tagSelect.setAttribute(Qt::WA_QuitOnClose, false);
     if(tagSelect.exec() == QDialog::Accepted)
     {        Tag *tag = tagSelect.getSelectedTag();
         if(tag)

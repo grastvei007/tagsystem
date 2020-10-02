@@ -1,6 +1,7 @@
 #ifndef TAGSELECTVIEW_H
 #define TAGSELECTVIEW_H
 
+#include "tagsystem_global.h"
 #include <QWidget>
 #include <QDialog>
 #include <memory>
@@ -32,7 +33,7 @@ namespace Ui {
 class TagSelectView;
 }
 
-class TagSelectView : public QDialog
+class TAGSYSTEMSHARED_EXPORT TagSelectView : public QDialog
 {
     Q_OBJECT
 
