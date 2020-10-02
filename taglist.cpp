@@ -350,6 +350,11 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
         tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eString);
         tag->setValue(attribs.value("value").toString());
     }
+    else if(type == Tag::toString(Tag::eTime))
+    {
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eTime);
+        tag->setValue(QDateTime::fromMSecsSinceEpoch(attribs.value("value").toLongLong()));
+    }
     else
         Q_UNREACHABLE();
 
@@ -379,25 +384,26 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     {
         double value = attribs.value("value").toDouble();
         tag->setValue(value, timestamp);
-        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eInt)
     {
         int value = attribs.value("value").toInt();
         tag->setValue(value, timestamp);
-        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eBool)
     {
         bool value = attribs.value("value").toInt() == 1 ? true : false;
         tag->setValue(value, timestamp);
-        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eString)
     {
         QString value = attribs.value("value").toString();
         tag->setValue(value, timestamp);
-        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
+    }
+    else if(tag->getType() == Tag::eTime)
+    {
+        QDateTime time = QDateTime::fromMSecsSinceEpoch(attribs.value("value").toLongLong());
+        tag->setValue(time, timestamp);
     }
     else
         Q_UNREACHABLE();
