@@ -101,6 +101,20 @@ void Tag::setValue(QString aValue, qint64 msSinceEpoc)
     emit valueChanged(this);
 }
 
+void Tag::setValue(QDateTime aValue, qint64 msSinceEpoc)
+{
+    qint64 value = aValue.toMSecsSinceEpoch();
+    if(value == mTimeValue)
+        return;
+    if(msSinceEpoc < 0)
+        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+    else
+        mTimeStamp = msSinceEpoc;
+
+    mTimeValue = value;
+    emit valueChanged(this);
+}
+
 QString Tag::getFullName() const
 {
     return QString("%1.%2").arg(mSubSystem).arg(mName);
@@ -149,6 +163,8 @@ QString Tag::getTypeStr() const
         return "Bool";
     case eString:
         return "String";
+    case eTime:
+        return "Time";
     }
 
     Q_UNREACHABLE();
@@ -178,6 +194,11 @@ QString Tag::getStringValue() const
     return mStringValue;
 }
 
+QDateTime Tag::getTimeValue() const
+{
+    return QDateTime::fromMSecsSinceEpoch(mTimeValue);
+}
+
 void Tag::writeToXml(QXmlStreamWriter &aStream)
 {
     aStream.writeStartElement("tag");
@@ -193,6 +214,8 @@ void Tag::writeToXml(QXmlStreamWriter &aStream)
         aStream.writeAttribute("value", (mBoolValue) ? "1" : "0");
     else if(mType == eString)
         aStream.writeAttribute("value", mStringValue);
+    else if(mType == eTime)
+        aStream.writeAttribute("value", QString::number(mTimeValue));
     else
         Q_UNREACHABLE(); ///< unhandled tag type.
 
@@ -227,7 +250,11 @@ Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
         tag = new Tag(sub, name, eString);
         tag->setValue(val);
     }
-
+    else if(typeFromString(type) == eTime)
+    {
+        tag = new Tag(sub, name, eTime);
+        tag->setValue(QDateTime::fromMSecsSinceEpoch(val.toLongLong()));
+    }
     aReader.attributes().value("value");
 
 
@@ -244,6 +271,8 @@ Tag::Type Tag::typeFromString(const QString &aTypeString)
         return eDouble;
     else if(aTypeString == "String")
         return eString;
+    else if(aTypeString == "Time")
+        return eTime;
     else
         Q_UNREACHABLE();
 }
@@ -259,6 +288,8 @@ QString Tag::toString(Tag::Type aType)
             return "Double";
         case eString:
             return "String";
+        case eTime:
+            return "Time";
         default:
             break;
     }

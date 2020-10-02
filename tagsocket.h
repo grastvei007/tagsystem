@@ -30,7 +30,8 @@ public:
         eDouble,
         eInt,
         eBool,
-        eString
+        eString,
+        eTime
     };
     ///< construct a new tagsocket.
     static TagSocket* createTagSocket(QString aSubSystem, QString aName, Type aType);
@@ -53,11 +54,13 @@ public:
     void writeValue(bool aValue);
     void writeValue(int aValue);
     void writeValue(QString aValue);
+    void writeValue(QDateTime aValue);
 
     bool readValue(double &rValue);
     bool readValue(bool &rValue);
     bool readValue(int &rValue);
     bool readValue(QString &rValue);
+    bool readValue(QDateTime &rValue);
 
     static Type typeFromString(const QString &aTypeString);
 signals:
@@ -65,6 +68,7 @@ signals:
     void valueChanged(bool);
     void valueChanged(int);
     void valueChanged(QString);
+    void valueChanged(QDateTime);
     void valueChanged(TagSocket*);
 
 private slots:

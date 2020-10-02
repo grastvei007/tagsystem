@@ -63,6 +63,9 @@ bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value,
             case Tag::eString:
                 tag->setValue(value.toString());
                 return true;
+            case Tag::eTime:
+                tag->setValue(value.toDateTime());
+                return true;
             }
         }
     }
@@ -103,6 +106,8 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
                 return tag->getBoolValue();
             else if(tag->getType() == Tag::eString)
                 return tag->getStringValue();
+            else if(tag->getType() == Tag::eTime)
+                return tag->getTimeValue().toString(tag->getTimeStampFormat());
             else
                 Q_UNREACHABLE();
         }
