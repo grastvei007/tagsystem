@@ -124,6 +124,14 @@ bool TagSocket::hookupTag(Tag *aTag)
             return false;
         mTag = aTag;
     }
+    else if(mType == eTime)
+    {
+        if(aTag->getType() != Tag::eTime)
+            return false;
+        mTag = aTag;
+    }
+    else
+        Q_UNREACHABLE();
 
     if(mTag)
     {

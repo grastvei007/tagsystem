@@ -96,6 +96,10 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
                     tagsocket->readValue(str);
                     return str;
                 }
+                else if(tagsocket->getType() == TagSocket::eTime)
+                {
+                    break;
+                }
                 else {
                    Q_UNREACHABLE();
                 }
