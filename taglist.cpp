@@ -371,13 +371,19 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     QString type = attribs.value("type").toString();
     qint64 timestamp = -1;
     if(attribs.hasAttribute("timestamp"))
+    {
         timestamp = attribs.value("timestamp").toLongLong();
+    }
 
     Tag *tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
     if(!tag)
     {
         tag = createTag(subsystem, name, Tag::typeFromString(type));
         qDebug() << "Local tag do not exist, create tag:" << QString("%1.%2").arg(subsystem).arg(name);
+    }
+    if(timestamp > 0 && timestamp < tag->getMsSinceEpoc())
+    {
+        return tag;
     }
 
     if(tag->getType() == Tag::eDouble)
