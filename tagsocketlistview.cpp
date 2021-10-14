@@ -63,7 +63,7 @@ void TagSocketListView::onDoubleClick(const QModelIndex &aIndex)
 
 void TagSocketListView::onCloseClicked(bool aChecked)
 {
-
+    hide();
 }
 
 
