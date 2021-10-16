@@ -34,12 +34,14 @@ TagListTableModel::~TagListTableModel()
 
 int TagListTableModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return TagList::sGetInstance().getNumberOfTags();
 }
 
 
 int TagListTableModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return 4;
 }
 

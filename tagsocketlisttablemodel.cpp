@@ -39,12 +39,14 @@ TagSocketListTableModel::~TagSocketListTableModel()
 
 int TagSocketListTableModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return TagSocketList::sGetInstance().getNumberOfTagSockets();
 }
 
 
 int TagSocketListTableModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return 4;
 }
 
@@ -178,6 +180,7 @@ bool TagSocketListTableModel::setData(const QModelIndex &index, const QVariant &
 
 Qt::ItemFlags TagSocketListTableModel::flags(const QModelIndex &index) const
 {
+    Q_UNUSED(index);
     return Qt::ItemIsEnabled;
 }
 
