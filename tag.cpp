@@ -20,10 +20,10 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QXmlStreamAttributes>
 
 Tag::Tag(QObject *parent) : QObject(parent),
+  mType(Tag::eDouble),
   mDoubleValue(0.0),
   mIntValue(0),
   mBoolValue(false),
-  mType(Tag::eDouble),
   mStringValue(),
   mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
   mTimeStamp(QDateTime::currentMSecsSinceEpoch())
@@ -38,8 +38,64 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
     mType(aType),
     mDoubleValue(0.0),
     mIntValue(0),
-    mStringValue(),
     mBoolValue(false),
+    mStringValue(),
+    mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
+    mTimeStamp(QDateTime::currentMSecsSinceEpoch())
+{
+
+}
+
+Tag::Tag(QString subSystem, QString name, Tag::Type type, double initValue) :
+    mSubSystem(subSystem),
+    mName(name),
+    mType(type),
+    mDoubleValue(initValue),
+    mIntValue(0),
+    mBoolValue(false),
+    mStringValue(),
+    mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
+    mTimeStamp(QDateTime::currentMSecsSinceEpoch())
+{
+
+}
+
+Tag::Tag(QString subSystem, QString name, Tag::Type type, int initValue) :
+    mSubSystem(subSystem),
+    mName(name),
+    mType(type),
+    mDoubleValue(0.0),
+    mIntValue(initValue),
+    mBoolValue(false),
+    mStringValue(),
+    mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
+    mTimeStamp(QDateTime::currentMSecsSinceEpoch())
+{
+
+}
+
+Tag::Tag(QString subSystem, QString name, Tag::Type type, bool initValue) :
+    mSubSystem(subSystem),
+    mName(name),
+    mType(type),
+    mDoubleValue(0.0),
+    mIntValue(0),
+    mBoolValue(initValue),
+    mStringValue(),
+    mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
+    mTimeStamp(QDateTime::currentMSecsSinceEpoch())
+{
+
+}
+
+Tag::Tag(QString subSystem, QString name, Tag::Type type, QString initValue) :
+    mSubSystem(subSystem),
+    mName(name),
+    mType(type),
+    mDoubleValue(0.0),
+    mIntValue(0),
+    mBoolValue(false),
+    mStringValue(initValue),
     mTimeStampFormat("dd.MM.yyyy hh:mm:ss.zzz"),
     mTimeStamp(QDateTime::currentMSecsSinceEpoch())
 {
