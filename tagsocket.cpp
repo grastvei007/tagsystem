@@ -31,11 +31,11 @@ TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, TagSock
 
 
 TagSocket::TagSocket(QString aSubSystem, QString aName, Type aType) :
+    mTag(nullptr),
+    mTagName(),
     mSubSystem(aSubSystem),
     mName(aName),
-    mType(aType),
-    mTag(nullptr),
-    mTagName()
+    mType(aType)
 {
     TagSocketList::sGetInstance().addTagSocket(this);
 }
