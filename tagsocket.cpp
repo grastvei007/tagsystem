@@ -152,6 +152,7 @@ bool TagSocket::hookupTag(QString aTagSubsytem, QString aTagName)
         return hookupTag(tag);
 
     // listen to changes to hookup tag when/if it is created.
+    isWaitingForTag_ = true;
     connect(&TagList::sGetInstance(), &TagList::tagCreated, this, &TagSocket::onTagCreated);
     return false;
 }
@@ -159,6 +160,11 @@ bool TagSocket::hookupTag(QString aTagSubsytem, QString aTagName)
 bool TagSocket::isHookedUp() const
 {
     return mTag;
+}
+
+bool TagSocket::isWaitingForTag() const
+{
+    return isWaitingForTag_;
 }
 
 void TagSocket::writeValue(double aValue)
@@ -285,5 +291,8 @@ void TagSocket::onTagCreated()
         return;
 
     if(hookupTag(tag))
+    {
+        isWaitingForTag_ = false;
         disconnect(&TagList::sGetInstance(), &TagList::tagCreated, this, &TagSocket::onTagCreated);
+    }
 }

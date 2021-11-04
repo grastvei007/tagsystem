@@ -41,6 +41,7 @@ public:
     bool hookupTag(Tag *aTag);
     bool hookupTag(QString aTagSubsytem, QString aTagName);
     bool isHookedUp() const;
+    bool isWaitingForTag() const;
 
     QString getFullName() const;
     QString getSubSystem() const;
@@ -85,6 +86,7 @@ private:
     QString mSubSystem;
     QString mName;
     Type mType;
+    bool isWaitingForTag_ = false;
 };
 
 #endif // TAGSOCKET_H
