@@ -194,6 +194,8 @@ void TagSocketList::loadBindingList()
                     t = TagSocket::eDouble;
                 else if(type == "String")
                     t = TagSocket::eString;
+                else if(type == "Time")
+                    continue;
                 else
                     Q_UNREACHABLE();
 
