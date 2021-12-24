@@ -34,12 +34,9 @@ TagList::TagList() :
     mWebSocket(nullptr),
     mTagSyncTimer(nullptr),
     mFreeRideFlag(false),
-    mAutoconnectOnBroadcastFlag(false),
     mIsConnected(false)
 {
-    mUdpSocket = new QUdpSocket(this);
-    mUdpSocket->bind(45454, QUdpSocket::ShareAddress);
-    connect(mUdpSocket, &QUdpSocket::readyRead, this, &TagList::onRecieveDatagrams);
+
 }
 
 void TagList::freeRide(bool aOn)
@@ -437,34 +434,3 @@ void TagList::onTagValueChanged(Tag *aTag)
         syncTags();
 }
 
-
-void TagList::onRecieveDatagrams()
-{
-    QByteArray datagram;
-    while(mUdpSocket->hasPendingDatagrams())
-    {
-        datagram.resize(int(mUdpSocket->pendingDatagramSize()));
-        mUdpSocket->readDatagram(datagram.data(), datagram.size());
-    }
-
-    qDebug() << __FUNCTION__ << "datagram: " << datagram;
-    if(mIsConnected)
-        return;
-    if(!mAutoconnectOnBroadcastFlag)
-        return;
-
-    QString msg(datagram);
-    if(msg.startsWith("juneserveronline"))
-    {
-        QStringList list = msg.split(":");
-        if(list.size() < 1)
-            return;
-        connectToServer(list[1], 5000);
-    }
-}
-
-
-void TagList::setAutoconnectOnBroadcast(bool aAutoconnect)
-{
-    mAutoconnectOnBroadcastFlag = aAutoconnect;
-}
