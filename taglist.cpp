@@ -32,8 +32,8 @@ TagList& TagList::sGetInstance()
 
 TagList::TagList() :
     mWebSocket(nullptr),
-    mTagSyncTimer(nullptr),
     mFreeRideFlag(false),
+    mTagSyncTimer(nullptr),
     mIsConnected(false)
 {
 
@@ -58,6 +58,50 @@ Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
     }
     // tag does not exist, create it.
     tag = new Tag(aSubSystem, aName, aType);
+    mTagByName[tag->getFullName()] = tag;
+    mTags.push_back(tag);
+    connect(tag, &Tag::valueChanged, this, &TagList::valueChanged);
+    connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
+    connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
+    if(mWebSocket)
+        mTagsCreateQueue.push_back(tag);
+    qDebug() << "Create tag: " << tag->getFullName() << " (" << mTagsCreateQueue.size() << ")";
+    emit tagCreated();
+    return tag;
+}
+
+Tag *TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue)
+{
+    Tag *tag = findByTagName(QString("%1.%2").arg(aSubSystem).arg(aName));
+    if(tag)
+    {
+        return tag;
+    }
+    switch (aType)
+    {
+    case Tag::eDouble:
+    {
+        auto value = initValue.toDouble();
+        tag = new Tag(aSubSystem, aName, aType, value);
+        break;
+    }
+    case Tag::eInt:
+    {
+        auto value = initValue.toInt();
+        tag = new Tag(aSubSystem, aName, aType, value);
+        break;
+    }
+    case Tag::eBool:
+    {
+        auto value = initValue.toBool();
+        tag = new Tag(aSubSystem, aName, aType, value);
+        break;
+    }
+    default:
+        tag = new Tag(aSubSystem, aName, aType);
+        break;
+    }
+
     mTagByName[tag->getFullName()] = tag;
     mTags.push_back(tag);
     connect(tag, &Tag::valueChanged, this, &TagList::valueChanged);

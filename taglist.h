@@ -35,6 +35,7 @@ public:
     int getNumberOfTags() const;
 
     Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType);
+    Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue);
     Tag* createTag(QXmlStreamReader &aStream);
     Tag* updateTag(QXmlStreamReader &aStream);
 
