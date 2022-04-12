@@ -282,29 +282,29 @@ void TagList::onBinaryDataRecieved(QByteArray aMsg)
             continue;
         if(token == QXmlStreamReader::StartElement)
         {
-            if(stream.name() == "create")
+            if(stream.name() == QString("create"))
             {
                 while(!(stream.tokenType() == QXmlStreamReader::EndElement &&
-                        stream.name() == "create"))
+                        stream.name() == QString("create")))
                 {
                     if(stream.readNext() != QXmlStreamReader::StartElement)
                         continue;
 
-                    if(stream.name() == "tag")
+                    if(stream.name() == QString("tag"))
                     {
                         createTag(stream);
                     }
                 }
             }
-            else if(stream.name() == "update")
+            else if(stream.name() == QString("update"))
             {
                 while(!(stream.tokenType() == QXmlStreamReader::EndElement &&
-                        stream.name() == "update"))
+                        stream.name() == QString("update")))
                 {
                     if(stream.readNext() != QXmlStreamReader::StartElement)
                         continue;
 
-                    if(stream.name() == "tag")
+                    if(stream.name() == QString("tag"))
                     {
                         updateTag(stream);
                     }
@@ -371,17 +371,17 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
 
     // tag does not exist create it.
 
-    if(type == "Double")
+    if(type == Tag::toString(Tag::eDouble))
     {
         tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eDouble);
         tag->setValue(attribs.value("value").toDouble());
     }
-    else if(type == "Int")
+    else if(type == Tag::toString(Tag::eInt))
     {
         tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eInt);
         tag->setValue(attribs.value("value").toInt());
     }
-    else if(type == "Bool")
+    else if(type == Tag::toString(Tag::eBool))
     {
         tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eBool);
         tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
