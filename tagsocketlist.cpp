@@ -178,23 +178,23 @@ void TagSocketList::loadBindingList()
             continue;
         if(token == QXmlStreamReader::StartElement)
         {
-            if(stream.name() == "bindings")
+            if(stream.name() == QString("bindings"))
                 continue;
-            if(stream.name() == "tagsocket")
+            if(stream.name() == QString("tagsocket"))
             {
                 QString subsytem = stream.attributes().value("subsystem").toString();
                 QString name = stream.attributes().value("name").toString();
                 QString type = stream.attributes().value("type").toString();
                 TagSocket::Type t;
-                if(type == "Bool")
+                if(type == TagSocket::toString(TagSocket::eBool))
                     t = TagSocket::eBool;
-                else if(type == "Int")
+                else if(type == TagSocket::toString(TagSocket::eInt))
                     t = TagSocket::eInt;
-                else if(type == "Double")
+                else if(type == TagSocket::toString(TagSocket::eDouble))
                     t = TagSocket::eDouble;
-                else if(type == "String")
+                else if(type == TagSocket::toString(TagSocket::eString))
                     t = TagSocket::eString;
-                else if(type == "Time")
+                else if(type == TagSocket::toString(TagSocket::eTime))
                     continue;
                 else
                     Q_UNREACHABLE();

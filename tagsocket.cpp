@@ -260,6 +260,25 @@ TagSocket::Type TagSocket::typeFromString(const QString &aTypeString)
         Q_UNREACHABLE();
 }
 
+QString TagSocket::toString(const TagSocket::Type type)
+{
+    switch (type) {
+        case TagSocket::eDouble:
+            return "Double";
+        case TagSocket::eInt:
+            return "Int";
+        case TagSocket::eBool:
+            return "Bool";
+        case TagSocket::eString:
+            return "String";
+        case TagSocket::eTime:
+            return "Time";
+        default:
+            Q_UNREACHABLE();
+    }
+    return QString();
+}
+
 void TagSocket::onTagValueChanged(Tag* aTag)
 {
     if(mType == eDouble)

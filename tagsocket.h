@@ -64,6 +64,7 @@ public:
     bool readValue(QDateTime &rValue);
 
     static Type typeFromString(const QString &aTypeString);
+    static QString toString(const Type type);
 signals:
     void valueChanged(double);
     void valueChanged(bool);
