@@ -363,7 +363,7 @@ QString Tag::toString(Tag::Type aType)
 QByteArray Tag::toMessage()
 {
     QByteArray ba;
-    ba.append(mName);
+    ba.append(mName.toLatin1());
     if(mType == eDouble)
     {
         ba.append(":f");

@@ -57,7 +57,7 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
     {
         TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByIndex(index.row());
         if(!tagsocket)
-            return QVariant(QVariant::Invalid);
+            return QVariant();
         switch(index.column())
         {
             case eTagSocketName:
@@ -110,11 +110,11 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
                 Q_UNREACHABLE();
         }
     }
-    else if(role == Qt::BackgroundColorRole)
+    else if(role == Qt::BackgroundRole)
     {
         TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByIndex(index.row());
         if(!tagsocket)
-            return QVariant(QVariant::Invalid);
+            return QVariant();
         if(tagsocket->isHookedUp())
             return QColor(Qt::green);
         else if(!tagsocket->isHookedUp() && !tagsocket->getTagName().isEmpty())
@@ -123,7 +123,7 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
             return QColor(Qt::gray);
     }
 
-    return QVariant(QVariant::Invalid);
+    return QVariant();
 }
 
 
@@ -153,7 +153,7 @@ QVariant TagSocketListTableModel::headerData(int section, Qt::Orientation orient
         if(role == Qt::DisplayRole || role == Qt::EditRole)
             return QString::number(section);
     }
-    return QVariant(QVariant::Invalid);
+    return QVariant();
 }
 
 

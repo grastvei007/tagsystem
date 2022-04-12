@@ -61,19 +61,19 @@ void TagSocketListView::onDoubleClick(const QModelIndex &aIndex)
  }
 
 
-void TagSocketListView::onCloseClicked(bool aChecked)
+void TagSocketListView::onCloseClicked(bool /*aChecked*/)
 {
     hide();
 }
 
 
-void TagSocketListView::onOkClicked(bool aChecked)
+void TagSocketListView::onOkClicked(bool /*aChecked*/)
 {
 
 }
 
 
-void TagSocketListView::onSaveClicked(bool aCkecked)
+void TagSocketListView::onSaveClicked(bool /*aCkecked*/)
 {
     mTagSocketListTableModel->saveTagSocketBindings();
 }

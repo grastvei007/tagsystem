@@ -128,7 +128,7 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
             return QColor(Qt::gray);
     }
 
-    return QVariant(QVariant::Invalid);
+    return QVariant();
 }
 
 
@@ -158,7 +158,7 @@ QVariant TagListTableModel::headerData(int section, Qt::Orientation orientation,
             return QString::number(section);
     }
 
-    return QVariant(QVariant::Invalid);
+    return QVariant();
 }
 
 
