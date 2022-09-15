@@ -39,18 +39,18 @@ public:
     };
     explicit Tag(QObject *parent = nullptr);
 
-    Tag(QString aSubSystem, QString aName, Type aType);
+    Tag(QString subSystem, QString name, Type type);
 
     Tag(QString subSystem, QString name, Type type, double initValue);
     Tag(QString subSystem, QString name, Type type, int initValue);
     Tag(QString subSystem, QString name, Type type, bool initValue);
     Tag(QString subSystem, QString name, Type type, QString initValue);
 
-    void setValue(double aValue, qint64 msSinceEpoc=-1);
-    void setValue(int aValue, qint64 msSinceEpoc=-1);
-    void setValue(bool aValue, qint64 msSinceEpoc=-1);
-    void setValue(QString aValue, qint64 msSinceEpoc=-1);
-    void setValue(QDateTime aValue, qint64 msSinceEpoc=-1);
+    void setValue(double value, qint64 msSinceEpoc=-1);
+    void setValue(int value, qint64 msSinceEpoc=-1);
+    void setValue(bool value, qint64 msSinceEpoc=-1);
+    void setValue(QString value, qint64 msSinceEpoc=-1);
+    void setValue(QDateTime value, qint64 msSinceEpoc=-1);
 
     Type getType() const;
     QString getTypeStr() const;
@@ -68,28 +68,28 @@ public:
     QDateTime getTimeValue() const;
 
 
-    void writeToXml(QXmlStreamWriter &aStream);
-    static Tag* createFromXml(const QXmlStreamReader &aReader);
-    static Type typeFromString(const QString &aTypeString);
-    static QString toString(Type aType);
+    void writeToXml(QXmlStreamWriter &stream);
+    static Tag* createFromXml(const QXmlStreamReader &reader);
+    static Type typeFromString(const QString &typeString);
+    static QString toString(Type type);
     QByteArray toMessage();
 signals:
     void valueChanged(Tag*);
 public slots:
 
 private:
-    QString mSubSystem = QString();
-    QString mName = QString();
-    Type mType = Tag::eDouble;
+    QString subSystem_ = QString();
+    QString name_ = QString();
+    Type type_ = Tag::eDouble;
 
-    double mDoubleValue = 0.0;
-    int mIntValue = 0;
-    bool mBoolValue = false;
-    QString mStringValue = QString();
+    double doubleValue_ = 0.0;
+    int intValue_ = 0;
+    bool boolValue_ = false;
+    QString stringValue_ = QString();
 
-    qint64 mTimeValue = 0; ///< value for tag type time
-    QString mTimeStampFormat = "dd.MM.yyyy hh:mm:ss.zzz";
-    qint64 mTimeStamp = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc
+    qint64 timeValue_ = 0; ///< value for tag type time
+    QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
+    qint64 timeStamp_ = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc
 };
 
 

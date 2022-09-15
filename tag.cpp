@@ -26,158 +26,158 @@ Tag::Tag(QObject *parent) : QObject(parent)
 
 
 Tag::Tag(QString aSubSystem, QString aName, Type aType) :
-    mSubSystem(aSubSystem),
-    mName(aName),
-    mType(aType)
+    subSystem_(aSubSystem),
+    name_(aName),
+    type_(aType)
 {
 
 }
 
 Tag::Tag(QString subSystem, QString name, Tag::Type type, double initValue) :
-    mSubSystem(subSystem),
-    mName(name),
-    mType(type),
-    mDoubleValue(initValue)
+    subSystem_(subSystem),
+    name_(name),
+    type_(type),
+    doubleValue_(initValue)
 {
 
 }
 
 Tag::Tag(QString subSystem, QString name, Tag::Type type, int initValue) :
-    mSubSystem(subSystem),
-    mName(name),
-    mType(type),
-    mIntValue(initValue)
+    subSystem_(subSystem),
+    name_(name),
+    type_(type),
+    intValue_(initValue)
 {
 
 }
 
 Tag::Tag(QString subSystem, QString name, Tag::Type type, bool initValue) :
-    mSubSystem(subSystem),
-    mName(name),
-    mType(type),
-    mBoolValue(initValue)
+    subSystem_(subSystem),
+    name_(name),
+    type_(type),
+    boolValue_(initValue)
 {
 
 }
 
 Tag::Tag(QString subSystem, QString name, Tag::Type type, QString initValue) :
-    mSubSystem(subSystem),
-    mName(name),
-    mType(type),
-    mStringValue(initValue)
+    subSystem_(subSystem),
+    name_(name),
+    type_(type),
+    stringValue_(initValue)
 {
 
 }
 
 void Tag::setValue(double aValue, qint64 msSinceEpoc)
 {
-    if(qFuzzyCompare(aValue, mDoubleValue))
+    if(qFuzzyCompare(aValue, doubleValue_))
         return;
 
-    mDoubleValue = aValue;
+    doubleValue_ = aValue;
     if(msSinceEpoc < 0)
-        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
     else
-        mTimeStamp = msSinceEpoc;
+        timeStamp_ = msSinceEpoc;
     emit valueChanged(this);
 }
 
 
 void Tag::setValue(int aValue, qint64 msSinceEpoc)
 {
-    if(aValue == mIntValue)
+    if(aValue == intValue_)
         return;
 
-    mIntValue = aValue;
+    intValue_ = aValue;
     if(msSinceEpoc < 0)
-        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
     else
-        mTimeStamp = msSinceEpoc;
+        timeStamp_ = msSinceEpoc;
     emit valueChanged(this);
 }
 
 
 void Tag::setValue(bool aValue, qint64 msSinceEpoc)
 {
-    if(aValue == mBoolValue)
+    if(aValue == boolValue_)
         return;
 
-    mBoolValue = aValue;
+    boolValue_ = aValue;
     if(msSinceEpoc < 0)
-        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
     else
-        mTimeStamp = msSinceEpoc;
+        timeStamp_ = msSinceEpoc;
     emit valueChanged(this);
 }
 
 
 void Tag::setValue(QString aValue, qint64 msSinceEpoc)
 {
-    if(mStringValue == aValue)
+    if(stringValue_ == aValue)
         return;
 
     if(msSinceEpoc < 0)
-        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
     else
-        mTimeStamp = msSinceEpoc;
-    mStringValue = aValue;
+        timeStamp_ = msSinceEpoc;
+    stringValue_ = aValue;
     emit valueChanged(this);
 }
 
 void Tag::setValue(QDateTime aValue, qint64 msSinceEpoc)
 {
     qint64 value = aValue.toMSecsSinceEpoch();
-    if(value == mTimeValue)
+    if(value == timeValue_)
         return;
     if(msSinceEpoc < 0)
-        mTimeStamp = QDateTime::currentMSecsSinceEpoch();
+        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
     else
-        mTimeStamp = msSinceEpoc;
+        timeStamp_ = msSinceEpoc;
 
-    mTimeValue = value;
+    timeValue_ = value;
     emit valueChanged(this);
 }
 
 QString Tag::getFullName() const
 {
-    return QString("%1.%2").arg(mSubSystem).arg(mName);
+    return QString("%1.%2").arg(subSystem_).arg(name_);
 }
 
 QString Tag::getSubsystem() const
 {
-    return mSubSystem;
+    return subSystem_;
 }
 
 
 QString Tag::getName() const
 {
-    return mName;
+    return name_;
 }
 
 QString Tag::getTimeStamp() const
 {
-    return QDateTime::fromMSecsSinceEpoch(mTimeStamp).toString(mTimeStampFormat);
+    return QDateTime::fromMSecsSinceEpoch(timeStamp_).toString(timeStampFormat_);
 }
 
 const QString &Tag::getTimeStampFormat() const
 {
-    return mTimeStampFormat;
+    return timeStampFormat_;
 }
 
 qint64 Tag::getMsSinceEpoc() const
 {
-    return mTimeStamp;
+    return timeStamp_;
 }
 
 
 Tag::Type Tag::getType() const
 {
-    return mType;
+    return type_;
 }
 
 QString Tag::getTypeStr() const
 {
-    switch (mType) {
+    switch (type_) {
     case eDouble:
         return "Double";
     case eInt:
@@ -196,49 +196,49 @@ QString Tag::getTypeStr() const
 
 double Tag::getDoubleValue() const
 {
-    return mDoubleValue;
+    return doubleValue_;
 }
 
 
 int Tag::getIntValue() const
 {
-    return mIntValue;
+    return intValue_;
 }
 
 
 bool Tag::getBoolValue() const
 {
-    return mBoolValue;
+    return boolValue_;
 }
 
 
 QString Tag::getStringValue() const
 {
-    return mStringValue;
+    return stringValue_;
 }
 
 QDateTime Tag::getTimeValue() const
 {
-    return QDateTime::fromMSecsSinceEpoch(mTimeValue);
+    return QDateTime::fromMSecsSinceEpoch(timeValue_);
 }
 
 void Tag::writeToXml(QXmlStreamWriter &aStream)
 {
     aStream.writeStartElement("tag");
-    aStream.writeAttribute("subsystem", mSubSystem);
-    aStream.writeAttribute("name", mName);
-    aStream.writeAttribute("timestamp", QString::number(mTimeStamp));
+    aStream.writeAttribute("subsystem", subSystem_);
+    aStream.writeAttribute("name", name_);
+    aStream.writeAttribute("timestamp", QString::number(timeStamp_));
     aStream.writeAttribute("type", getTypeStr());
-    if(mType == eDouble)
-        aStream.writeAttribute("value", QString::number(mDoubleValue));
-    else if(mType == eInt)
-        aStream.writeAttribute("value", QString::number(mIntValue));
-    else if(mType == eBool)
-        aStream.writeAttribute("value", (mBoolValue) ? "1" : "0");
-    else if(mType == eString)
-        aStream.writeAttribute("value", mStringValue);
-    else if(mType == eTime)
-        aStream.writeAttribute("value", QString::number(mTimeValue));
+    if(type_ == eDouble)
+        aStream.writeAttribute("value", QString::number(doubleValue_));
+    else if(type_ == eInt)
+        aStream.writeAttribute("value", QString::number(intValue_));
+    else if(type_ == eBool)
+        aStream.writeAttribute("value", (boolValue_) ? "1" : "0");
+    else if(type_ == eString)
+        aStream.writeAttribute("value", stringValue_);
+    else if(type_ == eTime)
+        aStream.writeAttribute("value", QString::number(timeValue_));
     else
         Q_UNREACHABLE(); ///< unhandled tag type.
 
@@ -330,31 +330,31 @@ QString Tag::toString(Tag::Type aType)
 QByteArray Tag::toMessage()
 {
     QByteArray ba;
-    ba.append(mName.toLatin1());
-    if(mType == eDouble)
+    ba.append(name_.toLatin1());
+    if(type_ == eDouble)
     {
         ba.append(":f");
         union U{
            float f;
            char byte[4];
         }u;
-        u.f = (float)mDoubleValue;
+        u.f = (float)doubleValue_;
         ba.append(u.byte, 4);
     }
-    else if(mType == eInt)
+    else if(type_ == eInt)
     {
         ba.append(":i");
         union U{
             int i;
             char byte[4];
         }u;
-        u.i = mIntValue;
+        u.i = intValue_;
         ba.append(u.byte, 4);
     }
-    else if(mType == eBool)
+    else if(type_ == eBool)
     {
         ba.append(":b");
-        ba.append( mBoolValue ? char(1) : char(0) );
+        ba.append(boolValue_ ? char(1) : char(0));
     }
     else
         Q_UNREACHABLE();

@@ -81,12 +81,12 @@ private:
     TagSocket(QString aSubSystem, QString aName, Type aType);
 
 private:
-    Tag *mTag;
-    QString mTagName;
+    Tag *tag_ = nullptr;
+    QString tagName_ = QString();
 
-    QString mSubSystem;
-    QString mName;
-    Type mType;
+    QString subSystem_;
+    QString name_;
+    Type type_;
     bool isWaitingForTag_ = false;
 };
 

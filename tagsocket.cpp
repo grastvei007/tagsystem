@@ -25,17 +25,14 @@ TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, TagSock
     TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByName(fullname);
     if(tagsocket)
         return tagsocket;
-    tagsocket = new TagSocket(aSubSystem, aName, aType);
-    return tagsocket;
+    return new TagSocket(aSubSystem, aName, aType);
 }
 
 
 TagSocket::TagSocket(QString aSubSystem, QString aName, Type aType) :
-    mTag(nullptr),
-    mTagName(),
-    mSubSystem(aSubSystem),
-    mName(aName),
-    mType(aType)
+    subSystem_(aSubSystem),
+    name_(aName),
+    type_(aType)
 {
     TagSocketList::sGetInstance().addTagSocket(this);
 }
@@ -47,33 +44,33 @@ TagSocket::~TagSocket()
 
 QString TagSocket::getFullName() const
 {
-    return QString("%1.%2").arg(mSubSystem).arg(mName);
+    return QString("%1.%2").arg(subSystem_).arg(name_);
 }
 
 
 QString TagSocket::getSubSystem() const
 {
-    return mSubSystem;
+    return subSystem_;
 }
 
 
 QString TagSocket::getName() const
 {
-    return mName;
+    return name_;
 }
 
 
 QString TagSocket::getTypeStr() const
 {
-    if(mType == eDouble)
+    if(type_ == eDouble)
         return QString("Double");
-    else if(mType == eInt)
+    else if(type_ == eInt)
         return QString("Int");
-    else if(mType == eBool)
+    else if(type_ == eBool)
         return QString("Bool");
-    else if(mType == eString)
+    else if(type_ == eString)
         return QString("String");
-    else if(mType == eTime)
+    else if(type_ == eTime)
         return QString("Time");
     else
         Q_UNREACHABLE();
@@ -82,17 +79,17 @@ QString TagSocket::getTypeStr() const
 
 QString TagSocket::getTagName() const
 {
-    return mTagName;
+    return tagName_;
 }
 
 TagSocket::Type TagSocket::getType() const
 {
-    return mType;
+    return type_;
 }
 
 Tag* TagSocket::getTag() const
 {
-    return mTag;
+    return tag_;
 }
 
 bool TagSocket::hookupTag(Tag *aTag)
@@ -100,44 +97,44 @@ bool TagSocket::hookupTag(Tag *aTag)
     if(!aTag)
         return false;
 
-    if(mType == eDouble)
+    if(type_ == eDouble)
     {
         if(aTag->getType() != Tag::eDouble)
             return false;
-        mTag = aTag;
+        tag_ = aTag;
     }
-    else if(mType == eBool)
+    else if(type_ == eBool)
     {
         if(aTag->getType() != Tag::eBool)
             return false;
-        mTag = aTag;
+        tag_ = aTag;
     }
-    else if(mType == eInt)
+    else if(type_ == eInt)
     {
         if(aTag->getType()  != Tag::eInt)
             return false;
-        mTag = aTag;
+        tag_ = aTag;
     }
-    else if(mType == eString)
+    else if(type_ == eString)
     {
         if(aTag->getType() != Tag::eString)
             return false;
-        mTag = aTag;
+        tag_ = aTag;
     }
-    else if(mType == eTime)
+    else if(type_ == eTime)
     {
         if(aTag->getType() != Tag::eTime)
             return false;
-        mTag = aTag;
+        tag_ = aTag;
     }
     else
         Q_UNREACHABLE();
 
-    if(mTag)
+    if(tag_)
     {
-        connect(mTag, &Tag::valueChanged, this, &TagSocket::onTagValueChanged);
-        onTagValueChanged(mTag); // get an update
-        mTagName = mTag->getFullName();
+        connect(tag_, &Tag::valueChanged, this, &TagSocket::onTagValueChanged);
+        onTagValueChanged(tag_); // get an update
+        tagName_ = tag_->getFullName();
         return true;
     }
 
@@ -146,8 +143,8 @@ bool TagSocket::hookupTag(Tag *aTag)
 
 bool TagSocket::hookupTag(QString aTagSubsytem, QString aTagName)
 {
-    mTagName = QString("%1.%2").arg(aTagSubsytem).arg(aTagName);
-    Tag *tag = TagList::sGetInstance().findByTagName(mTagName);
+    tagName_ = QString("%1.%2").arg(aTagSubsytem).arg(aTagName);
+    Tag *tag = TagList::sGetInstance().findByTagName(tagName_);
     if(tag)
         return hookupTag(tag);
 
@@ -159,7 +156,7 @@ bool TagSocket::hookupTag(QString aTagSubsytem, QString aTagName)
 
 bool TagSocket::isHookedUp() const
 {
-    return mTag;
+    return tag_;
 }
 
 bool TagSocket::isWaitingForTag() const
@@ -169,78 +166,78 @@ bool TagSocket::isWaitingForTag() const
 
 void TagSocket::writeValue(double aValue)
 {
-    if(mTag)
-        mTag->setValue(aValue);
+    if(tag_)
+        tag_->setValue(aValue);
 }
 
 
 void TagSocket::writeValue(bool aValue)
 {
-    if(mTag)
-        mTag->setValue(aValue);
+    if(tag_)
+        tag_->setValue(aValue);
 }
 
 
 void TagSocket::writeValue(int aValue)
 {
-    if(mTag)
-        mTag->setValue(aValue);
+    if(tag_)
+        tag_->setValue(aValue);
 }
 
 
 void TagSocket::writeValue(QString aValue)
 {
-    if(mTag)
-        mTag->setValue(aValue);
+    if(tag_)
+        tag_->setValue(aValue);
 }
 
 void TagSocket::writeValue(QDateTime aValue)
 {
-    if(mTag)
-        mTag->setValue(aValue);
+    if(tag_)
+        tag_->setValue(aValue);
 }
 
 
 bool TagSocket::readValue(double &rValue)
 {
-    if(!mTag)
+    if(!tag_)
         return false;
-    rValue = mTag->getDoubleValue();
+    rValue = tag_->getDoubleValue();
     return true;
 }
 
 
 bool TagSocket::readValue(bool &rValue)
 {
-    if(!mTag)
+    if(!tag_)
         return false;
-    rValue = mTag->getBoolValue();
+    rValue = tag_->getBoolValue();
     return true;
 }
 
 
 bool TagSocket::readValue(int &rValue)
 {
-    if(!mTag)
+    if(!tag_)
         return false;
-    rValue = mTag->getIntValue();
+    rValue = tag_->getIntValue();
     return true;
 }
 
 
 bool TagSocket::readValue(QString &rValue)
 {
-    if(!mTag)
+    if(!tag_)
         return false;
-    rValue = mTag->getStringValue();
+    rValue = tag_->getStringValue();
     return true;
 }
 
 bool TagSocket::readValue(QDateTime &rValue)
 {
-    if(!mTag)
+    if(!tag_)
         return false;
-    rValue = mTag->getTimeValue();
+    rValue = tag_->getTimeValue();
     return true;
 }
 
@@ -281,22 +278,22 @@ QString TagSocket::toString(const TagSocket::Type type)
 
 void TagSocket::onTagValueChanged(Tag* aTag)
 {
-    if(mType == eDouble)
+    if(type_ == eDouble)
     {
         emit valueChanged(aTag->getDoubleValue());
     }
-    else if(mType == eBool)
+    else if(type_ == eBool)
     {
         emit valueChanged(aTag->getBoolValue());
     }
-    else if(mType == eInt)
+    else if(type_ == eInt)
     {
         emit valueChanged(aTag->getIntValue());
     }
-    else if(mType == eString)
+    else if(type_ == eString)
         emit valueChanged(aTag->getStringValue());
-    else if(mType == eTime)
-        emit valueChanged(mTag->getTimeValue());
+    else if(type_ == eTime)
+        emit valueChanged(tag_->getTimeValue());
     else
         Q_UNREACHABLE();
 
@@ -305,7 +302,7 @@ void TagSocket::onTagValueChanged(Tag* aTag)
 
 void TagSocket::onTagCreated()
 {
-    Tag *tag = TagList::sGetInstance().findByTagName(mTagName);
+    Tag *tag = TagList::sGetInstance().findByTagName(tagName_);
     if(!tag)
         return;
 
