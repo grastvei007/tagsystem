@@ -78,18 +78,18 @@ signals:
 public slots:
 
 private:
-    QString mSubSystem;
-    QString mName;
-    Type mType;
+    QString mSubSystem = QString();
+    QString mName = QString();
+    Type mType = Tag::eDouble;
 
-    double mDoubleValue;
-    int mIntValue;
-    bool mBoolValue;
-    QString mStringValue;
+    double mDoubleValue = 0.0;
+    int mIntValue = 0;
+    bool mBoolValue = false;
+    QString mStringValue = QString();
 
     qint64 mTimeValue = 0; ///< value for tag type time
-    QString mTimeStampFormat;
-    qint64 mTimeStamp; ///< msSinceEpoc
+    QString mTimeStampFormat = "dd.MM.yyyy hh:mm:ss.zzz";
+    qint64 mTimeStamp = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc
 };
 
 
