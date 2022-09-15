@@ -30,23 +30,19 @@ TagList& TagList::sGetInstance()
     return sTagList;
 }
 
-TagList::TagList() :
-    mWebSocket(nullptr),
-    mFreeRideFlag(false),
-    mTagSyncTimer(nullptr),
-    mIsConnected(false)
+TagList::TagList()
 {
 
 }
 
 void TagList::freeRide(bool aOn)
 {
-    mFreeRideFlag = aOn;
+    freeRideFlag_ = aOn;
 }
 
 int TagList::getNumberOfTags() const
 {
-    return mTagByName.size();
+    return tagByName_.size();
 }
 
 Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType)
@@ -58,14 +54,14 @@ Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
     }
     // tag does not exist, create it.
     tag = new Tag(aSubSystem, aName, aType);
-    mTagByName[tag->getFullName()] = tag;
-    mTags.push_back(tag);
+    tagByName_[tag->getFullName()] = tag;
+    tags_.push_back(tag);
     connect(tag, &Tag::valueChanged, this, &TagList::valueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
-    if(mWebSocket)
-        mTagsCreateQueue.push_back(tag);
-    qDebug() << "Create tag: " << tag->getFullName() << " (" << mTagsCreateQueue.size() << ")";
+    if(webSocket_)
+        tagsCreateQueue_.push_back(tag);
+    qDebug() << "Create tag: " << tag->getFullName() << " (" << tagsCreateQueue_.size() << ")";
     emit tagCreated();
     return tag;
 }
@@ -102,14 +98,14 @@ Tag *TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
         break;
     }
 
-    mTagByName[tag->getFullName()] = tag;
-    mTags.push_back(tag);
+    tagByName_[tag->getFullName()] = tag;
+    tags_.push_back(tag);
     connect(tag, &Tag::valueChanged, this, &TagList::valueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
-    if(mWebSocket)
-        mTagsCreateQueue.push_back(tag);
-    qDebug() << "Create tag: " << tag->getFullName() << " (" << mTagsCreateQueue.size() << ")";
+    if(webSocket_)
+        tagsCreateQueue_.push_back(tag);
+    qDebug() << "Create tag: " << tag->getFullName() << " (" << tagsCreateQueue_.size() << ")";
     emit tagCreated();
     return tag;
 }
@@ -117,16 +113,16 @@ Tag *TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
 
 Tag* TagList::findByTagName(const QString &aName)
 {
-    if(!mTagByName.contains(aName))
+    if(!tagByName_.contains(aName))
         return nullptr;
 
-    return mTagByName[aName];
+    return tagByName_[aName];
 }
 
 
 Tag* TagList::getTagByIndex(int aIndex)
 {
-    return mTags.at(aIndex);
+    return tags_.at(aIndex);
 }
 
 
@@ -141,9 +137,9 @@ void TagList::toXml(QByteArray &rXml, bool aCreate) const
     else
         stream.writeStartElement("update");
 
-    for(int i=0; i<mTags.size(); ++i)
+    for(int i=0; i<tags_.size(); ++i)
     {
-        mTags[i]->writeToXml(stream);
+        tags_[i]->writeToXml(stream);
     }
 
     stream.writeEndElement();
@@ -154,52 +150,52 @@ void TagList::toXml(QByteArray &rXml, bool aCreate) const
 
 void TagList::connectToServer(const QString &aAdress, qint16 aPort)
 {
-    if(mClientName.isEmpty())
+    if(clientName_.isEmpty())
         qFatal("Set client name before connecting to server..");
-    mAdress = aAdress;
-    mPort = aPort;
+    adress_ = aAdress;
+    port_ = aPort;
     QUrl url(QString("ws://%1:%2").arg(aAdress).arg(QString::number(aPort)));
     qDebug() << "Connect to: " << url;
-    mWebSocket = new QWebSocket;
-    connect(mWebSocket, &QWebSocket::connected, this, &TagList::onConnected);
-    connect(mWebSocket, &QWebSocket::disconnected, this, &TagList::onDisconnected);
-    connect(mWebSocket, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error), this, &TagList::onError);
-    mWebSocket->open(url);
+    webSocket_ = new QWebSocket;
+    connect(webSocket_, &QWebSocket::connected, this, &TagList::onConnected);
+    connect(webSocket_, &QWebSocket::disconnected, this, &TagList::onDisconnected);
+    connect(webSocket_, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error), this, &TagList::onError);
+    webSocket_->open(url);
 }
 
 
 void TagList::reconnect()
 {
-    connectToServer(mAdress, mPort);
+    connectToServer(adress_, port_);
 }
 
 
 void TagList::setClientName(const QString &aName)
 {
-    mClientName = aName;
+    clientName_ = aName;
 }
 
 void TagList::onError()
 {
-    QString errorStr = mWebSocket->errorString();
+    QString errorStr = webSocket_->errorString();
     qDebug() << errorStr;
-    switch (mWebSocket->error())
+    switch (webSocket_->error())
     {
         case QAbstractSocket::ConnectionRefusedError:
-            if(!mAdress.isEmpty() && mPort > 1024)
+            if(!adress_.isEmpty() && port_ > 1024)
             {
                 QTimer::singleShot(1000*60, [this](){
                     qDebug() << "Reconnect..";
-                    connectToServer(mAdress, mPort);});
+                    connectToServer(adress_, port_);});
                 return;
             }
             break;
 
         case QAbstractSocket::RemoteHostClosedError:
-            if(!mAdress.isEmpty() && mPort > 1024)
+            if(!adress_.isEmpty() && port_ > 1024)
             {
                 QTimer::singleShot(1000*30, [this](){
-                    connectToServer(mAdress, mPort);});
+                    connectToServer(adress_, port_);});
                 return;
             }
             break;
@@ -238,28 +234,28 @@ void TagList::onError()
 
 void TagList::onConnected()
 {
-    ClientInformation cl(mClientName);
-    mWebSocket->sendTextMessage(cl.getInfo());
+    ClientInformation cl(clientName_);
+    webSocket_->sendTextMessage(cl.getInfo());
 
-    connect(mWebSocket, &QWebSocket::binaryMessageReceived, this, &TagList::onBinaryDataRecieved);
+    connect(webSocket_, &QWebSocket::binaryMessageReceived, this, &TagList::onBinaryDataRecieved);
    // QByteArray data;
    // toXml(data);
    // mWebSocket->sendBinaryMessage(data);
-    if(!mTagSyncTimer && !mFreeRideFlag)
+    if(!tagSyncTimer_ && !freeRideFlag_)
     {
-        mTagSyncTimer = new QTimer(this);
-        mTagSyncTimer->setInterval(1000);
-        connect(mTagSyncTimer, &QTimer::timeout, this, &TagList::syncTags);
-        mTagSyncTimer->start();
+        tagSyncTimer_ = new QTimer(this);
+        tagSyncTimer_->setInterval(1000);
+        connect(tagSyncTimer_, &QTimer::timeout, this, &TagList::syncTags);
+        tagSyncTimer_->start();
     }
-    mIsConnected = true;
+    isConnected_ = true;
     emit connected();
 }
 
 
 void TagList::onDisconnected()
 {
-    mIsConnected = false;
+    isConnected_ = false;
     emit disconnect();
 }
 
@@ -327,21 +323,21 @@ void TagList::syncTags()
     stream.writeStartDocument();
     stream.writeStartElement("taglist");
 
-    if(mTagsCreateQueue.size() > 0)
+    if(tagsCreateQueue_.size() > 0)
     {
         stream.writeStartElement("create");
-        for(int i=0; i<mTagsCreateQueue.size(); ++i)
-            mTagsCreateQueue[i]->writeToXml(stream);
-        mTagsCreateQueue.clear();
+        for(int i=0; i<tagsCreateQueue_.size(); ++i)
+            tagsCreateQueue_[i]->writeToXml(stream);
+        tagsCreateQueue_.clear();
         create = true;
         stream.writeEndElement();
     }
-    if(mTagUpdateQueue.size() > 0)
+    if(tagUpdateQueue_.size() > 0)
     {
         stream.writeStartElement("update");
-        for(int i=0; i<mTagUpdateQueue.size(); ++i)
-            mTagUpdateQueue[i]->writeToXml(stream);
-        mTagUpdateQueue.clear();
+        for(int i=0; i<tagUpdateQueue_.size(); ++i)
+            tagUpdateQueue_[i]->writeToXml(stream);
+        tagUpdateQueue_.clear();
         stream.writeEndElement();
         update = true;
     }
@@ -349,10 +345,10 @@ void TagList::syncTags()
     stream.writeEndElement();
     stream.writeEndDocument();
 
-    if(mWebSocket && (update || create))
+    if(webSocket_ && (update || create))
     {
         qDebug() << "Sending data ";
-        mWebSocket->sendBinaryMessage(data);
+        webSocket_->sendBinaryMessage(data);
     }
 }
 
@@ -466,15 +462,15 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
  */
 void TagList::onTagValueChanged(Tag *aTag)
 {
-    if(!mWebSocket)
+    if(!webSocket_)
         return;
 
-    if(mTagUpdateQueue.contains(aTag))
-        mTagUpdateQueue.removeAll(aTag);
+    if(tagUpdateQueue_.contains(aTag))
+        tagUpdateQueue_.removeAll(aTag);
 
-    mTagUpdateQueue.push_back(aTag);
+    tagUpdateQueue_.push_back(aTag);
 
-    if(mFreeRideFlag)
+    if(freeRideFlag_)
         syncTags();
 }
 

@@ -72,22 +72,22 @@ private:
     TagList();
 
 private:
-    QMap<QString, Tag*> mTagByName;
-    QVector<Tag*> mTags;
-    QString mAdress;
-    qint16 mPort;
+    QMap<QString, Tag*> tagByName_;
+    QVector<Tag*> tags_;
+    QString adress_;
+    qint16 port_ = 0;
 
-    QWebSocket *mWebSocket;
+    QWebSocket *webSocket_ = nullptr;
 
-    bool mFreeRideFlag;
+    bool freeRideFlag_ = false;
     // Tags to sync with server if connected.
-    QVector<Tag*> mTagsCreateQueue;
-    QVector<Tag*> mTagUpdateQueue;
-    QTimer *mTagSyncTimer;
+    QVector<Tag*> tagsCreateQueue_;
+    QVector<Tag*> tagUpdateQueue_;
+    QTimer *tagSyncTimer_ = nullptr;
 
-    QString mClientName; ///< the name that identify this client when connected to a server.
+    QString clientName_; ///< the name that identify this client when connected to a server.
 
-    bool mIsConnected;
+    bool isConnected_ = false;
 };
 
 #endif // TAGLIST_H

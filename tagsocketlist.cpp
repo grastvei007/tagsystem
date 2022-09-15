@@ -33,15 +33,15 @@ TagSocketList& TagSocketList::sGetInstance()
 
 int TagSocketList::getNumberOfTagSockets() const
 {
-    return mTagSocketList.size();
+    return tagSocketList_.size();
 }
 
 bool TagSocketList::addTagSocket(TagSocket *aTagSocket)
 {
     if(!aTagSocket)
         return false;
-    mTagSocketList.push_back(aTagSocket);
-    mTagSocketByName[aTagSocket->getFullName()] = aTagSocket;
+    tagSocketList_.push_back(aTagSocket);
+    tagSocketByName_[aTagSocket->getFullName()] = aTagSocket;
     connect(aTagSocket, qOverload<TagSocket*>(&TagSocket::valueChanged), this, &TagSocketList::tagSocketValueChanged);
     emit tagSocketAdded();
     return true;
@@ -49,26 +49,26 @@ bool TagSocketList::addTagSocket(TagSocket *aTagSocket)
 
 void TagSocketList::removeTagSocket(TagSocket *aTagSocket)
 {
-    mTagSocketByName.remove(aTagSocket->getFullName());
-    mTagSocketList.removeAll(aTagSocket);
+    tagSocketByName_.remove(aTagSocket->getFullName());
+    tagSocketList_.removeAll(aTagSocket);
     emit tagSocketRemoved();
 }
 
 
 TagSocket* TagSocketList::getTagSocketByIndex(int aIndex)
 {
-    if(aIndex < 0 || aIndex > mTagSocketList.size())
+    if(aIndex < 0 || aIndex > tagSocketList_.size())
         return nullptr;
 
-    return mTagSocketList.at(aIndex);
+    return tagSocketList_.at(aIndex);
 }
 
 
 TagSocket* TagSocketList::getTagSocketByName(QString aName)
 {
-    if(mTagSocketByName.contains(aName))
+    if(tagSocketByName_.contains(aName))
     {
-        return mTagSocketByName[aName];
+        return tagSocketByName_[aName];
     }
     return nullptr;
 }
@@ -83,7 +83,7 @@ TagSocket* TagSocketList::getTagSocketByName(QString aName)
  */
 void TagSocketList::setApplicationName(QString aName)
 {
-    mApplicationName = aName;
+    applicationName_ = aName;
 }
 
 
@@ -91,13 +91,13 @@ void TagSocketList::saveBindingList()
 {
 #ifdef __linux__
     QString path = QDir::homePath() + QDir::separator() + ".config" + QDir::separator() + "june";
-    if(mApplicationName.isEmpty())
+    if(applicationName_.isEmpty())
     {
         qDebug() << __FUNCTION__ << "Set application name";
 
     }
     else
-        path += QDir::separator() + mApplicationName;
+        path += QDir::separator() + applicationName_;
 #else
     QString path = qApp->applicationDirPath();
 #endif
@@ -149,13 +149,13 @@ void TagSocketList::loadBindingList()
 {
 #ifdef __linux__
     QString path = QDir::homePath() + QDir::separator() + ".config" + QDir::separator() + "june";
-    if(mApplicationName.isEmpty())
+    if(applicationName_.isEmpty())
     {
         qDebug() << __FUNCTION__ << "Set application name";
 
     }
     else
-        path += QDir::separator() + mApplicationName;
+        path += QDir::separator() + applicationName_;
 #else
   QString path = qApp->applicationDirPath();
 #endif

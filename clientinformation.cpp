@@ -21,7 +21,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QStringList>
 
 ClientInformation::ClientInformation(const QString &aName) :
-    mClientName(aName)
+    clientName_(aName)
 {
 
 }
@@ -40,7 +40,7 @@ QString ClientInformation::getInfo() const
     stream.setAutoFormatting(true);
     stream.writeStartDocument();
     stream.writeStartElement("client");
-    stream.writeTextElement("name", mClientName);
+    stream.writeTextElement("name", clientName_);
     stream.writeTextElement("ip", ips.first());
     stream.writeEndElement();
     stream.writeEndDocument();
