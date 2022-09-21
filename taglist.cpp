@@ -168,6 +168,22 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
     webSocket_->open(url);
 }
 
+bool TagList::tryToAutoConnect()
+{
+    if(clientName_.isEmpty())
+        return false;
+    QSettings settings("june", clientName_);
+    auto adress = settings.value("serverAdress", "localhost").toString();
+    auto port = settings.value("serverPort", 5000).toInt();
+    auto autoConnect = settings.value("serverAutoConnect", false).toBool();
+    if(autoConnect)
+    {
+        connectToServer(adress, port);
+        return true;
+    }
+    return false;
+}
+
 
 void TagList::reconnect()
 {

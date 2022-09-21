@@ -47,6 +47,7 @@ public:
 
     void freeRide(bool aOn);
     void connectToServer(const QString &aAdress, qint16 aPort);
+    bool tryToAutoConnect();
     void setClientName(const QString &aName);
     void reconnect();
 
