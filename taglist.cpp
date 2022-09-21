@@ -125,6 +125,11 @@ Tag* TagList::getTagByIndex(int aIndex)
     return tags_.at(aIndex);
 }
 
+const QString &TagList::clientName() const
+{
+    return clientName_;
+}
+
 
 void TagList::toXml(QByteArray &rXml, bool aCreate) const
 {
@@ -347,7 +352,6 @@ void TagList::syncTags()
 
     if(webSocket_ && (update || create))
     {
-        qDebug() << "Sending data ";
         webSocket_->sendBinaryMessage(data);
     }
 }

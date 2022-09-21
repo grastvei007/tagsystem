@@ -41,6 +41,7 @@ public:
 
     Tag* findByTagName(const QString &aName);
     Tag* getTagByIndex(int aIndex);
+    const QString& clientName() const;
 
     void toXml(QByteArray &rXml, bool aCreate=false) const;
 
