@@ -21,6 +21,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QString>
 #include <QByteArray>
 #include <QDateTime>
+#include <QJsonObject>
 
 class QXmlStreamReader;
 class QXmlStreamWriter;
@@ -73,6 +74,7 @@ public:
     static Type typeFromString(const QString &typeString);
     static QString toString(Type type);
     QByteArray toMessage();
+    const QJsonObject& toJson();
 signals:
     void valueChanged(Tag*);
 public slots:
@@ -90,6 +92,8 @@ private:
     qint64 timeValue_ = 0; ///< value for tag type time
     QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
     qint64 timeStamp_ = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc
+
+    QJsonObject jsonObject_ = QJsonObject();
 };
 
 

@@ -361,3 +361,32 @@ QByteArray Tag::toMessage()
 
     return ba;
 }
+
+const QJsonObject &Tag::toJson()
+{
+    jsonObject_.insert("name", name_);
+    jsonObject_.insert("subsystem", subSystem_);
+    jsonObject_.insert("type", Tag::toString(type_));
+    switch (type_) {
+        case eDouble:
+            jsonObject_.insert("value", doubleValue_);
+            break;
+        case eInt:
+            jsonObject_.insert("value", intValue_);
+            break;
+        case eBool:
+            jsonObject_.insert("value", boolValue_);
+            break;
+        case eString:
+            jsonObject_.insert("value", stringValue_);
+            break;
+        case eTime:
+            jsonObject_.insert("value", timeValue_);
+            break;
+        default:
+            jsonObject_.insert("value", QString());
+            break;
+    }
+
+    return jsonObject_;
+}
