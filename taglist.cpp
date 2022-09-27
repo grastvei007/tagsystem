@@ -186,6 +186,17 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
     webSocket_->open(url);
 }
 
+void TagList::disconnectFromServer()
+{
+    if(!webSocket_)
+        return;
+    webSocket_->disconnect();
+    webSocket_->deleteLater();
+    webSocket_ = nullptr;
+    emit disconnect();
+    isConnected_ = false;
+}
+
 bool TagList::tryToAutoConnect()
 {
     if(clientName_.isEmpty())
