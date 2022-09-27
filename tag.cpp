@@ -271,7 +271,7 @@ Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
     QString name = aReader.attributes().value("name").toString();
     QString type = aReader.attributes().value("type").toString();
     QString val = aReader.attributes().value("value").toString();
-    QString description = aReader.attributes().value("descripton").toString();
+    QString description = aReader.attributes().value("description").toString();
 
     Tag *tag = nullptr;
     if(type == "Double")
