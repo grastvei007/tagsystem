@@ -29,6 +29,7 @@ public:
         eTagName,
         eType,
         eValue,
+        eDescription,
         eTimeStamp
     };
 
@@ -45,7 +46,6 @@ public:
 private slots:
     void onTagCreated();
     void onTagValueChanged();
-
 };
 
 #endif // TAGLISTTABLEMODEL_H

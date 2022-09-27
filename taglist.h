@@ -36,6 +36,7 @@ public:
 
     Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType);
     Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue);
+    Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue, const QString& description);
     Tag* createTag(QXmlStreamReader &aStream);
     Tag* updateTag(QXmlStreamReader &aStream);
 

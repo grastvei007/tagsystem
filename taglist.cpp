@@ -66,36 +66,54 @@ Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
     return tag;
 }
 
-Tag *TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue)
+
+Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue)
 {
-    Tag *tag = findByTagName(QString("%1.%2").arg(aSubSystem).arg(aName));
+    return createTag(subSystem, name, type, initValue, QString());
+}
+
+
+Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue, const QString &description)
+{
+    auto *tag = findByTagName(QString("%1.%2").arg(subSystem).arg(name));
     if(tag)
-    {
         return tag;
-    }
-    switch (aType)
+
+    switch(type)
     {
-    case Tag::eDouble:
-    {
-        auto value = initValue.toDouble();
-        tag = new Tag(aSubSystem, aName, aType, value);
-        break;
-    }
-    case Tag::eInt:
-    {
-        auto value = initValue.toInt();
-        tag = new Tag(aSubSystem, aName, aType, value);
-        break;
-    }
-    case Tag::eBool:
-    {
-        auto value = initValue.toBool();
-        tag = new Tag(aSubSystem, aName, aType, value);
-        break;
-    }
-    default:
-        tag = new Tag(aSubSystem, aName, aType);
-        break;
+        case Tag::eDouble:
+        {
+            double value = initValue.toDouble();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        case Tag::eInt:
+        {
+            auto value = initValue.toInt();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        case Tag::eBool:
+        {
+            auto value = initValue.toBool();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        case Tag::eString:
+        {
+            auto value = initValue.toString();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        case Tag::eTime:
+        {
+            auto value = initValue.toDateTime();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        default:
+            tag = new Tag(subSystem, name, type);
+            break;
     }
 
     tagByName_[tag->getFullName()] = tag;
@@ -378,6 +396,7 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
     QString subsystem = attribs.value("subsystem").toString();
     QString name = attribs.value("name").toString();
     QString type = attribs.value("type").toString();
+    QString description = attribs.value("description").toString();
 
     Tag *tag = nullptr;
     // if the tag exist do not create.
@@ -389,28 +408,26 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
 
     if(type == Tag::toString(Tag::eDouble))
     {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eDouble);
-        tag->setValue(attribs.value("value").toDouble());
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eDouble, attribs.value("value").toDouble(), description);
     }
     else if(type == Tag::toString(Tag::eInt))
     {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eInt);
-        tag->setValue(attribs.value("value").toInt());
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eInt, attribs.value("value").toInt(), description);
     }
     else if(type == Tag::toString(Tag::eBool))
     {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eBool);
-        tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
+        auto value = attribs.value("value").toInt() == 1 ? true : false;
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eBool, value, description);
     }
     else if(type == Tag::toString(Tag::eString))
     {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eString);
-        tag->setValue(attribs.value("value").toString());
+        auto value = attribs.value("value").toString();
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eString, value, description);
     }
     else if(type == Tag::toString(Tag::eTime))
     {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eTime);
-        tag->setValue(QDateTime::fromMSecsSinceEpoch(attribs.value("value").toLongLong()));
+        auto value = QDateTime::fromMSecsSinceEpoch(attribs.value("value").toLongLong());
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eTime, value, description);
     }
     else
         Q_UNREACHABLE();

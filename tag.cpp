@@ -33,40 +33,53 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
 
 }
 
-Tag::Tag(QString subSystem, QString name, Tag::Type type, double initValue) :
+Tag::Tag(QString subSystem, QString name, Tag::Type type, double initValue, const QString &description) :
     subSystem_(subSystem),
     name_(name),
     type_(type),
+    description_(description),
     doubleValue_(initValue)
 {
 
 }
 
-Tag::Tag(QString subSystem, QString name, Tag::Type type, int initValue) :
+Tag::Tag(QString subSystem, QString name, Tag::Type type, int initValue, const QString &description) :
     subSystem_(subSystem),
     name_(name),
     type_(type),
+    description_(description),
     intValue_(initValue)
 {
 
 }
 
-Tag::Tag(QString subSystem, QString name, Tag::Type type, bool initValue) :
+Tag::Tag(QString subSystem, QString name, Tag::Type type, bool initValue, const QString &description) :
     subSystem_(subSystem),
     name_(name),
     type_(type),
+    description_(description),
     boolValue_(initValue)
 {
 
 }
 
-Tag::Tag(QString subSystem, QString name, Tag::Type type, QString initValue) :
+Tag::Tag(QString subSystem, QString name, Tag::Type type, QString initValue, const QString &description) :
     subSystem_(subSystem),
     name_(name),
     type_(type),
+    description_(description),
     stringValue_(initValue)
 {
 
+}
+
+Tag::Tag(QString subSystem, QString name, Type type, QDateTime initValue, const QString &description) :
+    subSystem_(subSystem),
+    name_(name),
+    type_(type),
+    description_(description)
+{
+    setValue(initValue);
 }
 
 void Tag::setValue(double aValue, qint64 msSinceEpoc)
@@ -159,6 +172,11 @@ QString Tag::getTimeStamp() const
     return QDateTime::fromMSecsSinceEpoch(timeStamp_).toString(timeStampFormat_);
 }
 
+const QString &Tag::getDescription() const
+{
+    return description_;
+}
+
 const QString &Tag::getTimeStampFormat() const
 {
     return timeStampFormat_;
@@ -241,6 +259,7 @@ void Tag::writeToXml(QXmlStreamWriter &aStream)
         aStream.writeAttribute("value", QString::number(timeValue_));
     else
         Q_UNREACHABLE(); ///< unhandled tag type.
+    aStream.writeAttribute("description", description_);
 
     aStream.writeEndElement();
 }
@@ -252,34 +271,29 @@ Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
     QString name = aReader.attributes().value("name").toString();
     QString type = aReader.attributes().value("type").toString();
     QString val = aReader.attributes().value("value").toString();
+    QString description = aReader.attributes().value("descripton").toString();
+
     Tag *tag = nullptr;
     if(type == "Double")
     {
-        tag = new Tag(sub, name, eDouble);
-        tag->setValue(val.toDouble());
+        tag = new Tag(sub, name, eDouble, val.toDouble(), description);
     }
     else if(type == "Int")
     {
-        tag = new Tag(sub, name, eInt);
-        tag->setValue(val.toInt());
+        tag = new Tag(sub, name, eInt, val.toInt(), description);
     }
     else if(type == "Bool")
     {
-        tag = new Tag(sub,name, eBool);
-        tag->setValue( (val.toInt() == 1) ? true : false );
+        tag = new Tag(sub,name, eBool, (val.toInt() == 1) ? true : false, description);
     }
     else if(type == "String")
     {
-        tag = new Tag(sub, name, eString);
-        tag->setValue(val);
+        tag = new Tag(sub, name, eString, val, description);
     }
     else if(typeFromString(type) == eTime)
     {
-        tag = new Tag(sub, name, eTime);
-        tag->setValue(QDateTime::fromMSecsSinceEpoch(val.toLongLong()));
+        tag = new Tag(sub, name, eTime, QDateTime::fromMSecsSinceEpoch(val.toLongLong()), description);
     }
-    aReader.attributes().value("value");
-
 
     return tag;
 }
@@ -367,6 +381,8 @@ const QJsonObject &Tag::toJson()
     jsonObject_.insert("name", name_);
     jsonObject_.insert("subsystem", subSystem_);
     jsonObject_.insert("type", Tag::toString(type_));
+    jsonObject_.insert("description", description_);
+
     switch (type_) {
         case eDouble:
             jsonObject_.insert("value", doubleValue_);

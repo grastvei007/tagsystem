@@ -42,7 +42,7 @@ int TagListTableModel::rowCount(const QModelIndex &parent) const
 int TagListTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return 4;
+    return 5;
 }
 
 bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -68,6 +68,7 @@ bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value,
             case Tag::eTime:
                 tag->setValue(value.toDateTime());
                 return true;
+
             }
         }
     }
@@ -116,6 +117,9 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
         case eTimeStamp:
             return tag->getTimeStamp();
 
+        case eDescription:
+            return tag->getDescription();
+
         default:
             break;
         }
@@ -147,6 +151,8 @@ QVariant TagListTableModel::headerData(int section, Qt::Orientation orientation,
                 return "Value";
             case eTimeStamp:
                 return "TimeStamp";
+            case eDescription:
+                return "Description";
             default:
                 break;
             }

@@ -42,10 +42,11 @@ public:
 
     Tag(QString subSystem, QString name, Type type);
 
-    Tag(QString subSystem, QString name, Type type, double initValue);
-    Tag(QString subSystem, QString name, Type type, int initValue);
-    Tag(QString subSystem, QString name, Type type, bool initValue);
-    Tag(QString subSystem, QString name, Type type, QString initValue);
+    Tag(QString subSystem, QString name, Type type, double initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, int initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, bool initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, QString initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, QDateTime initValue, const QString &description = QString());
 
     void setValue(double value, qint64 msSinceEpoc=-1);
     void setValue(int value, qint64 msSinceEpoc=-1);
@@ -59,6 +60,7 @@ public:
     QString getSubsystem() const;
     QString getName() const;
     QString getTimeStamp() const;
+    const QString& getDescription() const;
     const QString& getTimeStampFormat() const;
     qint64 getMsSinceEpoc() const;
 
@@ -83,6 +85,7 @@ private:
     QString subSystem_ = QString();
     QString name_ = QString();
     Type type_ = Tag::eDouble;
+    QString description_ = QString();
 
     double doubleValue_ = 0.0;
     int intValue_ = 0;
