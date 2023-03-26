@@ -22,20 +22,29 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 TagListView::TagListView(QWidget *parent) : QWidget(parent)
 {
-
     mTableView.reset(new QTableView(this));
     mTableView->setSortingEnabled(true);
     mTableView->horizontalHeader()->setSectionsClickable(true);
     mTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
     QGridLayout *grid = new QGridLayout(this);
+
+    tagListSortFilterProxyModel_ = std::make_unique<QSortFilterProxyModel>(this);
+
+
     grid->addWidget(mTableView.get());
 
     setLayout(grid);
-
-
     mTagListTableModel = new TagListTableModel();
 
+    tagListSortFilterProxyModel_->setSourceModel(mTagListTableModel);
     mTableView->setModel(mTagListTableModel);
+    mTableView->setSortingEnabled(true);
 
+    //auto headerView = mTableView->horizontalHeader();
+  //  connect(headerView, &QHeaderView::sectionClicked, this, &TagListView::onHeaderColumnClicked);
 }
+
+/*void TagListView::onHeaderColumnClicked(int index)
+{
+    tagListSortFilterProxyModel_->sort(index, Qt::AscendingOrder);
+}*/
