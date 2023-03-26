@@ -54,6 +54,7 @@ SOURCES += \
     serverconnectwidget.cpp \
     tag.cpp \
     taglist.cpp \
+    taglistsortfilterproxymodel.cpp \
     taglistview.cpp \
     taglisttablemodel.cpp \
     tagselectview.cpp \
@@ -65,6 +66,7 @@ SOURCES += \
 
 HEADERS += \
         serverconnectwidget.h \
+        taglistsortfilterproxymodel.h \
         tagsystem.h \
         tagsystem_global.h \ 
     tag.h \

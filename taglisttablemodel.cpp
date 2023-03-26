@@ -176,11 +176,11 @@ void TagListTableModel::onTagCreated(int index)
 
 void TagListTableModel::onTagValueChanged()
 {
-    //beginResetModel();
+    beginResetModel();
     QModelIndex top = index(0, eValue);
     QModelIndex bottom = index(rowCount(), eTimeStamp);
     emit dataChanged(top, bottom);
-   // endResetModel();
+    endResetModel();
 }
 
 bool TagListTableModel::insertRows(int row, int count, const QModelIndex &parent)
