@@ -37,14 +37,8 @@ TagListView::TagListView(QWidget *parent) : QWidget(parent)
     mTagListTableModel = new TagListTableModel();
 
     tagListSortFilterProxyModel_->setSourceModel(mTagListTableModel);
-    mTableView->setModel(mTagListTableModel);
+    mTableView->setModel(tagListSortFilterProxyModel_.get());
     mTableView->setSortingEnabled(true);
 
-    //auto headerView = mTableView->horizontalHeader();
-  //  connect(headerView, &QHeaderView::sectionClicked, this, &TagListView::onHeaderColumnClicked);
 }
 
-/*void TagListView::onHeaderColumnClicked(int index)
-{
-    tagListSortFilterProxyModel_->sort(index, Qt::AscendingOrder);
-}*/

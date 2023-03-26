@@ -32,7 +32,7 @@ public:
     TagListView(QWidget *parent=nullptr);
 
 private slots:
-    //void onHeaderColumnClicked(int index);
+
 private:
     TagListTableModel *mTagListTableModel;
     std::unique_ptr<QTableView> mTableView;
