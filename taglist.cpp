@@ -62,7 +62,7 @@ Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
     if(webSocket_)
         tagsCreateQueue_.push_back(tag);
     qDebug() << "Create tag: " << tag->getFullName() << " (" << tagsCreateQueue_.size() << ")";
-    emit tagCreated();
+    emit tagCreated(tags_.count());
     return tag;
 }
 
@@ -124,7 +124,7 @@ Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type
     if(webSocket_)
         tagsCreateQueue_.push_back(tag);
     qDebug() << "Create tag: " << tag->getFullName() << " (" << tagsCreateQueue_.size() << ")";
-    emit tagCreated();
+    emit tagCreated(tags_.count());
     return tag;
 }
 
@@ -443,7 +443,7 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
     else
         Q_UNREACHABLE();
 
-    emit tagCreated();
+    emit tagCreated(tags_.count());
     return tag;
 }
 

@@ -168,10 +168,9 @@ QVariant TagListTableModel::headerData(int section, Qt::Orientation orientation,
 }
 
 
-void TagListTableModel::onTagCreated()
+void TagListTableModel::onTagCreated(int index)
 {
-    emit layoutAboutToBeChanged();
-    emit layoutChanged();
+    insertRows(index, 1);
 }
 
 
@@ -184,3 +183,15 @@ void TagListTableModel::onTagValueChanged()
    // endResetModel();
 }
 
+bool TagListTableModel::insertRows(int row, int count, const QModelIndex &parent)
+{
+     beginInsertRows(parent, row, row +count);
+
+     for(int i=row; i<row+count; ++i)
+     {
+         insertRow(i);
+     }
+
+     endInsertRows();
+     return true;
+}
