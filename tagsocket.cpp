@@ -28,7 +28,6 @@ TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, TagSock
     return new TagSocket(aSubSystem, aName, aType);
 }
 
-
 TagSocket::TagSocket(QString aSubSystem, QString aName, Type aType) :
     subSystem_(aSubSystem),
     name_(aName),
@@ -274,6 +273,27 @@ QString TagSocket::toString(const TagSocket::Type type)
             Q_UNREACHABLE();
     }
     return QString();
+}
+
+TagSocket::Type TagSocket::typeMatchingTag(const Tag *tag)
+{
+    if(!tag)
+        return eNone;
+    switch (tag->getType()) {
+    case Tag::eBool:
+        return eBool;
+    case Tag::eDouble:
+        return eDouble;
+    case Tag::eInt:
+        return eInt;
+    case Tag::eString:
+        return eString;
+    case Tag::eTime:
+        return eTime;
+    default:
+        return eNone;
+    }
+    Q_UNREACHABLE();
 }
 
 void TagSocket::onTagValueChanged(Tag* aTag)

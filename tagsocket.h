@@ -27,6 +27,7 @@ class TAGSYSTEMSHARED_EXPORT TagSocket : public QObject
     Q_OBJECT
 public:
     enum Type{
+        eNone,
         eDouble,
         eInt,
         eBool,
@@ -65,6 +66,7 @@ public:
 
     static Type typeFromString(const QString &aTypeString);
     static QString toString(const Type type);
+    static Type typeMatchingTag(const Tag *tag);
 signals:
     void valueChanged(double);
     void valueChanged(bool);
