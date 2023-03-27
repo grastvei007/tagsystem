@@ -52,6 +52,8 @@ public:
     Type getType() const;
     Tag* getTag() const;
 
+    void setScaleValue(double scale); //< only for double socket
+
     void writeValue(double aValue);
     void writeValue(bool aValue);
     void writeValue(int aValue);
@@ -90,6 +92,7 @@ private:
     QString name_;
     Type type_;
     bool isWaitingForTag_ = false;
+    double scaleValue_ = 1.0;
 };
 
 #endif // TAGSOCKET_H

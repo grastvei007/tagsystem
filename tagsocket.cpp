@@ -91,6 +91,11 @@ Tag* TagSocket::getTag() const
     return tag_;
 }
 
+void TagSocket::setScaleValue(double scale)
+{
+    scaleValue_ = scale;
+}
+
 bool TagSocket::hookupTag(Tag *aTag)
 {
     if(!aTag)
@@ -163,10 +168,10 @@ bool TagSocket::isWaitingForTag() const
     return isWaitingForTag_;
 }
 
-void TagSocket::writeValue(double aValue)
+void TagSocket::writeValue(double value)
 {
     if(tag_)
-        tag_->setValue(aValue);
+        tag_->setValue(value * scaleValue_);
 }
 
 
