@@ -67,7 +67,6 @@ SOURCES += \
 HEADERS += \
         serverconnectwidget.h \
         taglistsortfilterproxymodel.h \
-        tagsystem.h \
         tagsystem_global.h \ 
     tag.h \
     taglist.h \
