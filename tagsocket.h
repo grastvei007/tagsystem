@@ -35,7 +35,13 @@ public:
         eTime
     };
     ///< construct a new tagsocket.
-    static TagSocket* createTagSocket(QString aSubSystem, QString aName, Type aType);
+    static TagSocket *createTagSocket(QString aSubSystem, QString aName, Type aType);
+
+    template<typename T>
+    static TagSocket *createTagSocket(QString subsystem, QString name)
+    {
+        return createTagSocket(subsystem, name, eBool);
+    }
 
     ~TagSocket();
 
