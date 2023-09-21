@@ -499,6 +499,9 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     else
         Q_UNREACHABLE();
 
+    int index = tags_.indexOf(tag);
+    emit valueChangedAtIndex(index);
+
     return tag;
 }
 

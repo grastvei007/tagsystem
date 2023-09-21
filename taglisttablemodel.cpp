@@ -23,7 +23,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 TagListTableModel::TagListTableModel(QObject *aParent) : QAbstractTableModel(aParent)
 {
     connect(&TagList::sGetInstance(), &TagList::tagCreated, this, &TagListTableModel::onTagCreated);
-    connect(&TagList::sGetInstance(), &TagList::valueChanged, this, &TagListTableModel::onTagValueChanged);
+    connect(&TagList::sGetInstance(), &TagList::valueChangedAtIndex, this, &TagListTableModel::onTagValueChanged);
 }
 
 TagListTableModel::~TagListTableModel()
@@ -174,13 +174,11 @@ void TagListTableModel::onTagCreated(int index)
 }
 
 
-void TagListTableModel::onTagValueChanged()
+void TagListTableModel::onTagValueChanged(int tagIndex)
 {
-    beginResetModel();
-    QModelIndex top = index(0, eValue);
-    QModelIndex bottom = index(rowCount(), eTimeStamp);
+    QModelIndex top = index(tagIndex, eValue);
+    QModelIndex bottom = index(tagIndex, eTimeStamp);
     emit dataChanged(top, bottom);
-    endResetModel();
 }
 
 bool TagListTableModel::insertRows(int row, int count, const QModelIndex &parent)

@@ -47,7 +47,7 @@ public:
     bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 private slots:
     void onTagCreated(int index);
-    void onTagValueChanged();
+    void onTagValueChanged(int index);
 };
 
 #endif // TAGLISTTABLEMODEL_H

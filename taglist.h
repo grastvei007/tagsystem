@@ -56,6 +56,7 @@ public:
 signals:
     void tagValueChanged(Tag*);
     void valueChanged();
+    void valueChangedAtIndex(int);
     void tagCreated(int); // index
 
     void error(QString aError);
