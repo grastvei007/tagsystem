@@ -47,7 +47,7 @@ int TagList::getNumberOfTags() const
 
 Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType)
 {
-    Tag *tag = findByTagName(QString("%1.%2").arg(aSubSystem).arg(aName));
+    Tag *tag = findByTagName(QString("%1.%2").arg(aSubSystem, aName));
     if(tag)
     {
         return tag;
@@ -75,7 +75,7 @@ Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type
 
 Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue, const QString &description)
 {
-    auto *tag = findByTagName(QString("%1.%2").arg(subSystem).arg(name));
+    auto *tag = findByTagName(QString("%1.%2").arg(subSystem, name));
     if(tag)
         return tag;
 
@@ -177,7 +177,7 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
         qFatal("Set client name before connecting to server..");
     adress_ = aAdress;
     port_ = aPort;
-    QUrl url(QString("ws://%1:%2").arg(aAdress).arg(QString::number(aPort)));
+    QUrl url(QString("ws://%1:%2").arg(aAdress, QString::number(aPort)));
     qDebug() << "Connect to: " << url;
     webSocket_ = new QWebSocket;
     connect(webSocket_, &QWebSocket::connected, this, &TagList::onConnected);
@@ -411,7 +411,7 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
 
     Tag *tag = nullptr;
     // if the tag exist do not create.
-    tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
+    tag = findByTagName(QString("%1.%2").arg(subsystem, name));
     if(tag)
         return nullptr;
 
@@ -460,11 +460,11 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
         timestamp = attribs.value("timestamp").toLongLong();
     }
 
-    Tag *tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
+    Tag *tag = findByTagName(QString("%1.%2").arg(subsystem, name));
     if(!tag)
     {
         tag = createTag(subsystem, name, Tag::typeFromString(type));
-        qDebug() << "Local tag do not exist, create tag:" << QString("%1.%2").arg(subsystem).arg(name);
+        qDebug() << "Local tag do not exist, create tag:" << QString("%1.%2").arg(subsystem, name);
     }
     if(timestamp > 0 && timestamp < tag->getMsSinceEpoc())
     {
