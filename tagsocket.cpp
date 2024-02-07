@@ -21,7 +21,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, TagSocket::Type aType)
 {
-    QString fullname = QString("%1.%2").arg(aSubSystem).arg(aName);
+    QString fullname = QString("%1.%2").arg(aSubSystem, aName);
     TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByName(fullname);
     if(tagsocket)
         return tagsocket;
@@ -43,7 +43,7 @@ TagSocket::~TagSocket()
 
 QString TagSocket::getFullName() const
 {
-    return QString("%1.%2").arg(subSystem_).arg(name_);
+    return QString("%1.%2").arg(subSystem_, name_);
 }
 
 
@@ -147,7 +147,7 @@ bool TagSocket::hookupTag(Tag *aTag)
 
 bool TagSocket::hookupTag(QString aTagSubsytem, QString aTagName)
 {
-    tagName_ = QString("%1.%2").arg(aTagSubsytem).arg(aTagName);
+    tagName_ = QString("%1.%2").arg(aTagSubsytem, aTagName);
     Tag *tag = TagList::sGetInstance().findByTagName(tagName_);
     if(tag)
         return hookupTag(tag);

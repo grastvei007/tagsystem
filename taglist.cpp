@@ -30,11 +30,6 @@ TagList& TagList::sGetInstance()
     return sTagList;
 }
 
-TagList::TagList()
-{
-
-}
-
 void TagList::freeRide(bool aOn)
 {
     freeRideFlag_ = aOn;
@@ -182,7 +177,7 @@ void TagList::connectToServer(const QString &aAdress, qint16 aPort)
     webSocket_ = new QWebSocket;
     connect(webSocket_, &QWebSocket::connected, this, &TagList::onConnected);
     connect(webSocket_, &QWebSocket::disconnected, this, &TagList::onDisconnected);
-    connect(webSocket_, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error), this, &TagList::onError);
+    connect(webSocket_, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::errorOccurred), this, &TagList::onError);
     webSocket_->open(url);
 }
 

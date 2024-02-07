@@ -74,7 +74,7 @@ private slots:
     void onError();
 
 private:
-    TagList();
+    TagList() = default;
 
 private:
     QMap<QString, Tag*> tagByName_;
