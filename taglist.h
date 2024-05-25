@@ -60,8 +60,10 @@ signals:
     void tagCreated(int); // index
 
     void error(QString aError);
-    void disconnected();
+    void serverDisconnected();
     void connected();
+
+    void initialTagBurst();
 
 private slots:
     void onConnected();
@@ -93,6 +95,7 @@ private:
     QString clientName_; ///< the name that identify this client when connected to a server.
 
     bool isConnected_ = false;
+    bool initialTagBurstReceived_ = false;
 };
 
 #endif // TAGLIST_H

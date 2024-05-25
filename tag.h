@@ -26,7 +26,6 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 class QXmlStreamReader;
 class QXmlStreamWriter;
 
-
 class TAGSYSTEMSHARED_EXPORT Tag : public QObject
 {
     Q_OBJECT

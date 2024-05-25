@@ -188,7 +188,7 @@ void TagList::disconnectFromServer()
     webSocket_->disconnect();
     webSocket_->deleteLater();
     webSocket_ = nullptr;
-    emit disconnect();
+    emit serverDisconnected();
     isConnected_ = false;
 }
 
@@ -301,7 +301,7 @@ void TagList::onConnected()
 void TagList::onDisconnected()
 {
     isConnected_ = false;
-    emit disconnect();
+    emit serverDisconnected();
 }
 
 
@@ -352,6 +352,12 @@ void TagList::onBinaryDataRecieved(QByteArray aMsg)
                 }
             }
         }
+    }
+
+    if(!initialTagBurstReceived_)
+    {
+        emit initialTagBurst();
+        initialTagBurstReceived_ = true;
     }
 }
 
