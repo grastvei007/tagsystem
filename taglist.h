@@ -25,6 +25,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 class QWebSocket;
 class QTimer;
+class QJsonArray;
 
 class TAGSYSTEMSHARED_EXPORT TagList : public QObject
 {
@@ -37,25 +38,24 @@ public:
     Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType);
     Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue);
     Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue, const QString& description);
-    Tag* createTag(QXmlStreamReader &aStream);
-    Tag* updateTag(QXmlStreamReader &aStream);
 
     Tag* findByTagName(const QString &aName);
     Tag* getTagByIndex(int aIndex);
     const QString& clientName() const;
 
-    void toXml(QByteArray &rXml, bool aCreate=false) const;
+    QJsonArray toJson(bool onlyUpdated = false) const;
 
-    void freeRide(bool aOn);
     void connectToServer(const QString &aAdress, qint16 aPort);
     void disconnectFromServer();
     bool tryToAutoConnect();
     void setClientName(const QString &aName);
     void reconnect();
 
+    // server sync
+    Tag* UpdateOrCreateTag(const QJsonObject &json);
+
 signals:
     void tagValueChanged(Tag*);
-    void valueChanged();
     void valueChangedAtIndex(int);
     void tagCreated(int); // index
 
@@ -86,10 +86,7 @@ private:
 
     QWebSocket *webSocket_ = nullptr;
 
-    bool freeRideFlag_ = false;
     // Tags to sync with server if connected.
-    QVector<Tag*> tagsCreateQueue_;
-    QVector<Tag*> tagUpdateQueue_;
     QTimer *tagSyncTimer_ = nullptr;
 
     QString clientName_; ///< the name that identify this client when connected to a server.
