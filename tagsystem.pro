@@ -51,9 +51,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        tagsystem.cpp \
+    serverconnectwidget.cpp \
     tag.cpp \
     taglist.cpp \
+    taglistsortfilterproxymodel.cpp \
     taglistview.cpp \
     taglisttablemodel.cpp \
     tagselectview.cpp \
@@ -61,11 +62,11 @@ SOURCES += \
     tagsocketlist.cpp \
     tagsocketlisttablemodel.cpp \
     tagsocketlistview.cpp \
-    clientinformation.cpp \
-    serverconnectwidget.cpp
+    clientinformation.cpp
 
 HEADERS += \
-        tagsystem.h \
+        serverconnectwidget.h \
+        taglistsortfilterproxymodel.h \
         tagsystem_global.h \ 
     tag.h \
     taglist.h \
@@ -76,8 +77,7 @@ HEADERS += \
     tagsocketlist.h \
     tagsocketlisttablemodel.h \
     tagsocketlistview.h \
-    clientinformation.h \
-    serverconnectwidget.h
+    clientinformation.h
 
 unix {
     target.path = /usr/lib
@@ -85,6 +85,6 @@ unix {
 }
 
 FORMS += \
+    serverconnectwidget.ui \
     tagselectview.ui \
-    tagsocketlistview.ui \
-    serverconnectwidget.ui
+    tagsocketlistview.ui

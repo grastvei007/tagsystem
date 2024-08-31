@@ -30,62 +30,117 @@ TagList& TagList::sGetInstance()
     return sTagList;
 }
 
-TagList::TagList() :
-    mWebSocket(nullptr),
-    mTagSyncTimer(nullptr),
-    mFreeRideFlag(false),
-    mAutoconnectOnBroadcastFlag(false),
-    mIsConnected(false)
-{
-    mUdpSocket = new QUdpSocket(this);
-    mUdpSocket->bind(45454, QUdpSocket::ShareAddress);
-    connect(mUdpSocket, &QUdpSocket::readyRead, this, &TagList::onRecieveDatagrams);
-}
-
 void TagList::freeRide(bool aOn)
 {
-    mFreeRideFlag = aOn;
+    freeRideFlag_ = aOn;
 }
 
 int TagList::getNumberOfTags() const
 {
-    return mTagByName.size();
+    return tagByName_.size();
 }
 
 Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType)
 {
-    Tag *tag = findByTagName(QString("%1.%2").arg(aSubSystem).arg(aName));
+    Tag *tag = findByTagName(QString("%1.%2").arg(aSubSystem, aName));
     if(tag)
     {
         return tag;
     }
     // tag does not exist, create it.
     tag = new Tag(aSubSystem, aName, aType);
-    mTagByName[tag->getFullName()] = tag;
-    mTags.push_back(tag);
+    tagByName_[tag->getFullName()] = tag;
+    tags_.push_back(tag);
     connect(tag, &Tag::valueChanged, this, &TagList::valueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
-    if(mWebSocket)
-        mTagsCreateQueue.push_back(tag);
-    qDebug() << "Create tag: " << tag->getFullName() << " (" << mTagsCreateQueue.size() << ")";
-    emit tagCreated();
+    if(webSocket_)
+        tagsCreateQueue_.push_back(tag);
+    qDebug() << "Create tag: " << tag->getFullName() << " (" << tagsCreateQueue_.size() << ")";
+    emit tagCreated(tags_.count());
+    return tag;
+}
+
+
+Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue)
+{
+    return createTag(subSystem, name, type, initValue, QString());
+}
+
+
+Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue, const QString &description)
+{
+    auto *tag = findByTagName(QString("%1.%2").arg(subSystem, name));
+    if(tag)
+        return tag;
+
+    switch(type)
+    {
+        case Tag::eDouble:
+        {
+            double value = initValue.toDouble();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        case Tag::eInt:
+        {
+            auto value = initValue.toInt();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        case Tag::eBool:
+        {
+            auto value = initValue.toBool();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        case Tag::eString:
+        {
+            auto value = initValue.toString();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        case Tag::eTime:
+        {
+            auto value = initValue.toDateTime();
+            tag = new Tag(subSystem, name, type, value, description);
+            break;
+        }
+        default:
+            tag = new Tag(subSystem, name, type);
+            break;
+    }
+
+    tagByName_[tag->getFullName()] = tag;
+    tags_.push_back(tag);
+    connect(tag, &Tag::valueChanged, this, &TagList::valueChanged);
+    connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
+    connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
+    if(webSocket_)
+        tagsCreateQueue_.push_back(tag);
+    qDebug() << "Create tag: " << tag->getFullName() << " (" << tagsCreateQueue_.size() << ")";
+    emit tagCreated(tags_.count());
     return tag;
 }
 
 
 Tag* TagList::findByTagName(const QString &aName)
 {
-    if(!mTagByName.contains(aName))
+    if(!tagByName_.contains(aName))
         return nullptr;
 
-    return mTagByName[aName];
+    return tagByName_[aName];
 }
 
 
 Tag* TagList::getTagByIndex(int aIndex)
 {
-    return mTags.at(aIndex);
+    return tags_.at(aIndex);
+}
+
+const QString &TagList::clientName() const
+{
+    return clientName_;
 }
 
 
@@ -100,9 +155,9 @@ void TagList::toXml(QByteArray &rXml, bool aCreate) const
     else
         stream.writeStartElement("update");
 
-    for(int i=0; i<mTags.size(); ++i)
+    for(int i=0; i<tags_.size(); ++i)
     {
-        mTags[i]->writeToXml(stream);
+        tags_[i]->writeToXml(stream);
     }
 
     stream.writeEndElement();
@@ -113,52 +168,79 @@ void TagList::toXml(QByteArray &rXml, bool aCreate) const
 
 void TagList::connectToServer(const QString &aAdress, qint16 aPort)
 {
-    if(mClientName.isEmpty())
+    if(clientName_.isEmpty())
         qFatal("Set client name before connecting to server..");
-    mAdress = aAdress;
-    mPort = aPort;
-    QUrl url(QString("ws://%1:%2").arg(aAdress).arg(QString::number(aPort)));
+    adress_ = aAdress;
+    port_ = aPort;
+    QUrl url(QString("ws://%1:%2").arg(aAdress, QString::number(aPort)));
     qDebug() << "Connect to: " << url;
-    mWebSocket = new QWebSocket;
-    connect(mWebSocket, &QWebSocket::connected, this, &TagList::onConnected);
-    connect(mWebSocket, &QWebSocket::disconnected, this, &TagList::onDisconnected);
-    connect(mWebSocket, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error), this, &TagList::onError);
-    mWebSocket->open(url);
+    webSocket_ = new QWebSocket;
+    connect(webSocket_, &QWebSocket::connected, this, &TagList::onConnected);
+    connect(webSocket_, &QWebSocket::disconnected, this, &TagList::onDisconnected);
+    connect(webSocket_, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::errorOccurred), this, &TagList::onError);
+    webSocket_->open(url);
+}
+
+void TagList::disconnectFromServer()
+{
+    if(!webSocket_)
+        return;
+    webSocket_->disconnect();
+    webSocket_->deleteLater();
+    webSocket_ = nullptr;
+    emit serverDisconnected();
+    isConnected_ = false;
+}
+
+bool TagList::tryToAutoConnect()
+{
+    if(clientName_.isEmpty())
+        return false;
+    QSettings settings("june", clientName_);
+    auto adress = settings.value("serverAdress", "localhost").toString();
+    auto port = settings.value("serverPort", 5000).toInt();
+    auto autoConnect = settings.value("serverAutoConnect", false).toBool();
+    if(autoConnect)
+    {
+        connectToServer(adress, port);
+        return true;
+    }
+    return false;
 }
 
 
 void TagList::reconnect()
 {
-    connectToServer(mAdress, mPort);
+    connectToServer(adress_, port_);
 }
 
 
 void TagList::setClientName(const QString &aName)
 {
-    mClientName = aName;
+    clientName_ = aName;
 }
 
 void TagList::onError()
 {
-    QString errorStr = mWebSocket->errorString();
+    QString errorStr = webSocket_->errorString();
     qDebug() << errorStr;
-    switch (mWebSocket->error())
+    switch (webSocket_->error())
     {
         case QAbstractSocket::ConnectionRefusedError:
-            if(!mAdress.isEmpty() && mPort > 1024)
+            if(!adress_.isEmpty() && port_ > 1024)
             {
                 QTimer::singleShot(1000*60, [this](){
                     qDebug() << "Reconnect..";
-                    connectToServer(mAdress, mPort);});
+                    connectToServer(adress_, port_);});
                 return;
             }
             break;
 
         case QAbstractSocket::RemoteHostClosedError:
-            if(!mAdress.isEmpty() && mPort > 1024)
+            if(!adress_.isEmpty() && port_ > 1024)
             {
                 QTimer::singleShot(1000*30, [this](){
-                    connectToServer(mAdress, mPort);});
+                    connectToServer(adress_, port_);});
                 return;
             }
             break;
@@ -197,29 +279,29 @@ void TagList::onError()
 
 void TagList::onConnected()
 {
-    ClientInformation cl(mClientName);
-    mWebSocket->sendTextMessage(cl.getInfo());
+    ClientInformation cl(clientName_);
+    webSocket_->sendTextMessage(cl.getInfo());
 
-    connect(mWebSocket, &QWebSocket::binaryMessageReceived, this, &TagList::onBinaryDataRecieved);
+    connect(webSocket_, &QWebSocket::binaryMessageReceived, this, &TagList::onBinaryDataRecieved);
    // QByteArray data;
    // toXml(data);
    // mWebSocket->sendBinaryMessage(data);
-    if(!mTagSyncTimer && !mFreeRideFlag)
+    if(!tagSyncTimer_ && !freeRideFlag_)
     {
-        mTagSyncTimer = new QTimer(this);
-        mTagSyncTimer->setInterval(1000);
-        connect(mTagSyncTimer, &QTimer::timeout, this, &TagList::syncTags);
-        mTagSyncTimer->start();
+        tagSyncTimer_ = new QTimer(this);
+        tagSyncTimer_->setInterval(1000);
+        connect(tagSyncTimer_, &QTimer::timeout, this, &TagList::syncTags);
+        tagSyncTimer_->start();
     }
-    mIsConnected = true;
+    isConnected_ = true;
     emit connected();
 }
 
 
 void TagList::onDisconnected()
 {
-    mIsConnected = false;
-    emit disconnect();
+    isConnected_ = false;
+    emit serverDisconnected();
 }
 
 
@@ -241,35 +323,41 @@ void TagList::onBinaryDataRecieved(QByteArray aMsg)
             continue;
         if(token == QXmlStreamReader::StartElement)
         {
-            if(stream.name() == "create")
+            if(stream.name() == QString("create"))
             {
                 while(!(stream.tokenType() == QXmlStreamReader::EndElement &&
-                        stream.name() == "create"))
+                        stream.name() == QString("create")))
                 {
                     if(stream.readNext() != QXmlStreamReader::StartElement)
                         continue;
 
-                    if(stream.name() == "tag")
+                    if(stream.name() == QString("tag"))
                     {
                         createTag(stream);
                     }
                 }
             }
-            else if(stream.name() == "update")
+            else if(stream.name() == QString("update"))
             {
                 while(!(stream.tokenType() == QXmlStreamReader::EndElement &&
-                        stream.name() == "update"))
+                        stream.name() == QString("update")))
                 {
                     if(stream.readNext() != QXmlStreamReader::StartElement)
                         continue;
 
-                    if(stream.name() == "tag")
+                    if(stream.name() == QString("tag"))
                     {
                         updateTag(stream);
                     }
                 }
             }
         }
+    }
+
+    if(!initialTagBurstReceived_)
+    {
+        emit initialTagBurst();
+        initialTagBurstReceived_ = true;
     }
 }
 
@@ -286,21 +374,21 @@ void TagList::syncTags()
     stream.writeStartDocument();
     stream.writeStartElement("taglist");
 
-    if(mTagsCreateQueue.size() > 0)
+    if(tagsCreateQueue_.size() > 0)
     {
         stream.writeStartElement("create");
-        for(int i=0; i<mTagsCreateQueue.size(); ++i)
-            mTagsCreateQueue[i]->writeToXml(stream);
-        mTagsCreateQueue.clear();
+        for(int i=0; i<tagsCreateQueue_.size(); ++i)
+            tagsCreateQueue_[i]->writeToXml(stream);
+        tagsCreateQueue_.clear();
         create = true;
         stream.writeEndElement();
     }
-    if(mTagUpdateQueue.size() > 0)
+    if(tagUpdateQueue_.size() > 0)
     {
         stream.writeStartElement("update");
-        for(int i=0; i<mTagUpdateQueue.size(); ++i)
-            mTagUpdateQueue[i]->writeToXml(stream);
-        mTagUpdateQueue.clear();
+        for(int i=0; i<tagUpdateQueue_.size(); ++i)
+            tagUpdateQueue_[i]->writeToXml(stream);
+        tagUpdateQueue_.clear();
         stream.writeEndElement();
         update = true;
     }
@@ -308,10 +396,9 @@ void TagList::syncTags()
     stream.writeEndElement();
     stream.writeEndDocument();
 
-    if(mWebSocket && (update || create))
+    if(webSocket_ && (update || create))
     {
-        qDebug() << "Sending data ";
-        mWebSocket->sendBinaryMessage(data);
+        webSocket_->sendBinaryMessage(data);
     }
 }
 
@@ -321,39 +408,43 @@ Tag* TagList::createTag(QXmlStreamReader &aStream)
     QString subsystem = attribs.value("subsystem").toString();
     QString name = attribs.value("name").toString();
     QString type = attribs.value("type").toString();
+    QString description = attribs.value("description").toString();
 
     Tag *tag = nullptr;
     // if the tag exist do not create.
-    tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
+    tag = findByTagName(QString("%1.%2").arg(subsystem, name));
     if(tag)
         return nullptr;
 
     // tag does not exist create it.
 
-    if(type == "Double")
+    if(type == Tag::toString(Tag::eDouble))
     {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eDouble);
-        tag->setValue(attribs.value("value").toDouble());
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eDouble, attribs.value("value").toDouble(), description);
     }
-    else if(type == "Int")
+    else if(type == Tag::toString(Tag::eInt))
     {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eInt);
-        tag->setValue(attribs.value("value").toInt());
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eInt, attribs.value("value").toInt(), description);
     }
-    else if(type == "Bool")
+    else if(type == Tag::toString(Tag::eBool))
     {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eBool);
-        tag->setValue(attribs.value("value").toInt() == 1 ? true : false);
+        auto value = attribs.value("value").toInt() == 1 ? true : false;
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eBool, value, description);
     }
     else if(type == Tag::toString(Tag::eString))
     {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eString);
-        tag->setValue(attribs.value("value").toString());
+        auto value = attribs.value("value").toString();
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eString, value, description);
+    }
+    else if(type == Tag::toString(Tag::eTime))
+    {
+        auto value = QDateTime::fromMSecsSinceEpoch(attribs.value("value").toLongLong());
+        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eTime, value, description);
     }
     else
         Q_UNREACHABLE();
 
-    emit tagCreated();
+    emit tagCreated(tags_.count());
     return tag;
 }
 
@@ -366,41 +457,51 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
     QString type = attribs.value("type").toString();
     qint64 timestamp = -1;
     if(attribs.hasAttribute("timestamp"))
+    {
         timestamp = attribs.value("timestamp").toLongLong();
+    }
 
-    Tag *tag = findByTagName(QString("%1.%2").arg(subsystem).arg(name));
+    Tag *tag = findByTagName(QString("%1.%2").arg(subsystem, name));
     if(!tag)
     {
         tag = createTag(subsystem, name, Tag::typeFromString(type));
-        qDebug() << "Local tag do not exist, create tag:" << QString("%1.%2").arg(subsystem).arg(name);
+        qDebug() << "Local tag do not exist, create tag:" << QString("%1.%2").arg(subsystem, name);
+    }
+    if(timestamp > 0 && timestamp < tag->getMsSinceEpoc())
+    {
+        return tag;
     }
 
     if(tag->getType() == Tag::eDouble)
     {
         double value = attribs.value("value").toDouble();
         tag->setValue(value, timestamp);
-        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eInt)
     {
         int value = attribs.value("value").toInt();
         tag->setValue(value, timestamp);
-        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eBool)
     {
         bool value = attribs.value("value").toInt() == 1 ? true : false;
         tag->setValue(value, timestamp);
-        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
     }
     else if(tag->getType() == Tag::eString)
     {
         QString value = attribs.value("value").toString();
         tag->setValue(value, timestamp);
-        qDebug() << "Update: " << QString("%1.%2").arg(subsystem).arg(name) << value;
+    }
+    else if(tag->getType() == Tag::eTime)
+    {
+        QDateTime time = QDateTime::fromMSecsSinceEpoch(attribs.value("value").toLongLong());
+        tag->setValue(time, timestamp);
     }
     else
         Q_UNREACHABLE();
+
+    int index = tags_.indexOf(tag);
+    emit valueChangedAtIndex(index);
 
     return tag;
 }
@@ -413,46 +514,15 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
  */
 void TagList::onTagValueChanged(Tag *aTag)
 {
-    if(!mWebSocket)
+    if(!webSocket_)
         return;
 
-    if(mTagUpdateQueue.contains(aTag))
-        mTagUpdateQueue.removeAll(aTag);
+    if(tagUpdateQueue_.contains(aTag))
+        tagUpdateQueue_.removeAll(aTag);
 
-    mTagUpdateQueue.push_back(aTag);
+    tagUpdateQueue_.push_back(aTag);
 
-    if(mFreeRideFlag)
+    if(freeRideFlag_)
         syncTags();
 }
 
-
-void TagList::onRecieveDatagrams()
-{
-    QByteArray datagram;
-    while(mUdpSocket->hasPendingDatagrams())
-    {
-        datagram.resize(int(mUdpSocket->pendingDatagramSize()));
-        mUdpSocket->readDatagram(datagram.data(), datagram.size());
-    }
-
-    qDebug() << __FUNCTION__ << "datagram: " << datagram;
-    if(mIsConnected)
-        return;
-    if(!mAutoconnectOnBroadcastFlag)
-        return;
-
-    QString msg(datagram);
-    if(msg.startsWith("juneserveronline"))
-    {
-        QStringList list = msg.split(":");
-        if(list.size() < 1)
-            return;
-        connectToServer(list[1], 5000);
-    }
-}
-
-
-void TagList::setAutoconnectOnBroadcast(bool aAutoconnect)
-{
-    mAutoconnectOnBroadcastFlag = aAutoconnect;
-}

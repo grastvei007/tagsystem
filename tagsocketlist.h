@@ -21,7 +21,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QVector>
 #include <QMap>
 
-#include "tagsocket.h"
+class TagSocket;
 
 
 class TAGSYSTEMSHARED_EXPORT TagSocketList : public QObject
@@ -51,10 +51,10 @@ signals:
 public slots:
 
 private:
-    QMap<QString, TagSocket*> mTagSocketByName;
-    QVector<TagSocket*> mTagSocketList;
+    QMap<QString, TagSocket*> tagSocketByName_;
+    QVector<TagSocket*> tagSocketList_;
 
-    QString mApplicationName;
+    QString applicationName_;
 };
 
 #endif // TAGSOCKETLIST_H

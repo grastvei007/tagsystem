@@ -27,8 +27,8 @@ public:
 
     QString getInfo() const;
 private:
-    QString mClientName;
-    QString mClientIp;
+    QString clientName_;
+    QString clientIp_;
 };
 
 #endif // CLIENTINFORMATION_H

@@ -27,19 +27,28 @@ class TAGSYSTEMSHARED_EXPORT TagSocket : public QObject
     Q_OBJECT
 public:
     enum Type{
+        eNone,
         eDouble,
         eInt,
         eBool,
-        eString
+        eString,
+        eTime
     };
     ///< construct a new tagsocket.
-    static TagSocket* createTagSocket(QString aSubSystem, QString aName, Type aType);
+    static TagSocket *createTagSocket(QString aSubSystem, QString aName, Type aType);
+
+    template<typename T>
+    static TagSocket *createTagSocket(QString subsystem, QString name)
+    {
+        return createTagSocket(subsystem, name, eBool);
+    }
 
     ~TagSocket();
 
     bool hookupTag(Tag *aTag);
     bool hookupTag(QString aTagSubsytem, QString aTagName);
     bool isHookedUp() const;
+    bool isWaitingForTag() const;
 
     QString getFullName() const;
     QString getSubSystem() const;
@@ -49,22 +58,29 @@ public:
     Type getType() const;
     Tag* getTag() const;
 
+    void setScaleValue(double scale); //< only for double socket
+
     void writeValue(double aValue);
     void writeValue(bool aValue);
     void writeValue(int aValue);
     void writeValue(QString aValue);
+    void writeValue(QDateTime aValue);
 
     bool readValue(double &rValue);
     bool readValue(bool &rValue);
     bool readValue(int &rValue);
     bool readValue(QString &rValue);
+    bool readValue(QDateTime &rValue);
 
     static Type typeFromString(const QString &aTypeString);
+    static QString toString(const Type type);
+    static Type typeMatchingTag(const Tag *tag);
 signals:
     void valueChanged(double);
     void valueChanged(bool);
     void valueChanged(int);
     void valueChanged(QString);
+    void valueChanged(QDateTime);
     void valueChanged(TagSocket*);
 
 private slots:
@@ -75,12 +91,14 @@ private:
     TagSocket(QString aSubSystem, QString aName, Type aType);
 
 private:
-    Tag *mTag;
-    QString mTagName;
+    Tag *tag_ = nullptr;
+    QString tagName_ = QString();
 
-    QString mSubSystem;
-    QString mName;
-    Type mType;
+    QString subSystem_;
+    QString name_;
+    Type type_;
+    bool isWaitingForTag_ = false;
+    double scaleValue_ = 1.0;
 };
 
 #endif // TAGSOCKET_H

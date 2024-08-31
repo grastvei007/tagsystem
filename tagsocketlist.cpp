@@ -14,6 +14,7 @@ You should have received a copy of the GNU General Public License
 along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "tagsocketlist.h"
+#include "tagsocket.h"
 
 #include <QString>
 #include <QDir>
@@ -33,15 +34,15 @@ TagSocketList& TagSocketList::sGetInstance()
 
 int TagSocketList::getNumberOfTagSockets() const
 {
-    return mTagSocketList.size();
+    return tagSocketList_.size();
 }
 
 bool TagSocketList::addTagSocket(TagSocket *aTagSocket)
 {
     if(!aTagSocket)
         return false;
-    mTagSocketList.push_back(aTagSocket);
-    mTagSocketByName[aTagSocket->getFullName()] = aTagSocket;
+    tagSocketList_.push_back(aTagSocket);
+    tagSocketByName_[aTagSocket->getFullName()] = aTagSocket;
     connect(aTagSocket, qOverload<TagSocket*>(&TagSocket::valueChanged), this, &TagSocketList::tagSocketValueChanged);
     emit tagSocketAdded();
     return true;
@@ -49,26 +50,26 @@ bool TagSocketList::addTagSocket(TagSocket *aTagSocket)
 
 void TagSocketList::removeTagSocket(TagSocket *aTagSocket)
 {
-    mTagSocketByName.remove(aTagSocket->getFullName());
-    mTagSocketList.removeAll(aTagSocket);
+    tagSocketByName_.remove(aTagSocket->getFullName());
+    tagSocketList_.removeAll(aTagSocket);
     emit tagSocketRemoved();
 }
 
 
 TagSocket* TagSocketList::getTagSocketByIndex(int aIndex)
 {
-    if(aIndex < 0 || aIndex > mTagSocketList.size())
+    if(aIndex < 0 || aIndex > tagSocketList_.size())
         return nullptr;
 
-    return mTagSocketList.at(aIndex);
+    return tagSocketList_.at(aIndex);
 }
 
 
 TagSocket* TagSocketList::getTagSocketByName(QString aName)
 {
-    if(mTagSocketByName.contains(aName))
+    if(tagSocketByName_.contains(aName))
     {
-        return mTagSocketByName[aName];
+        return tagSocketByName_[aName];
     }
     return nullptr;
 }
@@ -83,7 +84,7 @@ TagSocket* TagSocketList::getTagSocketByName(QString aName)
  */
 void TagSocketList::setApplicationName(QString aName)
 {
-    mApplicationName = aName;
+    applicationName_ = aName;
 }
 
 
@@ -91,13 +92,13 @@ void TagSocketList::saveBindingList()
 {
 #ifdef __linux__
     QString path = QDir::homePath() + QDir::separator() + ".config" + QDir::separator() + "june";
-    if(mApplicationName.isEmpty())
+    if(applicationName_.isEmpty())
     {
         qDebug() << __FUNCTION__ << "Set application name";
 
     }
     else
-        path += QDir::separator() + mApplicationName;
+        path += QDir::separator() + applicationName_;
 #else
     QString path = qApp->applicationDirPath();
 #endif
@@ -149,13 +150,13 @@ void TagSocketList::loadBindingList()
 {
 #ifdef __linux__
     QString path = QDir::homePath() + QDir::separator() + ".config" + QDir::separator() + "june";
-    if(mApplicationName.isEmpty())
+    if(applicationName_.isEmpty())
     {
         qDebug() << __FUNCTION__ << "Set application name";
 
     }
     else
-        path += QDir::separator() + mApplicationName;
+        path += QDir::separator() + applicationName_;
 #else
   QString path = qApp->applicationDirPath();
 #endif
@@ -178,22 +179,24 @@ void TagSocketList::loadBindingList()
             continue;
         if(token == QXmlStreamReader::StartElement)
         {
-            if(stream.name() == "bindings")
+            if(stream.name() == QString("bindings"))
                 continue;
-            if(stream.name() == "tagsocket")
+            if(stream.name() == QString("tagsocket"))
             {
                 QString subsytem = stream.attributes().value("subsystem").toString();
                 QString name = stream.attributes().value("name").toString();
                 QString type = stream.attributes().value("type").toString();
                 TagSocket::Type t;
-                if(type == "Bool")
+                if(type == TagSocket::toString(TagSocket::eBool))
                     t = TagSocket::eBool;
-                else if(type == "Int")
+                else if(type == TagSocket::toString(TagSocket::eInt))
                     t = TagSocket::eInt;
-                else if(type == "Double")
+                else if(type == TagSocket::toString(TagSocket::eDouble))
                     t = TagSocket::eDouble;
-                else if(type == "String")
+                else if(type == TagSocket::toString(TagSocket::eString))
                     t = TagSocket::eString;
+                else if(type == TagSocket::toString(TagSocket::eTime))
+                    continue;
                 else
                     Q_UNREACHABLE();
 

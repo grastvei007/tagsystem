@@ -24,9 +24,6 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tag.h"
 
 class QWebSocket;
-class QUdpSocket;
-
-
 class QTimer;
 
 class TAGSYSTEMSHARED_EXPORT TagList : public QObject
@@ -38,28 +35,35 @@ public:
     int getNumberOfTags() const;
 
     Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType);
+    Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue);
+    Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue, const QString& description);
     Tag* createTag(QXmlStreamReader &aStream);
     Tag* updateTag(QXmlStreamReader &aStream);
 
     Tag* findByTagName(const QString &aName);
     Tag* getTagByIndex(int aIndex);
+    const QString& clientName() const;
 
     void toXml(QByteArray &rXml, bool aCreate=false) const;
 
     void freeRide(bool aOn);
     void connectToServer(const QString &aAdress, qint16 aPort);
+    void disconnectFromServer();
+    bool tryToAutoConnect();
     void setClientName(const QString &aName);
     void reconnect();
 
-    void setAutoconnectOnBroadcast(bool aAutoconnect);
 signals:
     void tagValueChanged(Tag*);
     void valueChanged();
-    void tagCreated();
+    void valueChangedAtIndex(int);
+    void tagCreated(int); // index
 
     void error(QString aError);
-    void disconnected();
+    void serverDisconnected();
     void connected();
+
+    void initialTagBurst();
 
 private slots:
     void onConnected();
@@ -71,29 +75,27 @@ private slots:
 
     void onError();
 
-    void onRecieveDatagrams(); ///< recieve brodcast message.
 private:
-    TagList();
+    TagList() = default;
 
 private:
-    QMap<QString, Tag*> mTagByName;
-    QVector<Tag*> mTags;
-    QString mAdress;
-    qint16 mPort;
+    QMap<QString, Tag*> tagByName_;
+    QVector<Tag*> tags_;
+    QString adress_;
+    qint16 port_ = 0;
 
-    QWebSocket *mWebSocket;
-    QUdpSocket *mUdpSocket;
+    QWebSocket *webSocket_ = nullptr;
 
-    bool mFreeRideFlag;
+    bool freeRideFlag_ = false;
     // Tags to sync with server if connected.
-    QVector<Tag*> mTagsCreateQueue;
-    QVector<Tag*> mTagUpdateQueue;
-    QTimer *mTagSyncTimer;
+    QVector<Tag*> tagsCreateQueue_;
+    QVector<Tag*> tagUpdateQueue_;
+    QTimer *tagSyncTimer_ = nullptr;
 
-    QString mClientName; ///< the name that identify this client when connected to a server.
+    QString clientName_; ///< the name that identify this client when connected to a server.
 
-    bool mAutoconnectOnBroadcastFlag;
-    bool mIsConnected;
+    bool isConnected_ = false;
+    bool initialTagBurstReceived_ = false;
 };
 
 #endif // TAGLIST_H

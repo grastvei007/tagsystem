@@ -21,10 +21,10 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QString>
 #include <QByteArray>
 #include <QDateTime>
+#include <QJsonObject>
 
 class QXmlStreamReader;
 class QXmlStreamWriter;
-
 
 class TAGSYSTEMSHARED_EXPORT Tag : public QObject
 {
@@ -34,16 +34,24 @@ public:
         eDouble,
         eInt,
         eBool,
-        eString
+        eString,
+        eTime
     };
     explicit Tag(QObject *parent = nullptr);
 
-    Tag(QString aSubSystem, QString aName, Type aType);
+    Tag(QString subSystem, QString name, Type type);
 
-    void setValue(double aValue, qint64 msSinceEpoc=-1);
-    void setValue(int aValue, qint64 msSinceEpoc=-1);
-    void setValue(bool aValue, qint64 msSinceEpoc=-1);
-    void setValue(QString aValue, qint64 msSinceEpoc=-1);
+    Tag(QString subSystem, QString name, Type type, double initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, int initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, bool initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, QString initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, QDateTime initValue, const QString &description = QString());
+
+    void setValue(double value, qint64 msSinceEpoc=-1);
+    void setValue(int value, qint64 msSinceEpoc=-1);
+    void setValue(bool value, qint64 msSinceEpoc=-1);
+    void setValue(QString value, qint64 msSinceEpoc=-1);
+    void setValue(QDateTime value, qint64 msSinceEpoc=-1);
 
     Type getType() const;
     QString getTypeStr() const;
@@ -51,6 +59,7 @@ public:
     QString getSubsystem() const;
     QString getName() const;
     QString getTimeStamp() const;
+    const QString& getDescription() const;
     const QString& getTimeStampFormat() const;
     qint64 getMsSinceEpoc() const;
 
@@ -58,27 +67,35 @@ public:
     int getIntValue() const;
     bool getBoolValue() const;
     QString getStringValue() const;
+    QDateTime getTimeValue() const;
 
-    void writeToXml(QXmlStreamWriter &aStream);
-    static Tag* createFromXml(const QXmlStreamReader &aReader);
-    static Type typeFromString(const QString &aTypeString);
-    static QString toString(Type aType);
+
+    void writeToXml(QXmlStreamWriter &stream);
+    static Tag* createFromXml(const QXmlStreamReader &reader);
+    static Type typeFromString(const QString &typeString);
+    static QString toString(Type type);
     QByteArray toMessage();
+    const QJsonObject& toJson();
 signals:
     void valueChanged(Tag*);
 public slots:
 
 private:
-    QString mSubSystem;
-    QString mName;
-    Type mType;
-    qint64 mTimeStamp; ///< msSinceEpoc
+    QString subSystem_ = QString();
+    QString name_ = QString();
+    Type type_ = Tag::eDouble;
+    QString description_ = QString();
 
-    double mDoubleValue;
-    int mIntValue;
-    bool mBoolValue;
-    QString mStringValue;
-    QString mTimeStampFormat;
+    double doubleValue_ = 0.0;
+    int intValue_ = 0;
+    bool boolValue_ = false;
+    QString stringValue_ = QString();
+
+    qint64 timeValue_ = 0; ///< value for tag type time
+    QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
+    qint64 timeStamp_ = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc
+
+    QJsonObject jsonObject_ = QJsonObject();
 };
 
 

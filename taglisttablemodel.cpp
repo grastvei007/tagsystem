@@ -23,7 +23,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 TagListTableModel::TagListTableModel(QObject *aParent) : QAbstractTableModel(aParent)
 {
     connect(&TagList::sGetInstance(), &TagList::tagCreated, this, &TagListTableModel::onTagCreated);
-    connect(&TagList::sGetInstance(), &TagList::valueChanged, this, &TagListTableModel::onTagValueChanged);
+    connect(&TagList::sGetInstance(), &TagList::valueChangedAtIndex, this, &TagListTableModel::onTagValueChanged);
 }
 
 TagListTableModel::~TagListTableModel()
@@ -34,13 +34,15 @@ TagListTableModel::~TagListTableModel()
 
 int TagListTableModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return TagList::sGetInstance().getNumberOfTags();
 }
 
 
 int TagListTableModel::columnCount(const QModelIndex &parent) const
 {
-    return 4;
+    Q_UNUSED(parent);
+    return 5;
 }
 
 bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -63,6 +65,10 @@ bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value,
             case Tag::eString:
                 tag->setValue(value.toString());
                 return true;
+            case Tag::eTime:
+                tag->setValue(value.toDateTime());
+                return true;
+
             }
         }
     }
@@ -103,11 +109,16 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
                 return tag->getBoolValue();
             else if(tag->getType() == Tag::eString)
                 return tag->getStringValue();
+            else if(tag->getType() == Tag::eTime)
+                return tag->getTimeValue().toString(tag->getTimeStampFormat());
             else
                 Q_UNREACHABLE();
         }
         case eTimeStamp:
             return tag->getTimeStamp();
+
+        case eDescription:
+            return tag->getDescription();
 
         default:
             break;
@@ -121,7 +132,7 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
             return QColor(Qt::gray);
     }
 
-    return QVariant(QVariant::Invalid);
+    return QVariant();
 }
 
 
@@ -140,6 +151,8 @@ QVariant TagListTableModel::headerData(int section, Qt::Orientation orientation,
                 return "Value";
             case eTimeStamp:
                 return "TimeStamp";
+            case eDescription:
+                return "Description";
             default:
                 break;
             }
@@ -151,23 +164,32 @@ QVariant TagListTableModel::headerData(int section, Qt::Orientation orientation,
             return QString::number(section);
     }
 
-    return QVariant(QVariant::Invalid);
+    return QVariant();
 }
 
 
-void TagListTableModel::onTagCreated()
+void TagListTableModel::onTagCreated(int index)
 {
-    emit layoutAboutToBeChanged();
-    emit layoutChanged();
+    insertRows(index, 1);
 }
 
 
-void TagListTableModel::onTagValueChanged()
+void TagListTableModel::onTagValueChanged(int tagIndex)
 {
-    //beginResetModel();
-    QModelIndex top = index(0, eValue);
-    QModelIndex bottom = index(rowCount(), eTimeStamp);
+    QModelIndex top = index(tagIndex, eValue);
+    QModelIndex bottom = index(tagIndex, eTimeStamp);
     emit dataChanged(top, bottom);
-   // endResetModel();
 }
 
+bool TagListTableModel::insertRows(int row, int count, const QModelIndex &parent)
+{
+     beginInsertRows(parent, row, row +count);
+
+     for(int i=row; i<row+count; ++i)
+     {
+         insertRow(i);
+     }
+
+     endInsertRows();
+     return true;
+}

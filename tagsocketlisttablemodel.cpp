@@ -39,12 +39,14 @@ TagSocketListTableModel::~TagSocketListTableModel()
 
 int TagSocketListTableModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return TagSocketList::sGetInstance().getNumberOfTagSockets();
 }
 
 
 int TagSocketListTableModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return 4;
 }
 
@@ -55,7 +57,7 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
     {
         TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByIndex(index.row());
         if(!tagsocket)
-            return QVariant(QVariant::Invalid);
+            return QVariant();
         switch(index.column())
         {
             case eTagSocketName:
@@ -96,6 +98,10 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
                     tagsocket->readValue(str);
                     return str;
                 }
+                else if(tagsocket->getType() == TagSocket::eTime)
+                {
+                    break;
+                }
                 else {
                    Q_UNREACHABLE();
                 }
@@ -104,11 +110,11 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
                 Q_UNREACHABLE();
         }
     }
-    else if(role == Qt::BackgroundColorRole)
+    else if(role == Qt::BackgroundRole)
     {
         TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByIndex(index.row());
         if(!tagsocket)
-            return QVariant(QVariant::Invalid);
+            return QVariant();
         if(tagsocket->isHookedUp())
             return QColor(Qt::green);
         else if(!tagsocket->isHookedUp() && !tagsocket->getTagName().isEmpty())
@@ -117,7 +123,7 @@ QVariant TagSocketListTableModel::data(const QModelIndex &index, int role) const
             return QColor(Qt::gray);
     }
 
-    return QVariant(QVariant::Invalid);
+    return QVariant();
 }
 
 
@@ -147,7 +153,7 @@ QVariant TagSocketListTableModel::headerData(int section, Qt::Orientation orient
         if(role == Qt::DisplayRole || role == Qt::EditRole)
             return QString::number(section);
     }
-    return QVariant(QVariant::Invalid);
+    return QVariant();
 }
 
 
@@ -174,6 +180,7 @@ bool TagSocketListTableModel::setData(const QModelIndex &index, const QVariant &
 
 Qt::ItemFlags TagSocketListTableModel::flags(const QModelIndex &index) const
 {
+    Q_UNUSED(index);
     return Qt::ItemIsEnabled;
 }
 
