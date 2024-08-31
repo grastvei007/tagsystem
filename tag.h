@@ -76,6 +76,10 @@ public:
     static QString toString(Type type);
     QByteArray toMessage();
     const QJsonObject& toJson();
+
+    bool isUpdated() const {return isUpdated_;}
+    void resetUpdateFlag() {isUpdated_ = false;}
+    void setUpdatedFlag() {isUpdated_ = true; }
 signals:
     void valueChanged(Tag*);
 public slots:
@@ -96,6 +100,8 @@ private:
     qint64 timeStamp_ = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc
 
     QJsonObject jsonObject_ = QJsonObject();
+
+    bool isUpdated_ = false; ///< local update, indicate ready to be synced with server
 };
 
 

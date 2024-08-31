@@ -22,17 +22,15 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QTimer>
 #include <QDebug>
 
+#include <QJsonArray>
+#include <QJsonObject>
+
 #include "clientinformation.h"
 
 TagList& TagList::sGetInstance()
 {
     static TagList sTagList;
     return sTagList;
-}
-
-void TagList::freeRide(bool aOn)
-{
-    freeRideFlag_ = aOn;
 }
 
 int TagList::getNumberOfTags() const
@@ -51,12 +49,10 @@ Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
     tag = new Tag(aSubSystem, aName, aType);
     tagByName_[tag->getFullName()] = tag;
     tags_.push_back(tag);
-    connect(tag, &Tag::valueChanged, this, &TagList::valueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
-    if(webSocket_)
-        tagsCreateQueue_.push_back(tag);
-    qDebug() << "Create tag: " << tag->getFullName() << " (" << tagsCreateQueue_.size() << ")";
+
+    qDebug() << "Create tag: " << tag->getFullName() << " (" << tags_.size() << ")";
     emit tagCreated(tags_.count());
     return tag;
 }
@@ -113,12 +109,10 @@ Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type
 
     tagByName_[tag->getFullName()] = tag;
     tags_.push_back(tag);
-    connect(tag, &Tag::valueChanged, this, &TagList::valueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
-    if(webSocket_)
-        tagsCreateQueue_.push_back(tag);
-    qDebug() << "Create tag: " << tag->getFullName() << " (" << tagsCreateQueue_.size() << ")";
+
+    qDebug() << "Create tag: " << tag->getFullName() << " (" << tags_.size() << ")";
     emit tagCreated(tags_.count());
     return tag;
 }
@@ -143,28 +137,19 @@ const QString &TagList::clientName() const
     return clientName_;
 }
 
-
-void TagList::toXml(QByteArray &rXml, bool aCreate) const
+QJsonArray TagList::toJson(bool onlyUpdated) const
 {
-    QXmlStreamWriter stream(&rXml);
-    stream.setAutoFormatting(true);
-    stream.writeStartDocument();
-    stream.writeStartElement("taglist");
-    if(aCreate)
-        stream.writeStartElement("create");
-    else
-        stream.writeStartElement("update");
-
-    for(int i=0; i<tags_.size(); ++i)
+    QJsonArray array;
+    for (auto tag : tags_)
     {
-        tags_[i]->writeToXml(stream);
+        if (onlyUpdated && !tag->isUpdated())
+            continue;
+
+        array.push_back(tag->toJson());
+        tag->resetUpdateFlag();
     }
-
-    stream.writeEndElement();
-    stream.writeEndElement();
-    stream.writeEndDocument();
+    return array;
 }
-
 
 void TagList::connectToServer(const QString &aAdress, qint16 aPort)
 {
@@ -286,7 +271,7 @@ void TagList::onConnected()
    // QByteArray data;
    // toXml(data);
    // mWebSocket->sendBinaryMessage(data);
-    if(!tagSyncTimer_ && !freeRideFlag_)
+    if(!tagSyncTimer_)
     {
         tagSyncTimer_ = new QTimer(this);
         tagSyncTimer_->setInterval(1000);
@@ -313,45 +298,13 @@ void TagList::onDisconnected()
  */
 void TagList::onBinaryDataRecieved(QByteArray aMsg)
 {
-    //qDebug() << __FUNCTION__ << aMsg;
-    QXmlStreamReader stream(aMsg);
+    auto document = QJsonDocument::fromJson(aMsg);
+    auto array = document.array();
 
-    while(!stream.atEnd() && !stream.hasError())
+    for (const auto &jsonRef : array)
     {
-        QXmlStreamReader::TokenType token = stream.readNext();
-        if(token == QXmlStreamReader::StartDocument)
-            continue;
-        if(token == QXmlStreamReader::StartElement)
-        {
-            if(stream.name() == QString("create"))
-            {
-                while(!(stream.tokenType() == QXmlStreamReader::EndElement &&
-                        stream.name() == QString("create")))
-                {
-                    if(stream.readNext() != QXmlStreamReader::StartElement)
-                        continue;
-
-                    if(stream.name() == QString("tag"))
-                    {
-                        createTag(stream);
-                    }
-                }
-            }
-            else if(stream.name() == QString("update"))
-            {
-                while(!(stream.tokenType() == QXmlStreamReader::EndElement &&
-                        stream.name() == QString("update")))
-                {
-                    if(stream.readNext() != QXmlStreamReader::StartElement)
-                        continue;
-
-                    if(stream.name() == QString("tag"))
-                    {
-                        updateTag(stream);
-                    }
-                }
-            }
-        }
+        auto jsonTag = jsonRef.toObject();
+        UpdateOrCreateTag(jsonTag);
     }
 
     if(!initialTagBurstReceived_)
@@ -364,146 +317,16 @@ void TagList::onBinaryDataRecieved(QByteArray aMsg)
 
 void TagList::syncTags()
 {
+    if (!webSocket_)
+        return;
 
-    bool update = false;
-    bool create = false;
+    auto list = toJson(true);
 
-    QByteArray data;
-    QXmlStreamWriter stream(&data);
-    stream.setAutoFormatting(true);
-    stream.writeStartDocument();
-    stream.writeStartElement("taglist");
-
-    if(tagsCreateQueue_.size() > 0)
+    if(!list.empty())
     {
-        stream.writeStartElement("create");
-        for(int i=0; i<tagsCreateQueue_.size(); ++i)
-            tagsCreateQueue_[i]->writeToXml(stream);
-        tagsCreateQueue_.clear();
-        create = true;
-        stream.writeEndElement();
+        QJsonDocument document(list);
+        webSocket_->sendBinaryMessage(document.toJson());
     }
-    if(tagUpdateQueue_.size() > 0)
-    {
-        stream.writeStartElement("update");
-        for(int i=0; i<tagUpdateQueue_.size(); ++i)
-            tagUpdateQueue_[i]->writeToXml(stream);
-        tagUpdateQueue_.clear();
-        stream.writeEndElement();
-        update = true;
-    }
-
-    stream.writeEndElement();
-    stream.writeEndDocument();
-
-    if(webSocket_ && (update || create))
-    {
-        webSocket_->sendBinaryMessage(data);
-    }
-}
-
-Tag* TagList::createTag(QXmlStreamReader &aStream)
-{
-    QXmlStreamAttributes attribs = aStream.attributes();
-    QString subsystem = attribs.value("subsystem").toString();
-    QString name = attribs.value("name").toString();
-    QString type = attribs.value("type").toString();
-    QString description = attribs.value("description").toString();
-
-    Tag *tag = nullptr;
-    // if the tag exist do not create.
-    tag = findByTagName(QString("%1.%2").arg(subsystem, name));
-    if(tag)
-        return nullptr;
-
-    // tag does not exist create it.
-
-    if(type == Tag::toString(Tag::eDouble))
-    {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eDouble, attribs.value("value").toDouble(), description);
-    }
-    else if(type == Tag::toString(Tag::eInt))
-    {
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eInt, attribs.value("value").toInt(), description);
-    }
-    else if(type == Tag::toString(Tag::eBool))
-    {
-        auto value = attribs.value("value").toInt() == 1 ? true : false;
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eBool, value, description);
-    }
-    else if(type == Tag::toString(Tag::eString))
-    {
-        auto value = attribs.value("value").toString();
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eString, value, description);
-    }
-    else if(type == Tag::toString(Tag::eTime))
-    {
-        auto value = QDateTime::fromMSecsSinceEpoch(attribs.value("value").toLongLong());
-        tag = TagList::sGetInstance().createTag(subsystem, name, Tag::eTime, value, description);
-    }
-    else
-        Q_UNREACHABLE();
-
-    emit tagCreated(tags_.count());
-    return tag;
-}
-
-
-Tag* TagList::updateTag(QXmlStreamReader &aStream)
-{
-    QXmlStreamAttributes attribs = aStream.attributes();
-    QString subsystem = attribs.value("subsystem").toString();
-    QString name = attribs.value("name").toString();
-    QString type = attribs.value("type").toString();
-    qint64 timestamp = -1;
-    if(attribs.hasAttribute("timestamp"))
-    {
-        timestamp = attribs.value("timestamp").toLongLong();
-    }
-
-    Tag *tag = findByTagName(QString("%1.%2").arg(subsystem, name));
-    if(!tag)
-    {
-        tag = createTag(subsystem, name, Tag::typeFromString(type));
-        qDebug() << "Local tag do not exist, create tag:" << QString("%1.%2").arg(subsystem, name);
-    }
-    if(timestamp > 0 && timestamp < tag->getMsSinceEpoc())
-    {
-        return tag;
-    }
-
-    if(tag->getType() == Tag::eDouble)
-    {
-        double value = attribs.value("value").toDouble();
-        tag->setValue(value, timestamp);
-    }
-    else if(tag->getType() == Tag::eInt)
-    {
-        int value = attribs.value("value").toInt();
-        tag->setValue(value, timestamp);
-    }
-    else if(tag->getType() == Tag::eBool)
-    {
-        bool value = attribs.value("value").toInt() == 1 ? true : false;
-        tag->setValue(value, timestamp);
-    }
-    else if(tag->getType() == Tag::eString)
-    {
-        QString value = attribs.value("value").toString();
-        tag->setValue(value, timestamp);
-    }
-    else if(tag->getType() == Tag::eTime)
-    {
-        QDateTime time = QDateTime::fromMSecsSinceEpoch(attribs.value("value").toLongLong());
-        tag->setValue(time, timestamp);
-    }
-    else
-        Q_UNREACHABLE();
-
-    int index = tags_.indexOf(tag);
-    emit valueChangedAtIndex(index);
-
-    return tag;
 }
 
 /**
@@ -514,15 +337,72 @@ Tag* TagList::updateTag(QXmlStreamReader &aStream)
  */
 void TagList::onTagValueChanged(Tag *aTag)
 {
-    if(!webSocket_)
-        return;
-
-    if(tagUpdateQueue_.contains(aTag))
-        tagUpdateQueue_.removeAll(aTag);
-
-    tagUpdateQueue_.push_back(aTag);
-
-    if(freeRideFlag_)
-        syncTags();
+    int index = tags_.indexOf(aTag);
+    emit valueChangedAtIndex(index);
 }
 
+Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
+{
+    const QString subsystem = json.value("subsystem").toString();
+    const QString name = json.value("name").toString();
+    const QString description = json.value("description").toString();
+    auto type = Tag::typeFromString(json.value("type").toString());
+    auto timestamp = json.value("timestamp").toInteger();
+    auto value = json.value("value");
+
+    auto *tag = findByTagName(QString("%1.%2").arg(subsystem, name));
+    Tag *createdTag = nullptr;
+
+    switch (type) {
+    case Tag::eDouble: {
+        if (tag)
+            tag->setValue(value.toDouble(), timestamp);
+        else
+            createdTag = createTag(subsystem, name, Tag::eDouble, value.toDouble(), description);
+        break;
+    }
+    case Tag::eInt: {
+        if (tag)
+            tag->setValue(value.toInt(), timestamp);
+        else
+            createdTag = createTag(subsystem, name, Tag::eInt, value.toInt(), description);
+        break;
+    }
+    case Tag::eBool: {
+        if (tag)
+            tag->setValue(value.toBool(), timestamp);
+        else
+            createdTag = createTag(subsystem, name, Tag::eBool, value.toBool(), description);
+        break;
+    }
+    case Tag::eString: {
+        if (tag)
+            tag->setValue(value.toString(), timestamp);
+        else
+            createdTag = createTag(subsystem, name, Tag::eString, value.toString(), description);
+        break;
+    }
+    case Tag::eTime: {
+        auto time = QDateTime::fromMSecsSinceEpoch(value.toInteger());
+        if (tag)
+            tag->setValue(time, timestamp);
+        else
+            createdTag = createTag(subsystem, name, Tag::eTime, time, description);
+        break;
+    }
+    default:
+        Q_UNREACHABLE();
+    }
+
+    // keep the old signals to not break anything
+    if (tag)
+    {
+        tag->resetUpdateFlag(); // update is from server prevent it from ping back
+        // update signals
+        return tag;
+    } else
+    {
+        emit tagCreated(tags_.count());
+        return createdTag;
+    }
+}

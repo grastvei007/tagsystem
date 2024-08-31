@@ -89,7 +89,10 @@ void Tag::setValue(double aValue, qint64 msSinceEpoc)
 
     doubleValue_ = aValue;
     if(msSinceEpoc < 0)
+    {
         timeStamp_ = QDateTime::currentMSecsSinceEpoch();
+        isUpdated_ = true;
+    }
     else
         timeStamp_ = msSinceEpoc;
     emit valueChanged(this);
@@ -103,7 +106,10 @@ void Tag::setValue(int aValue, qint64 msSinceEpoc)
 
     intValue_ = aValue;
     if(msSinceEpoc < 0)
+    {
         timeStamp_ = QDateTime::currentMSecsSinceEpoch();
+        isUpdated_ = true;
+    }
     else
         timeStamp_ = msSinceEpoc;
     emit valueChanged(this);
@@ -117,7 +123,10 @@ void Tag::setValue(bool aValue, qint64 msSinceEpoc)
 
     boolValue_ = aValue;
     if(msSinceEpoc < 0)
+    {
         timeStamp_ = QDateTime::currentMSecsSinceEpoch();
+        isUpdated_ = true;
+    }
     else
         timeStamp_ = msSinceEpoc;
     emit valueChanged(this);
@@ -130,7 +139,10 @@ void Tag::setValue(QString aValue, qint64 msSinceEpoc)
         return;
 
     if(msSinceEpoc < 0)
+    {
         timeStamp_ = QDateTime::currentMSecsSinceEpoch();
+        isUpdated_ = true;
+    }
     else
         timeStamp_ = msSinceEpoc;
     stringValue_ = aValue;
@@ -143,7 +155,10 @@ void Tag::setValue(QDateTime aValue, qint64 msSinceEpoc)
     if(value == timeValue_)
         return;
     if(msSinceEpoc < 0)
+    {
         timeStamp_ = QDateTime::currentMSecsSinceEpoch();
+        isUpdated_ = true;
+    }
     else
         timeStamp_ = msSinceEpoc;
 
@@ -382,6 +397,7 @@ const QJsonObject &Tag::toJson()
     jsonObject_.insert("subsystem", subSystem_);
     jsonObject_.insert("type", Tag::toString(type_));
     jsonObject_.insert("description", description_);
+    jsonObject_.insert("timestamp", timeStamp_);
 
     switch (type_) {
         case eDouble:
