@@ -55,8 +55,11 @@ target_link_libraries(tagsystem Qt6::WebSockets)
 
 target_include_directories(tagsystem INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_custom_command(TARGET tagsystem
-                   POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tagsystem> $ENV{DEV_LIBS} )
+set_target_properties(tagsystem
+    PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/lib
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/bin
+)
+
 
 
