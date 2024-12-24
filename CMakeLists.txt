@@ -14,7 +14,6 @@ endif()
 
 find_package(Qt6 COMPONENTS Core REQUIRED)
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
-find_package(Qt6 COMPONENTS Xml REQUIRED)
 find_package(Qt6 COMPONENTS WebSockets REQUIRED)
 
 qt_add_library(tagsystem SHARED
@@ -52,7 +51,6 @@ qt_add_library(tagsystem SHARED
 
 target_link_libraries(tagsystem Qt6::Core)
 target_link_libraries(tagsystem Qt6::Widgets)
-target_link_libraries(tagsystem Qt6::Xml)
 target_link_libraries(tagsystem Qt6::WebSockets)
 
 target_include_directories(tagsystem INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
