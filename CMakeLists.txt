@@ -47,6 +47,9 @@ qt_add_library(tagsystem SHARED
     tagsocketlisttablemodel.h
     tagsocketlistview.h
     clientinformation.h
+
+    util/json.h
+    util/json.cpp
 )
 
 target_link_libraries(tagsystem Qt6::Core)
