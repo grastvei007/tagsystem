@@ -137,6 +137,11 @@ const QString &TagList::clientName() const
     return clientName_;
 }
 
+const QString &TagList::adress() const
+{
+    return adress_;
+}
+
 QJsonArray TagList::toJson(bool onlyUpdated) const
 {
     QJsonArray array;

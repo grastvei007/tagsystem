@@ -42,6 +42,7 @@ public:
     Tag* findByTagName(const QString &aName);
     Tag* getTagByIndex(int aIndex);
     const QString& clientName() const;
+    const QString& adress() const;
 
     QJsonArray toJson(bool onlyUpdated = false) const;
 
