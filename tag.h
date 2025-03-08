@@ -31,6 +31,7 @@ class TAGSYSTEMSHARED_EXPORT Tag : public QObject
     Q_OBJECT
 public:
     enum Type{
+        eUnknown,
         eDouble,
         eInt,
         eBool,

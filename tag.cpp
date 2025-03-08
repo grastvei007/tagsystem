@@ -326,7 +326,7 @@ Tag::Type Tag::typeFromString(const QString &aTypeString)
     else if(aTypeString == "Time")
         return eTime;
     else
-        Q_UNREACHABLE();
+        return eUnknown;
 }
 
 QString Tag::toString(Tag::Type aType)
