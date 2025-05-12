@@ -39,7 +39,9 @@ public:
     Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue);
     Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue, const QString& description);
 
-    Tag* findByTagName(const QString &aName);
+    Tag* findByTagName(const QString &fullName);
+    Tag* findByTagName(const QString &subsystem, const QString &name);
+
     Tag* getTagByIndex(int aIndex);
     const QString& clientName() const;
     const QString& adress() const;

@@ -118,14 +118,18 @@ Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type
 }
 
 
-Tag* TagList::findByTagName(const QString &aName)
+Tag* TagList::findByTagName(const QString &fullname)
 {
-    if(!tagByName_.contains(aName))
+    if(!tagByName_.contains(fullname))
         return nullptr;
 
-    return tagByName_[aName];
+    return tagByName_[fullname];
 }
 
+Tag *TagList::findByTagName(const QString &subsystem, const QString &name)
+{
+    return findByTagName(QString("%1.%2").arg(subsystem, name));
+}
 
 Tag* TagList::getTagByIndex(int aIndex)
 {
