@@ -315,15 +315,15 @@ Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
 
 Tag::Type Tag::typeFromString(const QString &aTypeString)
 {
-    if(aTypeString == "Int")
+    if(aTypeString.contains(QString("Int"), Qt::CaseInsensitive))
         return eInt;
-    else if(aTypeString == "Bool")
+    else if(aTypeString.compare(QString("Bool"), Qt::CaseInsensitive))
         return eBool;
-    else if(aTypeString == "Double")
+    else if(aTypeString.compare(QString("Double"), Qt::CaseInsensitive))
         return eDouble;
-    else if(aTypeString == "String")
+    else if(aTypeString.compare(QString("String"), Qt::CaseInsensitive))
         return eString;
-    else if(aTypeString == "Time")
+    else if(aTypeString.compare(QString("Time"), Qt::CaseInsensitive))
         return eTime;
     else
         return eUnknown;
