@@ -85,7 +85,7 @@ signals:
 
 private slots:
     void onTagValueChanged(Tag* aTag);
-    void onTagCreated();
+    void onTagCreated(int index);
 
 private:
     TagSocket(QString aSubSystem, QString aName, Type aType);

@@ -326,7 +326,7 @@ void TagSocket::onTagValueChanged(Tag* aTag)
     emit valueChanged(this);
 }
 
-void TagSocket::onTagCreated()
+void TagSocket::onTagCreated(int index)
 {
     Tag *tag = TagList::sGetInstance().findByTagName(tagName_);
     if(!tag)
