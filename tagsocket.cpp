@@ -139,6 +139,7 @@ bool TagSocket::hookupTag(Tag *aTag)
         connect(tag_, &Tag::valueChanged, this, &TagSocket::onTagValueChanged);
         onTagValueChanged(tag_); // get an update
         tagName_ = tag_->getFullName();
+        qDebug() << "Hookup: " << QString("%1.%2").arg(subSystem_, name_) << " -> " << tagName_;
         return true;
     }
 
