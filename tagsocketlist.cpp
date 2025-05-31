@@ -18,9 +18,11 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include <QString>
 #include <QDir>
+#include <QTimer>
 #include <QDebug>
-#include <QXmlStreamWriter>
-#include <QXmlStreamReader>
+
+#include <QJsonArray>
+#include <QJsonObject>
 
 #ifndef __linux__
     #include <QCoreApplication>
@@ -44,6 +46,10 @@ bool TagSocketList::addTagSocket(TagSocket *aTagSocket)
     tagSocketList_.push_back(aTagSocket);
     tagSocketByName_[aTagSocket->getFullName()] = aTagSocket;
     connect(aTagSocket, qOverload<TagSocket*>(&TagSocket::valueChanged), this, &TagSocketList::tagSocketValueChanged);
+
+    if(autoSave_)
+        onTagSocketAdded();
+
     emit tagSocketAdded();
     return true;
 }
@@ -64,14 +70,19 @@ TagSocket* TagSocketList::getTagSocketByIndex(int aIndex)
     return tagSocketList_.at(aIndex);
 }
 
-
-TagSocket* TagSocketList::getTagSocketByName(QString aName)
+TagSocket *TagSocketList::getTagSocketByName(const QString &aName) const
 {
     if(tagSocketByName_.contains(aName))
     {
         return tagSocketByName_[aName];
     }
     return nullptr;
+}
+
+TagSocket *TagSocketList::findTagSocketByName(const QString &subsystem, const QString &name) const
+{
+    const auto fullname = QString("%1.%2").arg(subsystem, name);
+    return getTagSocketByName(fullname);
 }
 
 /**
@@ -87,6 +98,10 @@ void TagSocketList::setApplicationName(QString aName)
     applicationName_ = aName;
 }
 
+void TagSocketList::setAutoSave()
+{
+    autoSave_ = true;
+}
 
 void TagSocketList::saveBindingList()
 {
@@ -108,40 +123,27 @@ void TagSocketList::saveBindingList()
         QDir().mkpath(path);
 
     path.append(QDir::separator());
-    path.append("tagsocketbindings.xml");
+    path.append("tagsocketbindings.json");
     QFile file(path);
     if(!file.open(QIODevice::WriteOnly))
-        qDebug() << __FUNCTION__ << "Error opening file, " << path;
-
-    QXmlStreamWriter stream(&file);
-    stream.setAutoFormatting(true);
-    stream.writeStartDocument();
-    stream.writeStartElement("bindings");
-
-    for(int i=0; i<TagSocketList::sGetInstance().getNumberOfTagSockets(); ++i)
     {
-        TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByIndex(i);
-        stream.writeStartElement("tagsocket");
-        stream.writeAttribute("subsystem", tagsocket->getSubSystem());
-        stream.writeAttribute("name", tagsocket->getName());
-        stream.writeAttribute("type", tagsocket->getTypeStr());
-        if(tagsocket->isHookedUp())
-        {
-            stream.writeAttribute("hookedup", "1");
-            Tag *tag = tagsocket->getTag();
-            stream.writeAttribute("tagsubsystem", tag->getSubsystem());
-            stream.writeAttribute("tagname", tag->getName());
-        }
-        else
-        {
-           stream.writeAttribute("hookedup", "0");
-        }
-        stream.writeEndElement();
+        qDebug() << __FUNCTION__ << "Error opening file, " << path;
+        return;
     }
 
-    stream.writeEndElement();
-    stream.writeEndDocument();
+    QJsonArray tagsocketArray;
 
+    for(auto &tagsocket : tagSocketList_)
+    {
+        tagsocketArray.push_back(tagsocket->toJson());
+    }
+
+    QJsonObject obj;
+    obj.insert("tagsocketbinding", tagsocketArray);
+    QJsonDocument document(obj);
+
+    QTextStream stream(&file);
+    stream << document.toJson();
     file.close();
 }
 
@@ -161,7 +163,7 @@ void TagSocketList::loadBindingList()
   QString path = qApp->applicationDirPath();
 #endif
     path.append(QDir::separator());
-    path.append("tagsocketbindings.xml");
+    path.append("tagsocketbindings.json");
     QFile file(path);
     if(!file.exists())
     {
@@ -170,50 +172,35 @@ void TagSocketList::loadBindingList()
     }
 
     file.open(QIODevice::ReadOnly);
-    QXmlStreamReader stream(&file);
 
-    while(!stream.atEnd() && !stream.hasError())
+    QJsonDocument document = QJsonDocument::fromJson(file.readAll());
+
+    if(document.isObject())
     {
-        QXmlStreamReader::TokenType token = stream.readNext();
-        if(token == QXmlStreamReader::StartDocument)
-            continue;
-        if(token == QXmlStreamReader::StartElement)
+        QJsonObject object = document.object();
+
+        const QJsonArray tagsockets = object.value("tagsocketbinding").toArray();
+        for(const auto &tagsocketRef : tagsockets)
         {
-            if(stream.name() == QString("bindings"))
-                continue;
-            if(stream.name() == QString("tagsocket"))
-            {
-                QString subsytem = stream.attributes().value("subsystem").toString();
-                QString name = stream.attributes().value("name").toString();
-                QString type = stream.attributes().value("type").toString();
-                TagSocket::Type t;
-                if(type == TagSocket::toString(TagSocket::eBool))
-                    t = TagSocket::eBool;
-                else if(type == TagSocket::toString(TagSocket::eInt))
-                    t = TagSocket::eInt;
-                else if(type == TagSocket::toString(TagSocket::eDouble))
-                    t = TagSocket::eDouble;
-                else if(type == TagSocket::toString(TagSocket::eString))
-                    t = TagSocket::eString;
-                else if(type == TagSocket::toString(TagSocket::eTime))
-                    continue;
-                else
-                    Q_UNREACHABLE();
-
-                TagSocket *tagsocket = TagSocket::createTagSocket(subsytem, name, t);
-                if(stream.attributes().value("hookedup").toInt() == 1)
-                {
-                    QString tagsubsystem = stream.attributes().value("tagsubsystem").toString();
-                    QString tagname = stream.attributes().value("tagname").toString();
-                    tagsocket->hookupTag(tagsubsystem, tagname);
-                }
-            }
+            const QJsonObject &tagsocket = tagsocketRef.toObject();
+            TagSocket::createFromJson(tagsocket);
         }
-    }
-    if(stream.hasError())
-    {
-        qDebug() << __FUNCTION__ << stream.errorString();
+        qDebug() << "TagSockets loaded, " << tagsockets.size();
     }
 
     file.close();
+}
+
+void TagSocketList::onTagSocketAdded()
+{
+    if(temporaryBlockSave_)
+        return;
+
+    temporaryBlockSave_ = true;
+    // When called save 10 sec later, before opening for another save.
+    // prevent saving many times if an object is created and it has many new tagsockets.
+    QTimer::singleShot(10000, this, [this](){
+        saveBindingList();
+        temporaryBlockSave_ = false;
+    });
 }
