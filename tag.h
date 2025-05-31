@@ -25,6 +25,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 class QXmlStreamReader;
 class QXmlStreamWriter;
+class TagSocket;
 
 class TAGSYSTEMSHARED_EXPORT Tag : public QObject
 {
@@ -74,6 +75,7 @@ public:
     void writeToXml(QXmlStreamWriter &stream);
     static Tag* createFromXml(const QXmlStreamReader &reader);
     static Type typeFromString(const QString &typeString);
+    static Type typeMatchTagSocket(const TagSocket *tagsocket);
     static QString toString(Type type);
     QByteArray toMessage();
     const QJsonObject& toJson();

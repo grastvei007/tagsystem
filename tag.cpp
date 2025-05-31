@@ -14,6 +14,7 @@ You should have received a copy of the GNU General Public License
 along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "tag.h"
+#include "tagsocket.h"
 
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
@@ -311,6 +312,29 @@ Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
     }
 
     return tag;
+}
+
+Tag::Type Tag::typeMatchTagSocket(const TagSocket *tagsocket)
+{
+    if(!tagsocket)
+        return eUnknown;
+    switch (tagsocket->getType()) {
+    case TagSocket::eBool:
+        return eBool;
+    case TagSocket::eDouble:
+        return eDouble;
+    case TagSocket::eInt:
+        return eInt;
+    case TagSocket::eString:
+        return eString;
+    case TagSocket::eTime:
+        return eTime;
+    case TagSocket::eNone:
+        return eUnknown;
+    default:
+        return eUnknown;
+    }
+    Q_UNREACHABLE();
 }
 
 Tag::Type Tag::typeFromString(const QString &aTypeString)
