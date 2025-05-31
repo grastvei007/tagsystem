@@ -18,6 +18,8 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "taglist.h"
 #include "tagsocketlist.h"
 
+#include <QJsonObject>
+
 
 TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, TagSocket::Type aType)
 {
@@ -26,6 +28,26 @@ TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, TagSock
     if(tagsocket)
         return tagsocket;
     return new TagSocket(aSubSystem, aName, aType);
+}
+
+TagSocket *TagSocket::createFromJson(const QJsonObject &json)
+{
+    const auto subsystem = json.value("subsystem").toString();
+    const auto name = json.value("name").toString();
+    if(subsystem.isEmpty() || name.isEmpty())
+        return nullptr;
+    if(auto *tagsocket = TagSocketList::sGetInstance().findTagSocketByName(subsystem, name); tagsocket != nullptr)
+        return tagsocket;
+
+    auto type = TagSocket::typeFromString(json.value("type").toString());
+    TagSocket *tagsocket = new TagSocket(subsystem, name, type);
+
+    QString tag = json.value("tagname").toString();
+    auto tagsubsystem = tag.split(".").first();
+    auto tagname = tag.split(".").last();
+    if(!tagsubsystem.isEmpty() && !tagname.isEmpty())
+        tagsocket->hookupTag(tagsubsystem, tagname);
+    return tagsocket;
 }
 
 TagSocket::TagSocket(QString aSubSystem, QString aName, Type aType) :
@@ -244,6 +266,19 @@ bool TagSocket::readValue(QDateTime &rValue)
         return false;
     rValue = tag_->getTimeValue();
     return true;
+}
+
+QJsonObject TagSocket::toJson() const
+{
+    QJsonObject obj;
+
+    obj.insert("subsystem", getSubSystem());
+    obj.insert("name", getName());
+    obj.insert("type", getTypeStr());
+    obj.insert("hookedup", isHookedUp());
+    obj.insert("tagname", getTagName());
+
+    return obj;
 }
 
 TagSocket::Type TagSocket::typeFromString(const QString &aTypeString)

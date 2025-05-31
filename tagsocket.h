@@ -22,6 +22,8 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "tag.h"
 
+class QJsonObject;
+
 class TAGSYSTEMSHARED_EXPORT TagSocket : public QObject
 {
     Q_OBJECT
@@ -35,13 +37,9 @@ public:
         eTime
     };
     ///< construct a new tagsocket.
-    static TagSocket *createTagSocket(QString aSubSystem, QString aName, Type aType);
+    static TagSocket* createTagSocket(QString aSubSystem, QString aName, Type aType);
+    static TagSocket* createFromJson(const QJsonObject &json);
 
-    template<typename T>
-    static TagSocket *createTagSocket(QString subsystem, QString name)
-    {
-        return createTagSocket(subsystem, name, eBool);
-    }
 
     ~TagSocket();
 
@@ -71,6 +69,8 @@ public:
     bool readValue(int &rValue);
     bool readValue(QString &rValue);
     bool readValue(QDateTime &rValue);
+
+    QJsonObject toJson() const;
 
     static Type typeFromString(const QString &aTypeString);
     static QString toString(const Type type);
