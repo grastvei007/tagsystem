@@ -68,6 +68,8 @@ bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value,
             case Tag::eTime:
                 tag->setValue(value.toDateTime());
                 return true;
+            case Tag::eUnknown:
+                break;
 
             }
         }

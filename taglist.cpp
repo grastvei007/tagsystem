@@ -223,7 +223,7 @@ void TagList::onError()
         case QAbstractSocket::ConnectionRefusedError:
             if(!adress_.isEmpty() && port_ > 1024)
             {
-                QTimer::singleShot(1000*60, [this](){
+                QTimer::singleShot(1000*60, this, [this](){
                     qDebug() << "Reconnect..";
                     connectToServer(adress_, port_);});
                 return;
@@ -233,7 +233,7 @@ void TagList::onError()
         case QAbstractSocket::RemoteHostClosedError:
             if(!adress_.isEmpty() && port_ > 1024)
             {
-                QTimer::singleShot(1000*30, [this](){
+                QTimer::singleShot(1000*30, this, [this](){
                     connectToServer(adress_, port_);});
                 return;
             }
@@ -308,11 +308,11 @@ void TagList::onDisconnected()
 void TagList::onBinaryDataRecieved(QByteArray aMsg)
 {
     auto document = QJsonDocument::fromJson(aMsg);
-    auto array = document.array();
+    const auto array = document.array();
 
     for (const auto &jsonRef : array)
     {
-        auto jsonTag = jsonRef.toObject();
+        const auto &jsonTag = jsonRef.toObject();
         UpdateOrCreateTag(jsonTag);
     }
 

@@ -222,6 +222,8 @@ QString Tag::getTypeStr() const
         return "String";
     case eTime:
         return "Time";
+    case eUnknown:
+        return "Unknown";
     }
 
     Q_UNREACHABLE();
