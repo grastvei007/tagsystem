@@ -41,7 +41,7 @@ Tag::Tag(QString subSystem, QString name, Tag::Type type, double initValue, cons
     description_(description),
     doubleValue_(initValue)
 {
-
+    setValue(initValue);
 }
 
 Tag::Tag(QString subSystem, QString name, Tag::Type type, int initValue, const QString &description) :
@@ -51,7 +51,7 @@ Tag::Tag(QString subSystem, QString name, Tag::Type type, int initValue, const Q
     description_(description),
     intValue_(initValue)
 {
-
+    setValue(initValue);
 }
 
 Tag::Tag(QString subSystem, QString name, Tag::Type type, bool initValue, const QString &description) :
@@ -61,7 +61,7 @@ Tag::Tag(QString subSystem, QString name, Tag::Type type, bool initValue, const 
     description_(description),
     boolValue_(initValue)
 {
-
+    setValue(initValue);
 }
 
 Tag::Tag(QString subSystem, QString name, Tag::Type type, QString initValue, const QString &description) :
@@ -71,7 +71,7 @@ Tag::Tag(QString subSystem, QString name, Tag::Type type, QString initValue, con
     description_(description),
     stringValue_(initValue)
 {
-
+    setValue(initValue);
 }
 
 Tag::Tag(QString subSystem, QString name, Type type, QDateTime initValue, const QString &description) :
