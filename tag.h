@@ -104,7 +104,7 @@ private:
 
     QJsonObject jsonObject_ = QJsonObject();
 
-    bool isUpdated_ = false; ///< local update, indicate ready to be synced with server
+    bool isUpdated_ = true; ///< local update, indicate ready to be synced with server
 };
 
 
