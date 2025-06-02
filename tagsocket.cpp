@@ -137,9 +137,15 @@ bool TagSocket::hookupTag(Tag *aTag)
     }
     else if(type_ == eInt)
     {
-        if(aTag->getType()  != Tag::eInt)
-            return false;
-        tag_ = aTag;
+        if(auto tagType = aTag->getType(); tagType == Tag::eInt)
+        {
+            tag_ = aTag;
+        }
+        else if(tagType == Tag::eBool)
+        {
+            tag_ = aTag;
+        }
+        return false;
     }
     else if(type_ == eString)
     {
@@ -207,8 +213,15 @@ void TagSocket::writeValue(bool aValue)
 
 void TagSocket::writeValue(int aValue)
 {
-    if(tag_)
+    if(!tag_)
+        return;
+    if(type_ == eInt)
         tag_->setValue(aValue);
+    else if(type_ == eBool)
+    {
+        bool val = std::clamp(0, 1, aValue);
+        tag_->setValue(val);
+    }
 }
 
 
@@ -247,8 +260,19 @@ bool TagSocket::readValue(int &rValue)
 {
     if(!tag_)
         return false;
-    rValue = tag_->getIntValue();
-    return true;
+
+    if(type_ == eInt)
+    {
+        rValue = tag_->getIntValue();
+        return true;
+    }
+    else if(type_ == eBool)
+    {
+        rValue = static_cast<int>(tag_->getBoolValue());
+        return true;
+
+    }
+    return false;
 }
 
 
