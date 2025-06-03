@@ -43,6 +43,7 @@ public:
     Tag* findByTagName(const QString &subsystem, const QString &name);
 
     Tag* getTagByIndex(int aIndex);
+    const QStringList& subsystems();
     const QString& clientName() const;
     const QString& adress() const;
 
@@ -96,6 +97,8 @@ private:
 
     bool isConnected_ = false;
     bool initialTagBurstReceived_ = false;
+
+    QStringList subsystems_;
 };
 
 #endif // TAGLIST_H

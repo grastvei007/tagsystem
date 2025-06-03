@@ -18,6 +18,7 @@ find_package(Qt6 COMPONENTS WebSockets REQUIRED)
 
 qt_add_library(tagsystem SHARED
     serverconnectwidget.ui
+    taglistview.ui
     tagselectview.ui
     tagsocketlistview.ui
 

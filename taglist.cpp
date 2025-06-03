@@ -51,7 +51,7 @@ Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
     tags_.push_back(tag);
     connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
-
+    subsystems_.push_back(aSubSystem);
     qDebug() << "Create tag: " << tag->getFullName() << " (" << tags_.size() << ")";
     emit tagCreated(tags_.count());
     return tag;
@@ -112,6 +112,8 @@ Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type
     connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
 
+    subsystems_.push_back(subSystem);
+
     qDebug() << "Create tag: " << tag->getFullName() << " (" << tags_.size() << ")";
     emit tagCreated(tags_.count());
     return tag;
@@ -134,6 +136,12 @@ Tag *TagList::findByTagName(const QString &subsystem, const QString &name)
 Tag* TagList::getTagByIndex(int aIndex)
 {
     return tags_.at(aIndex);
+}
+
+const QStringList &TagList::subsystems()
+{
+    subsystems_.removeDuplicates();
+    return subsystems_;
 }
 
 const QString &TagList::clientName() const
