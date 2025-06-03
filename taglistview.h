@@ -23,6 +23,10 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "taglistsortfilterproxymodel.h"
 
+namespace Ui {
+class TagListView;
+}
+
 class TagListTableModel;
 
 class TAGSYSTEMSHARED_EXPORT TagListView : public QWidget
@@ -32,11 +36,14 @@ public:
     TagListView(QWidget *parent=nullptr);
 
 private slots:
-
+    void onCurrentTextChanged(const QString &text);
 private:
+    Ui::TagListView *ui_;
     TagListTableModel *mTagListTableModel;
     std::unique_ptr<QTableView> mTableView;
     std::unique_ptr<QSortFilterProxyModel> tagListSortFilterProxyModel_;
+
+    bool blockUpdate_ = false;
 };
 
 #endif // TAGLISTVIEW_H

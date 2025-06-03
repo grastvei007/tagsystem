@@ -14,27 +14,42 @@ You should have received a copy of the GNU General Public License
 along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "taglistview.h"
+#include "ui_taglistview.h"
 
 #include "taglisttablemodel.h"
-
-#include <QGridLayout>
+#include "taglist.h"
 #include <QHeaderView>
+#include <QComboBox>
 
-TagListView::TagListView(QWidget *parent) : QWidget(parent)
+TagListView::TagListView(QWidget *parent) : QWidget(parent),
+    ui_(new Ui::TagListView)
 {
-    mTableView.reset(new QTableView(this));
+    ui_->setupUi(this);
+
+    mTableView.reset(ui_->tableView);
     mTableView->setSortingEnabled(true);
     mTableView->horizontalHeader()->setSectionsClickable(true);
     mTableView->horizontalHeader()->setStretchLastSection(true);
     mTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    QGridLayout *grid = new QGridLayout(this);
+
+
+    auto updateComboBoxItem = [this](int){
+        blockUpdate_ = true;
+        ui_->comboBox->clear();
+        auto subsystems = TagList::sGetInstance().subsystems();
+        subsystems.push_front("--All--");
+        ui_->comboBox->addItems(subsystems);
+        blockUpdate_ = false;
+    };
+
+    updateComboBoxItem(1);
+
+    connect(&TagList::sGetInstance(), &TagList::tagCreated, this, updateComboBoxItem);
+    connect(ui_->comboBox, &QComboBox::currentTextChanged, this, &TagListView::onCurrentTextChanged);
 
     tagListSortFilterProxyModel_ = std::make_unique<QSortFilterProxyModel>(this);
+    tagListSortFilterProxyModel_->setFilterKeyColumn(TagListTableModel::eTagName);
 
-
-    grid->addWidget(mTableView.get());
-
-    setLayout(grid);
     mTagListTableModel = new TagListTableModel();
 
     tagListSortFilterProxyModel_->setSourceModel(mTagListTableModel);
@@ -43,3 +58,13 @@ TagListView::TagListView(QWidget *parent) : QWidget(parent)
 
 }
 
+void TagListView::onCurrentTextChanged(const QString &text)
+{
+    if(blockUpdate_)
+        return;
+
+    if(text == "--All--")
+        tagListSortFilterProxyModel_->setFilterFixedString("");
+    else
+        tagListSortFilterProxyModel_->setFilterFixedString(text);
+}
