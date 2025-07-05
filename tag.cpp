@@ -15,8 +15,11 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "tag.h"
 #include "tagsocket.h"
+#include "util/json.h"
 
 #include "util/json.h"
+
+#include <QJsonArray>
 
 Tag::Tag(QObject *parent) : QObject(parent)
 {
@@ -175,6 +178,45 @@ void Tag::setValue(QDateTime aValue, qint64 msSinceEpoc)
     emit valueChanged(this);
 }
 
+void Tag::setValue(const std::vector<int> &value, qint64 msSinceEpoc)
+{
+    if(value == intVectorValue_)
+        return;
+    if(msSinceEpoc < 0)
+    {
+        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
+        isUpdated_ = true;
+    }
+    else
+        timeStamp_ = msSinceEpoc;
+
+    intVectorValue_.clear();
+    std::ranges::copy(value, std::back_inserter(intVectorValue_));
+    emit valueChanged(this);
+}
+
+void Tag::setValue(const std::vector<double> &value, qint64 msSinceEpoc)
+{
+    if(value == doubleVectorValue_)
+        return;
+    if(msSinceEpoc < 0)
+    {
+        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
+        isUpdated_ = true;
+    }
+    else
+        timeStamp_ = msSinceEpoc;
+
+    doubleVectorValue_.clear();
+    std::ranges::copy(value, std::back_inserter(doubleVectorValue_));
+    emit valueChanged(this);
+}
+
+bool Tag::isArray() const
+{
+    return type_ == eIntVector || type_ == eDoubleVector;
+}
+
 QString Tag::getFullName() const
 {
     return QString("%1.%2").arg(subSystem_).arg(name_);
@@ -230,6 +272,10 @@ QString Tag::getTypeStr() const
         return "String";
     case eTime:
         return "Time";
+    case eIntVector:
+        return "IntVector";
+    case eDoubleVector:
+        return "DoubleVector";
     case eUnknown:
         return "Unknown";
     }
@@ -264,6 +310,16 @@ QString Tag::getStringValue() const
 QDateTime Tag::getTimeValue() const
 {
     return QDateTime::fromMSecsSinceEpoch(timeValue_);
+}
+
+const std::vector<int> &Tag::intVector() const
+{
+    return intVectorValue_;
+}
+
+const std::vector<double> &Tag::doubleVector() const
+{
+    return doubleVectorValue_;
 }
 
 QString Tag::enumValue(int value) const
@@ -308,6 +364,10 @@ Tag::Type Tag::typeFromString(const QString &aTypeString)
         return eString;
     else if(aTypeString.compare(QString("Time"), Qt::CaseInsensitive) == 0)
         return eTime;
+    else if(aTypeString.compare(QString("IntVector"), Qt::CaseInsensitive) == 0)
+        return eIntVector;
+    else if(aTypeString.compare(QString("DoubleVector"), Qt::CaseInsensitive) == 0)
+        return eDoubleVector;
     else
         return eUnknown;
 }
@@ -410,6 +470,12 @@ const QJsonObject &Tag::toJson()
             break;
         case eTime:
             jsonObject_.insert("value", timeValue_);
+            break;
+        case eIntVector:
+            jsonObject_.insert("value", util::json::toJsonArray(intVectorValue_));
+            break;
+        case eDoubleVector:
+            jsonObject_.insert("value", util::json::toJsonArray(doubleVectorValue_));
             break;
         default:
             jsonObject_.insert("value", QString());

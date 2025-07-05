@@ -34,7 +34,9 @@ public:
         eInt,
         eBool,
         eString,
-        eTime
+        eTime,
+        eIntVector,
+        eDoubleVector
     };
     ///< construct a new tagsocket.
     static TagSocket* createTagSocket(QString aSubSystem, QString aName, Type aType);
@@ -63,12 +65,16 @@ public:
     void writeValue(int aValue);
     void writeValue(QString aValue);
     void writeValue(QDateTime aValue);
+    void writeValue(const std::vector<int> &value);
+    void writeValue(const std::vector<double> &value);
 
     bool readValue(double &rValue);
     bool readValue(bool &rValue);
     bool readValue(int &rValue);
     bool readValue(QString &rValue);
     bool readValue(QDateTime &rValue);
+    bool readValue(std::vector<int> &rValue);
+    bool readValue(std::vector<double> &rValue);
 
     QJsonObject toJson() const;
 
@@ -82,6 +88,8 @@ signals:
     void valueChanged(QString);
     void valueChanged(QDateTime);
     void valueChanged(TagSocket*);
+    void valueChanged(const std::vector<int>&);
+    void valueChanged(const std::vector<double>&);
 
 private slots:
     void onTagValueChanged(Tag* aTag);

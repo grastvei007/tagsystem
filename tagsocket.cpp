@@ -160,6 +160,18 @@ bool TagSocket::hookupTag(Tag *aTag)
             return false;
         tag_ = aTag;
     }
+    else if(type_ == eIntVector)
+    {
+        if(aTag->getType() != Tag::eIntVector)
+            return false;
+        tag_ = aTag;
+    }
+    else if(type_ == eDoubleVector)
+    {
+        if(aTag->getType() != Tag::eDoubleVector)
+            return false;
+        tag_ = aTag;
+    }
     else
         Q_UNREACHABLE();
 
@@ -238,6 +250,17 @@ void TagSocket::writeValue(QDateTime aValue)
         tag_->setValue(aValue);
 }
 
+void TagSocket::writeValue(const std::vector<int> &value)
+{
+    if(tag_)
+        tag_->setValue(value);
+}
+
+void TagSocket::writeValue(const std::vector<double> &value)
+{
+    if(tag_)
+        tag_->setValue(value);
+}
 
 bool TagSocket::readValue(double &rValue)
 {
@@ -293,6 +316,23 @@ bool TagSocket::readValue(QDateTime &rValue)
     return true;
 }
 
+bool TagSocket::readValue(std::vector<int> &rValue)
+{
+    if(!tag_)
+        return false;
+    std::ranges::copy(tag_->intVector(), std::back_inserter(rValue));
+    return true;
+}
+
+bool TagSocket::readValue(std::vector<double> &rValue)
+{
+    if(!tag_)
+        return false;
+    std::ranges::copy(tag_->doubleVector(), std::back_inserter(rValue));
+    return true;
+}
+
+
 QJsonObject TagSocket::toJson() const
 {
     QJsonObject obj;
@@ -318,6 +358,10 @@ TagSocket::Type TagSocket::typeFromString(const QString &aTypeString)
         return eString;
     else if(aTypeString == "Time")
         return eTime;
+    else if(aTypeString == "IntVector")
+        return eIntVector;
+    else if(aTypeString == "DoubleVector")
+        return eDoubleVector;
     else
         Q_UNREACHABLE();
 }
@@ -335,6 +379,10 @@ QString TagSocket::toString(const TagSocket::Type type)
             return "String";
         case TagSocket::eTime:
             return "Time";
+        case TagSocket::eIntVector:
+            return "IndVector";
+        case TagSocket::eDoubleVector:
+            return "DoubleVector";
         default:
             Q_UNREACHABLE();
     }
@@ -356,6 +404,10 @@ TagSocket::Type TagSocket::typeMatchingTag(const Tag *tag)
         return eString;
     case Tag::eTime:
         return eTime;
+    case Tag::eIntVector:
+        return eIntVector;
+    case Tag::eDoubleVector:
+        return eDoubleVector;
     default:
         return eNone;
     }
@@ -380,6 +432,14 @@ void TagSocket::onTagValueChanged(Tag* aTag)
         emit valueChanged(aTag->getStringValue());
     else if(type_ == eTime)
         emit valueChanged(tag_->getTimeValue());
+    else if(type_ == eIntVector)
+    {
+        emit valueChanged(tag_->intVector());
+    }
+    else if(type_ == eDoubleVector)
+    {
+        emit valueChanged(tag_->doubleVector());
+    }
     else
         Q_UNREACHABLE();
 

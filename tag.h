@@ -36,7 +36,9 @@ public:
         eInt,
         eBool,
         eString,
-        eTime
+        eTime,
+        eIntVector,
+        eDoubleVector
     };
     explicit Tag(QObject *parent = nullptr);
     using EnumMap = std::map<int, QString>;
@@ -59,6 +61,10 @@ public:
     void setValue(bool value, qint64 msSinceEpoc=-1);
     void setValue(QString value, qint64 msSinceEpoc=-1);
     void setValue(QDateTime value, qint64 msSinceEpoc=-1);
+    void setValue(const std::vector<int> &value, qint64 msSinceEpoc = -1);
+    void setValue(const std::vector<double> &value, qint64 msSinceEpoc = -1);
+
+    bool isArray() const;
 
     // getters
     Type getType() const;
@@ -77,6 +83,9 @@ public:
     QString getStringValue() const;
     QDateTime getTimeValue() const;
     QString enumValue(int value) const;
+
+    const std::vector<int>& intVector() const;
+    const std::vector<double>& doubleVector() const;
 
     // other
     static Type typeFromString(const QString &typeString);
@@ -102,6 +111,8 @@ private:
     int intValue_ = 0;
     bool boolValue_ = false;
     QString stringValue_ = QString();
+    std::vector<int> intVectorValue_;
+    std::vector<double> doubleVectorValue_;
 
     qint64 timeValue_ = 0; ///< value for tag type time
     QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
