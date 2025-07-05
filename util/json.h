@@ -4,6 +4,10 @@
 #include <QByteArray>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QJsonValue>
+
+#include <ranges>
+#include <algorithm>
 #include <optional>
 #include <iterator>
 
@@ -12,6 +16,7 @@ namespace util::json
 
 std::optional<QJsonArray> byteArrayToJsonArray(const QByteArray &array);
 std::optional<QJsonObject> byteArrayToJsonObject(const QByteArray &array);
+
 
 
 QJsonArray toJsonArray(auto& vector)
