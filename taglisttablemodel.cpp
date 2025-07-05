@@ -16,6 +16,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "taglisttablemodel.h"
 
 #include <QColor>
+#include <QString>
 
 #include "taglist.h"
 #include "tag.h"
@@ -68,6 +69,8 @@ bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value,
             case Tag::eTime:
                 tag->setValue(value.toDateTime());
                 return true;
+            case Tag::eIntVector:
+            case Tag::eDoubleVector:
             case Tag::eUnknown:
                 break;
 
@@ -120,6 +123,48 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
                 return tag->getStringValue();
             else if(tag->getType() == Tag::eTime)
                 return tag->getTimeValue().toString(tag->getTimeStampFormat());
+            else if(tag->getType() == Tag::eIntVector)
+            {
+                const std::vector<int>& v = tag->intVector();
+                if(v.empty())
+                    return "[]";
+                else if(v.size() < 5)
+                {
+                    QString str("[");
+                    for(const auto &elm : v)
+                    {
+                        str.append("%1 ").arg(elm);
+                    }
+                    str.append("]");
+                    return str;
+                }
+                else // more than 5 elements show the first 5
+                {
+                    return QString("[%1 %2 %3 %4 %5 ...]")
+                        .arg(QString::number(v[0]), QString::number(v[1]), QString::number(v[2]), QString::number(v[3]), QString::number(v[4]));
+                }
+            }
+            else if(tag->getType() == Tag::eDoubleVector)
+            {
+                const std::vector<double>& v = tag->doubleVector();
+                if(v.empty())
+                    return "[]";
+                else if(v.size() < 5)
+                {
+                    QString str("[");
+                    for(const auto &elm : v)
+                    {
+                        str.append("%1 ").arg(elm);
+                    }
+                    str.append("]");
+                    return str;
+                }
+                else // more than 5 elements show the first 5
+                {
+                    return QString("[%1 %2 %3 %4 %5 ...]")
+                    .arg(QString::number(v[0]), QString::number(v[1]), QString::number(v[2]), QString::number(v[3]), QString::number(v[4]));
+                }
+            }
             else
                 Q_UNREACHABLE();
         }
