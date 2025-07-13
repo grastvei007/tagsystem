@@ -106,7 +106,14 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
             if(tag->getType() == Tag::eDouble)
                 return tag->getDoubleValue();
             else if(tag->getType() == Tag::eInt)
-                return tag->getIntValue();
+            {
+                int value = tag->getIntValue();
+                QString enumStr = tag->enumValue(value);
+                if(!enumStr.isEmpty())
+                    return enumStr;
+
+                return value;
+            }
             else if(tag->getType() == Tag::eBool)
                 return tag->getBoolValue();
             else if(tag->getType() == Tag::eString)

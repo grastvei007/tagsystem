@@ -16,9 +16,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tag.h"
 #include "tagsocket.h"
 
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-#include <QXmlStreamAttributes>
+#include "util/json.h"
 
 Tag::Tag(QObject *parent) : QObject(parent)
 {
@@ -81,6 +79,16 @@ Tag::Tag(QString subSystem, QString name, Type type, QDateTime initValue, const 
     description_(description)
 {
     setValue(initValue);
+}
+
+void Tag::setEnumValues(const EnumMap &map)
+{
+    if(type_ != eInt)
+        return;
+    for(auto &[key, value] : map)
+    {
+        enumValues_[key] = value;
+    }
 }
 
 void Tag::setValue(double aValue, qint64 msSinceEpoc)
@@ -258,62 +266,11 @@ QDateTime Tag::getTimeValue() const
     return QDateTime::fromMSecsSinceEpoch(timeValue_);
 }
 
-void Tag::writeToXml(QXmlStreamWriter &aStream)
+QString Tag::enumValue(int value) const
 {
-    aStream.writeStartElement("tag");
-    aStream.writeAttribute("subsystem", subSystem_);
-    aStream.writeAttribute("name", name_);
-    aStream.writeAttribute("timestamp", QString::number(timeStamp_));
-    aStream.writeAttribute("type", getTypeStr());
-    if(type_ == eDouble)
-        aStream.writeAttribute("value", QString::number(doubleValue_));
-    else if(type_ == eInt)
-        aStream.writeAttribute("value", QString::number(intValue_));
-    else if(type_ == eBool)
-        aStream.writeAttribute("value", (boolValue_) ? "1" : "0");
-    else if(type_ == eString)
-        aStream.writeAttribute("value", stringValue_);
-    else if(type_ == eTime)
-        aStream.writeAttribute("value", QString::number(timeValue_));
-    else
-        Q_UNREACHABLE(); ///< unhandled tag type.
-    aStream.writeAttribute("description", description_);
-
-    aStream.writeEndElement();
-}
-
-
-Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
-{
-    QString sub = aReader.attributes().value("subsystem").toString();
-    QString name = aReader.attributes().value("name").toString();
-    QString type = aReader.attributes().value("type").toString();
-    QString val = aReader.attributes().value("value").toString();
-    QString description = aReader.attributes().value("description").toString();
-
-    Tag *tag = nullptr;
-    if(type == "Double")
-    {
-        tag = new Tag(sub, name, eDouble, val.toDouble(), description);
-    }
-    else if(type == "Int")
-    {
-        tag = new Tag(sub, name, eInt, val.toInt(), description);
-    }
-    else if(type == "Bool")
-    {
-        tag = new Tag(sub,name, eBool, (val.toInt() == 1) ? true : false, description);
-    }
-    else if(type == "String")
-    {
-        tag = new Tag(sub, name, eString, val, description);
-    }
-    else if(typeFromString(type) == eTime)
-    {
-        tag = new Tag(sub, name, eTime, QDateTime::fromMSecsSinceEpoch(val.toLongLong()), description);
-    }
-
-    return tag;
+    if(enumValues_.contains(value))
+        return enumValues_.at(value);
+    return {};
 }
 
 Tag::Type Tag::typeMatchTagSocket(const TagSocket *tagsocket)
@@ -430,6 +387,19 @@ const QJsonObject &Tag::toJson()
             jsonObject_.insert("value", doubleValue_);
             break;
         case eInt:
+            if(!enumValues_.empty())
+            {
+                auto transform = [](const auto& value)
+                {
+                    //auto &[key, value] = static_cast<stvalue;
+                    QJsonObject obj;
+                    obj.insert("key", value.first);
+                    obj.insert("value", value.second);
+                    return QJsonValue(obj);
+                };
+
+                jsonObject_.insert("enumvalues", util::json::toJsonArray(enumValues_, transform));
+            }
             jsonObject_.insert("value", intValue_);
             break;
         case eBool:

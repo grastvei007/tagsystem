@@ -23,9 +23,8 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QDateTime>
 #include <QJsonObject>
 
-class QXmlStreamReader;
-class QXmlStreamWriter;
 class TagSocket;
+
 
 class TAGSYSTEMSHARED_EXPORT Tag : public QObject
 {
@@ -40,6 +39,7 @@ public:
         eTime
     };
     explicit Tag(QObject *parent = nullptr);
+    using EnumMap = std::map<int, QString>;
 
     Tag(QString subSystem, QString name, Type type);
 
@@ -49,12 +49,18 @@ public:
     Tag(QString subSystem, QString name, Type type, QString initValue, const QString &description = QString());
     Tag(QString subSystem, QString name, Type type, QDateTime initValue, const QString &description = QString());
 
+    // config
+    void setEnumValues(const EnumMap &map); // available if type is eInt
+
+
+    // setters
     void setValue(double value, qint64 msSinceEpoc=-1);
     void setValue(int value, qint64 msSinceEpoc=-1);
     void setValue(bool value, qint64 msSinceEpoc=-1);
     void setValue(QString value, qint64 msSinceEpoc=-1);
     void setValue(QDateTime value, qint64 msSinceEpoc=-1);
 
+    // getters
     Type getType() const;
     QString getTypeStr() const;
     QString getFullName() const;
@@ -70,10 +76,9 @@ public:
     bool getBoolValue() const;
     QString getStringValue() const;
     QDateTime getTimeValue() const;
+    QString enumValue(int value) const;
 
-
-    void writeToXml(QXmlStreamWriter &stream);
-    static Tag* createFromXml(const QXmlStreamReader &reader);
+    // other
     static Type typeFromString(const QString &typeString);
     static Type typeMatchTagSocket(const TagSocket *tagsocket);
     static QString toString(Type type);
@@ -105,6 +110,8 @@ private:
     QJsonObject jsonObject_ = QJsonObject();
 
     bool isUpdated_ = true; ///< local update, indicate ready to be synced with server
+
+    EnumMap enumValues_;
 };
 
 
