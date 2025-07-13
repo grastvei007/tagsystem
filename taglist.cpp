@@ -26,6 +26,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QJsonObject>
 
 #include "clientinformation.h"
+#include "util/json.h"
 
 TagList& TagList::sGetInstance()
 {
@@ -380,7 +381,28 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
     }
     case Tag::eInt: {
         if (tag)
+        {
+            if(json.contains("enumvalues"))
+            {
+                const auto array = json.value("enumvalues").toArray();
+                auto transform = [](const QJsonValue &value)
+                {
+                    QJsonObject obj = value.toObject();
+                    int key = obj.value("key").toInt();
+                    QString str = obj.value("value").toString();
+                    return std::pair<int, QString>{key, str};
+                };
+
+                Tag::EnumMap list;
+                for(const auto &elm : array)
+                {
+                    list.insert(transform(elm));
+                }
+                if(!list.empty())
+                    tag->setEnumValues(list);
+            }
             tag->setValue(value.toInt(), timestamp);
+        }
         else
             createdTag = createTag(subsystem, name, Tag::eInt, value.toInt(), description);
         break;

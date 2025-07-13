@@ -20,6 +20,8 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QXmlStreamWriter>
 #include <QXmlStreamAttributes>
 
+#include "util/json.h"
+
 Tag::Tag(QObject *parent) : QObject(parent)
 {
 
@@ -81,6 +83,16 @@ Tag::Tag(QString subSystem, QString name, Type type, QDateTime initValue, const 
     description_(description)
 {
     setValue(initValue);
+}
+
+void Tag::setEnumValues(const EnumMap &map)
+{
+    if(type_ != eInt)
+        return;
+    for(auto &[key, value] : map)
+    {
+        enumValues_[key] = value;
+    }
 }
 
 void Tag::setValue(double aValue, qint64 msSinceEpoc)
@@ -258,6 +270,13 @@ QDateTime Tag::getTimeValue() const
     return QDateTime::fromMSecsSinceEpoch(timeValue_);
 }
 
+QString Tag::enumValue(int value) const
+{
+    if(enumValues_.contains(value))
+        return enumValues_.at(value);
+    return {};
+}
+
 void Tag::writeToXml(QXmlStreamWriter &aStream)
 {
     aStream.writeStartElement("tag");
@@ -430,6 +449,19 @@ const QJsonObject &Tag::toJson()
             jsonObject_.insert("value", doubleValue_);
             break;
         case eInt:
+            if(!enumValues_.empty())
+            {
+                auto transform = [](const auto& value)
+                {
+                    //auto &[key, value] = static_cast<stvalue;
+                    QJsonObject obj;
+                    obj.insert("key", value.first);
+                    obj.insert("value", value.second);
+                    return QJsonValue(obj);
+                };
+
+                jsonObject_.insert("enumvalues", util::json::toJsonArray(enumValues_, transform));
+            }
             jsonObject_.insert("value", intValue_);
             break;
         case eBool:
