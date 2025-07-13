@@ -23,8 +23,6 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QDateTime>
 #include <QJsonObject>
 
-class QXmlStreamReader;
-class QXmlStreamWriter;
 class TagSocket;
 
 
@@ -81,8 +79,6 @@ public:
     QString enumValue(int value) const;
 
     // other
-    void writeToXml(QXmlStreamWriter &stream);
-    static Tag* createFromXml(const QXmlStreamReader &reader);
     static Type typeFromString(const QString &typeString);
     static Type typeMatchTagSocket(const TagSocket *tagsocket);
     static QString toString(Type type);

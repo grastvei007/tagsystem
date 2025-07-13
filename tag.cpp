@@ -16,10 +16,6 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tag.h"
 #include "tagsocket.h"
 
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-#include <QXmlStreamAttributes>
-
 #include "util/json.h"
 
 Tag::Tag(QObject *parent) : QObject(parent)
@@ -275,64 +271,6 @@ QString Tag::enumValue(int value) const
     if(enumValues_.contains(value))
         return enumValues_.at(value);
     return {};
-}
-
-void Tag::writeToXml(QXmlStreamWriter &aStream)
-{
-    aStream.writeStartElement("tag");
-    aStream.writeAttribute("subsystem", subSystem_);
-    aStream.writeAttribute("name", name_);
-    aStream.writeAttribute("timestamp", QString::number(timeStamp_));
-    aStream.writeAttribute("type", getTypeStr());
-    if(type_ == eDouble)
-        aStream.writeAttribute("value", QString::number(doubleValue_));
-    else if(type_ == eInt)
-        aStream.writeAttribute("value", QString::number(intValue_));
-    else if(type_ == eBool)
-        aStream.writeAttribute("value", (boolValue_) ? "1" : "0");
-    else if(type_ == eString)
-        aStream.writeAttribute("value", stringValue_);
-    else if(type_ == eTime)
-        aStream.writeAttribute("value", QString::number(timeValue_));
-    else
-        Q_UNREACHABLE(); ///< unhandled tag type.
-    aStream.writeAttribute("description", description_);
-
-    aStream.writeEndElement();
-}
-
-
-Tag* Tag::createFromXml(const QXmlStreamReader &aReader)
-{
-    QString sub = aReader.attributes().value("subsystem").toString();
-    QString name = aReader.attributes().value("name").toString();
-    QString type = aReader.attributes().value("type").toString();
-    QString val = aReader.attributes().value("value").toString();
-    QString description = aReader.attributes().value("description").toString();
-
-    Tag *tag = nullptr;
-    if(type == "Double")
-    {
-        tag = new Tag(sub, name, eDouble, val.toDouble(), description);
-    }
-    else if(type == "Int")
-    {
-        tag = new Tag(sub, name, eInt, val.toInt(), description);
-    }
-    else if(type == "Bool")
-    {
-        tag = new Tag(sub,name, eBool, (val.toInt() == 1) ? true : false, description);
-    }
-    else if(type == "String")
-    {
-        tag = new Tag(sub, name, eString, val, description);
-    }
-    else if(typeFromString(type) == eTime)
-    {
-        tag = new Tag(sub, name, eTime, QDateTime::fromMSecsSinceEpoch(val.toLongLong()), description);
-    }
-
-    return tag;
 }
 
 Tag::Type Tag::typeMatchTagSocket(const TagSocket *tagsocket)
