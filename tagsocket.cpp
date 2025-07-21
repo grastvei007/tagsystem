@@ -145,7 +145,8 @@ bool TagSocket::hookupTag(Tag *aTag)
         {
             tag_ = aTag;
         }
-        return false;
+        else
+            return false;
     }
     else if(type_ == eString)
     {
