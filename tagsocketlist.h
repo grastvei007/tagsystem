@@ -22,6 +22,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QMap>
 
 class TagSocket;
+class QJsonArray;
 
 
 class TAGSYSTEMSHARED_EXPORT TagSocketList : public QObject
@@ -45,6 +46,7 @@ public:
     void setApplicationName(QString aName); ///< set the appplication name, used in path for config files.
     void setAutoSave();
 
+    QJsonArray toJsonArray() const;
 signals:
     void tagSocketAdded();
     void tagSocketRemoved();

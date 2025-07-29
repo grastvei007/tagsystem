@@ -103,6 +103,17 @@ void TagSocketList::setAutoSave()
     autoSave_ = true;
 }
 
+QJsonArray TagSocketList::toJsonArray() const
+{
+    QJsonArray tagsocketArray;
+
+    for(const auto &tagsocket : tagSocketList_)
+    {
+        tagsocketArray.push_back(tagsocket->toJson());
+    }
+    return tagsocketArray;
+}
+
 void TagSocketList::saveBindingList()
 {
 #ifdef __linux__
@@ -131,12 +142,7 @@ void TagSocketList::saveBindingList()
         return;
     }
 
-    QJsonArray tagsocketArray;
-
-    for(auto &tagsocket : tagSocketList_)
-    {
-        tagsocketArray.push_back(tagsocket->toJson());
-    }
+    QJsonArray tagsocketArray = toJsonArray();
 
     QJsonObject obj;
     obj.insert("tagsocketbinding", tagsocketArray);
