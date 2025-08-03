@@ -67,14 +67,6 @@ void TagSelectView::onSelectClicked(bool)
 {
     mSelectedTag = ui->mTableview->getSelectedTag();
 
-   // QModelIndex idx = mItemSelectionModel->currentIndex();
-   /* if(!list.isEmpty())
-    {
-        QModelIndex idx = list.first();
-        mSelectedTag = TagList::sGetInstance().getTagByIndex(idx.row());
-
-    }*/
-
     if(mSelectedTag)
         emit accept();
     else    // nothing selected.
