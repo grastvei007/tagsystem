@@ -23,6 +23,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "taglisttablemodel.h"
 #include "tag.h"
 #include "taglist.h"
+#include "ui/tagtypesortfilterproxymodel.h"
 
 TagSelectView::TagSelectView(QWidget *parent) :
     QDialog(parent),
@@ -33,8 +34,12 @@ TagSelectView::TagSelectView(QWidget *parent) :
 
     mTagListTableModel.reset(new TagListTableModel());
     mItemSelectionModel.reset(new QItemSelectionModel());
+    tagListSortFilterProxyModel_ = std::make_unique<TagTypeSortFilterProxyModel>(this);
 
-    ui->mTableview->setModel(mTagListTableModel.get());
+    tagListSortFilterProxyModel_->setSourceModel(mTagListTableModel.get());
+
+    ui->mTableview->setModel(tagListSortFilterProxyModel_.get());
+    ui->mTableview->setSortingEnabled(true);
     connect(ui->mCancel, &QPushButton::clicked, this, &TagSelectView::onCancelClicked);
     connect(ui->mSelect, &QPushButton::clicked, this, &TagSelectView::onSelectClicked);
 
@@ -47,6 +52,10 @@ TagSelectView::~TagSelectView()
     delete ui;
 }
 
+void TagSelectView::setFilterTagTypeCompatibleWithTagSocketType(TagSocket::Type type)
+{
+    tagListSortFilterProxyModel_->setFilterTagTypeCompatibleWithTagSocketType(type);
+}
 
 void TagSelectView::onCancelClicked(bool)
 {

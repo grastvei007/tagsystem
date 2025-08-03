@@ -26,8 +26,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
+#include "tagsocket.h"
+
 class Tag;
 class TableView;
+class TagTypeSortFilterProxyModel;
 
 namespace Ui {
 class TagSelectView;
@@ -41,6 +44,8 @@ public:
     explicit TagSelectView(QWidget *parent = 0);
     ~TagSelectView();
 
+    void setFilterTagTypeCompatibleWithTagSocketType(TagSocket::Type type);
+
     Tag* getSelectedTag() const;
 
 private slots:
@@ -53,7 +58,7 @@ private:
     std::unique_ptr<TagListTableModel> mTagListTableModel;
     Tag *mSelectedTag;
     std::unique_ptr<QItemSelectionModel> mItemSelectionModel;
-   // std::unique_ptr<TableView> mTableView;
+   std::unique_ptr<TagTypeSortFilterProxyModel> tagListSortFilterProxyModel_;
 };
 
 
