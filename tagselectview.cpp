@@ -102,9 +102,11 @@ Tag* TableView::getSelectedTag()
 {
     Tag* tag = nullptr;
     auto idx = currentIndex();
-    if(idx.isValid())
+    auto index = model()->index(idx.row(), TagListTableModel::eTagName);
+    auto tagName = model()->data(index).toString();
+    if(!tagName.isEmpty())
     {
-        tag = TagList::sGetInstance().getTagByIndex(idx.row());
+        tag = TagList::sGetInstance().findByTagName(tagName);
     }
 
     return tag;
