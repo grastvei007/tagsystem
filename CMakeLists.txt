@@ -49,7 +49,11 @@ qt_add_library(tagsystem SHARED
     util/json.h
     util/json.cpp
     util/path.h
+    util/util.h
+    util/util.cpp
 
+    ui/tagtypesortfilterproxymodel.h
+    ui/tagtypesortfilterproxymodel.cpp
 )
 
 target_link_libraries(tagsystem Qt6::Core)
