@@ -20,6 +20,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QObject>
 #include <QMap>
 #include <QVector>
+#include <vector>
 
 #include "tag.h"
 
@@ -41,6 +42,7 @@ public:
 
     Tag* findByTagName(const QString &fullName);
     Tag* findByTagName(const QString &subsystem, const QString &name);
+    std::vector<Tag *> findTagsInSubsystem(const QString &subsystem) const;
 
     Tag* getTagByIndex(int aIndex);
     const QStringList& subsystems();
