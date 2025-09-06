@@ -134,6 +134,19 @@ Tag *TagList::findByTagName(const QString &subsystem, const QString &name)
     return findByTagName(QString("%1.%2").arg(subsystem, name));
 }
 
+std::vector<Tag *> TagList::findTagsInSubsystem(const QString &subsystem) const
+{
+    std::vector<Tag *> result;
+
+    for (Tag *tag : tags_)
+    {
+        if (tag->getSubsystem() == subsystem)
+            result.push_back(tag);
+    }
+
+    return result;
+}
+
 Tag* TagList::getTagByIndex(int aIndex)
 {
     return tags_.at(aIndex);
