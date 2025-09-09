@@ -55,6 +55,7 @@ Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Ty
     subsystems_.push_back(aSubSystem);
     qDebug() << "Create tag: " << tag->getFullName() << " (" << tags_.size() << ")";
     emit tagCreated(tags_.count());
+    emit tagValueChanged(tag);
     return tag;
 }
 
@@ -117,6 +118,7 @@ Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type
 
     qDebug() << "Create tag: " << tag->getFullName() << " (" << tags_.size() << ")";
     emit tagCreated(tags_.count());
+    emit tagValueChanged(tag);
     return tag;
 }
 
