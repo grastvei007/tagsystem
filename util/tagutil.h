@@ -3,16 +3,20 @@
 
 #include <utility>
 #include <QString>
+#include <QList>
 
 namespace util::tag
 {
-std::pair<QString, QString> splitFullName(const QString &fullName)
+inline std::pair<QString, QString> splitFullName(const QString &fullName)
 {
-    QString subsystem = fullName.split(".").first();
-    QString name = fullName.split(".").last();
-    return std::pair<QString, QString>(subsystem, name);
+    auto list = fullName.split(".");
+    return std::pair<QString, QString>(list.first(), list.last());
 }
 
+inline QString fullName(const QString& subsystem, const QString& name)
+{
+    return QString("%1.%2").arg(subsystem, name);
+}
 
 } // end namespace
 
