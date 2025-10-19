@@ -378,24 +378,32 @@ TagSocket::Type TagSocket::typeMatchingTag(const Tag *tag)
     Q_UNREACHABLE();
 }
 
-void TagSocket::onTagValueChanged(Tag* aTag)
+void TagSocket::onTagValueChanged(Tag* tag)
 {
     if(type_ == eDouble)
     {
-        emit valueChanged(aTag->getDoubleValue());
+        emit valueChanged(tag->getDoubleValue());
     }
     else if(type_ == eBool)
     {
-        emit valueChanged(aTag->getBoolValue());
+        emit valueChanged(tag->getBoolValue());
     }
     else if(type_ == eInt)
     {
-        emit valueChanged(aTag->getIntValue());
+        if(tag->getType() == Tag::eBool)
+        {
+            int value = tag->getBoolValue();
+            emit valueChanged(value);
+        }
+        else
+        {
+            emit valueChanged(tag->getIntValue());
+        }
     }
     else if(type_ == eString)
-        emit valueChanged(aTag->getStringValue());
+        emit valueChanged(tag->getStringValue());
     else if(type_ == eTime)
-        emit valueChanged(tag_->getTimeValue());
+        emit valueChanged(tag->getTimeValue());
     else
         Q_UNREACHABLE();
 
