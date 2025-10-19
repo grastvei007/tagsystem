@@ -188,6 +188,22 @@ bool TagSocket::hookupTag(QString aTagSubsytem, QString aTagName)
     return false;
 }
 
+bool TagSocket::disconnectTag()
+{
+    if(isWaitingForTag_)
+    {
+        disconnect(&TagList::sGetInstance(), &TagList::tagCreated, this, &TagSocket::onTagCreated);
+    }
+    isWaitingForTag_ = false;
+    tagName_ = {};
+    if(tag_)
+    {
+        disconnect(tag_, &Tag::valueChanged, this, &TagSocket::onTagValueChanged);
+        tag_ = nullptr;
+    }
+    return true;
+}
+
 bool TagSocket::isHookedUp() const
 {
     return tag_;

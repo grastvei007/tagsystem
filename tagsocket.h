@@ -45,6 +45,7 @@ public:
 
     bool hookupTag(Tag *aTag);
     bool hookupTag(QString aTagSubsytem, QString aTagName);
+    bool disconnectTag();
     bool isHookedUp() const;
     bool isWaitingForTag() const;
 
