@@ -18,12 +18,12 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 #include <QWebSocket>
-#include <QtNetwork>
 #include <QTimer>
 #include <QDebug>
 
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QSettings>
 
 #include "clientinformation.h"
 #include "util/json.h"
@@ -39,20 +39,20 @@ int TagList::getNumberOfTags() const
     return tagByName_.size();
 }
 
-Tag* TagList::createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType)
+Tag* TagList::createTag(const QString &subSystem, const QString &name, Tag::Type type)
 {
-    Tag *tag = findByTagName(QString("%1.%2").arg(aSubSystem, aName));
+    Tag *tag = findByTagName(QString("%1.%2").arg(subSystem, name));
     if(tag)
     {
         return tag;
     }
     // tag does not exist, create it.
-    tag = new Tag(aSubSystem, aName, aType);
+    tag = new Tag(subSystem, name, type);
     tagByName_[tag->getFullName()] = tag;
     tags_.push_back(tag);
     connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
     connect(tag, &Tag::valueChanged, this, &TagList::onTagValueChanged);
-    subsystems_.push_back(aSubSystem);
+    subsystems_.push_back(subSystem);
     qDebug() << "Create tag: " << tag->getFullName() << " (" << tags_.size() << ")";
     emit tagCreated(tags_.count());
     emit tagValueChanged(tag);
@@ -149,9 +149,9 @@ std::vector<Tag *> TagList::findTagsInSubsystem(const QString &subsystem) const
     return result;
 }
 
-Tag* TagList::getTagByIndex(int aIndex)
+Tag* TagList::getTagByIndex(int index)
 {
-    return tags_.at(aIndex);
+    return tags_.at(index);
 }
 
 const QStringList &TagList::subsystems()
@@ -184,13 +184,13 @@ QJsonArray TagList::toJson(bool onlyUpdated) const
     return array;
 }
 
-void TagList::connectToServer(const QString &aAdress, qint16 aPort)
+void TagList::connectToServer(const QString &adress, qint16 port)
 {
     if(clientName_.isEmpty())
         qFatal("Set client name before connecting to server..");
-    adress_ = aAdress;
-    port_ = aPort;
-    QUrl url(QString("ws://%1:%2").arg(aAdress, QString::number(aPort)));
+    adress_ = adress;
+    port_ = port;
+    QUrl url(QString("ws://%1:%2").arg(adress, QString::number(port)));
     qDebug() << "Connect to: " << url;
     webSocket_ = new QWebSocket;
     connect(webSocket_, &QWebSocket::connected, this, &TagList::onConnected);
@@ -233,9 +233,9 @@ void TagList::reconnect()
 }
 
 
-void TagList::setClientName(const QString &aName)
+void TagList::setClientName(const QString &name)
 {
-    clientName_ = aName;
+    clientName_ = name;
 }
 
 void TagList::onError()
@@ -301,9 +301,7 @@ void TagList::onConnected()
     webSocket_->sendTextMessage(cl.getInfo());
 
     connect(webSocket_, &QWebSocket::binaryMessageReceived, this, &TagList::onBinaryDataRecieved);
-   // QByteArray data;
-   // toXml(data);
-   // mWebSocket->sendBinaryMessage(data);
+
     if(!tagSyncTimer_)
     {
         tagSyncTimer_ = new QTimer(this);
@@ -329,9 +327,9 @@ void TagList::onDisconnected()
  *
  * Recieve list of tags to create or update.
  */
-void TagList::onBinaryDataRecieved(QByteArray aMsg)
+void TagList::onBinaryDataRecieved(QByteArray msg)
 {
-    auto document = QJsonDocument::fromJson(aMsg);
+    auto document = QJsonDocument::fromJson(msg);
     const auto array = document.array();
 
     for (const auto &jsonRef : array)
@@ -368,9 +366,9 @@ void TagList::syncTags()
  *
  * Handle update if connected.
  */
-void TagList::onTagValueChanged(Tag *aTag)
+void TagList::onTagValueChanged(Tag *tag)
 {
-    int index = tags_.indexOf(aTag);
+    int index = tags_.indexOf(tag);
     emit valueChangedAtIndex(index);
 }
 

@@ -21,13 +21,13 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QJsonObject>
 
 
-TagSocket* TagSocket::createTagSocket(QString aSubSystem, QString aName, TagSocket::Type aType)
+TagSocket* TagSocket::createTagSocket(QString subSystem, QString name, TagSocket::Type type)
 {
-    QString fullname = QString("%1.%2").arg(aSubSystem, aName);
+    QString fullname = QString("%1.%2").arg(subSystem, name);
     TagSocket *tagsocket = TagSocketList::sGetInstance().getTagSocketByName(fullname);
     if(tagsocket)
         return tagsocket;
-    return new TagSocket(aSubSystem, aName, aType);
+    return new TagSocket(subSystem, name, type);
 }
 
 TagSocket *TagSocket::createFromJson(const QJsonObject &json)
@@ -50,10 +50,10 @@ TagSocket *TagSocket::createFromJson(const QJsonObject &json)
     return tagsocket;
 }
 
-TagSocket::TagSocket(QString aSubSystem, QString aName, Type aType) :
-    subSystem_(aSubSystem),
-    name_(aName),
-    type_(aType)
+TagSocket::TagSocket(QString subSystem, QString name, Type type) :
+    subSystem_(subSystem),
+    name_(name),
+    type_(type)
 {
     TagSocketList::sGetInstance().addTagSocket(this);
 }
@@ -118,47 +118,47 @@ void TagSocket::setScaleValue(double scale)
     scaleValue_ = scale;
 }
 
-bool TagSocket::hookupTag(Tag *aTag)
+bool TagSocket::hookupTag(Tag *tag)
 {
-    if(!aTag)
+    if(!tag)
         return false;
 
     if(type_ == eDouble)
     {
-        if(aTag->getType() != Tag::eDouble)
+        if(tag->getType() != Tag::eDouble)
             return false;
-        tag_ = aTag;
+        tag_ = tag;
     }
     else if(type_ == eBool)
     {
-        if(aTag->getType() != Tag::eBool)
+        if(tag->getType() != Tag::eBool)
             return false;
-        tag_ = aTag;
+        tag_ = tag;
     }
     else if(type_ == eInt)
     {
-        if(auto tagType = aTag->getType(); tagType == Tag::eInt)
+        if(auto tagType = tag->getType(); tagType == Tag::eInt)
         {
-            tag_ = aTag;
+            tag_ = tag;
         }
         else if(tagType == Tag::eBool)
         {
-            tag_ = aTag;
+            tag_ = tag;
         }
         else
             return false;
     }
     else if(type_ == eString)
     {
-        if(aTag->getType() != Tag::eString)
+        if(tag->getType() != Tag::eString)
             return false;
-        tag_ = aTag;
+        tag_ = tag;
     }
     else if(type_ == eTime)
     {
-        if(aTag->getType() != Tag::eTime)
+        if(tag->getType() != Tag::eTime)
             return false;
-        tag_ = aTag;
+        tag_ = tag;
     }
     else
         Q_UNREACHABLE();
@@ -175,9 +175,9 @@ bool TagSocket::hookupTag(Tag *aTag)
     return false;
 }
 
-bool TagSocket::hookupTag(QString aTagSubsytem, QString aTagName)
+bool TagSocket::hookupTag(QString tagSubsytem, QString tagName)
 {
-    tagName_ = QString("%1.%2").arg(aTagSubsytem, aTagName);
+    tagName_ = QString("%1.%2").arg(tagSubsytem, tagName);
     Tag *tag = TagList::sGetInstance().findByTagName(tagName_);
     if(tag)
         return hookupTag(tag);
@@ -221,37 +221,37 @@ void TagSocket::writeValue(double value)
 }
 
 
-void TagSocket::writeValue(bool aValue)
+void TagSocket::writeValue(bool value)
 {
     if(tag_)
-        tag_->setValue(aValue);
+        tag_->setValue(value);
 }
 
 
-void TagSocket::writeValue(int aValue)
+void TagSocket::writeValue(int value)
 {
     if(!tag_)
         return;
     if(type_ == eInt)
-        tag_->setValue(aValue);
+        tag_->setValue(value);
     else if(type_ == eBool)
     {
-        bool val = std::clamp(0, 1, aValue);
+        bool val = std::clamp(0, 1, value);
         tag_->setValue(val);
     }
 }
 
 
-void TagSocket::writeValue(QString aValue)
+void TagSocket::writeValue(QString value)
 {
     if(tag_)
-        tag_->setValue(aValue);
+        tag_->setValue(value);
 }
 
-void TagSocket::writeValue(QDateTime aValue)
+void TagSocket::writeValue(QDateTime value)
 {
     if(tag_)
-        tag_->setValue(aValue);
+        tag_->setValue(value);
 }
 
 
@@ -322,17 +322,17 @@ QJsonObject TagSocket::toJson() const
     return obj;
 }
 
-TagSocket::Type TagSocket::typeFromString(const QString &aTypeString)
+TagSocket::Type TagSocket::typeFromString(const QString &typeString)
 {
-    if(aTypeString == "Int")
+    if(typeString == "Int")
         return eInt;
-    else if(aTypeString == "Bool")
+    else if(typeString == "Bool")
         return eBool;
-    else if(aTypeString == "Double")
+    else if(typeString == "Double")
         return eDouble;
-    else if(aTypeString == "String")
+    else if(typeString == "String")
         return eString;
-    else if(aTypeString == "Time")
+    else if(typeString == "Time")
         return eTime;
     else
         Q_UNREACHABLE();

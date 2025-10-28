@@ -8,24 +8,24 @@
 
 ServerConnectWidget::ServerConnectWidget(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::ServerConnectWidget)
+    ui_(new Ui::ServerConnectWidget)
 {
-    ui->setupUi(this);
+    ui_->setupUi(this);
 
-    ui->port->setText("5000");
-    ui->adress->setText("127.0.0.1");
-    ui->autoConnect->setChecked(false);
+    ui_->port->setText("5000");
+    ui_->adress->setText("127.0.0.1");
+    ui_->autoConnect->setChecked(false);
 
     auto clientName = TagList::sGetInstance().clientName();
     if(!clientName.isEmpty())
     {
         QSettings settings("june", clientName);
         auto adress = settings.value("serverAdress", "localhost").toString();
-        ui->adress->setText(adress);
+        ui_->adress->setText(adress);
         auto port = settings.value("serverPort", 5000).toString();
-        ui->port->setText(port);
+        ui_->port->setText(port);
         auto autoConnect = settings.value("serverAutoConnect", false).toBool();
-        ui->autoConnect->setChecked(autoConnect);
+        ui_->autoConnect->setChecked(autoConnect);
     }
 
     connect(this, &QDialog::accepted, this, &ServerConnectWidget::onAccepted);
@@ -33,22 +33,22 @@ ServerConnectWidget::ServerConnectWidget(QWidget *parent) :
 
 ServerConnectWidget::~ServerConnectWidget()
 {
-    delete ui;
+    delete ui_;
 }
 
 QString ServerConnectWidget::adress() const
 {
-    return ui->adress->text();
+    return ui_->adress->text();
 }
 
 int ServerConnectWidget::port() const
 {
-    return ui->port->text().toInt();
+    return ui_->port->text().toInt();
 }
 
 bool ServerConnectWidget::autoConnect() const
 {
-    return ui->autoConnect->checkState() == Qt::CheckState::Checked;
+    return ui_->autoConnect->checkState() == Qt::CheckState::Checked;
 }
 
 void ServerConnectWidget::onAccepted()

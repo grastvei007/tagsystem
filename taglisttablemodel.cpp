@@ -20,7 +20,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "taglist.h"
 #include "tag.h"
 
-TagListTableModel::TagListTableModel(QObject *aParent) : QAbstractTableModel(aParent)
+TagListTableModel::TagListTableModel(QObject *parent) : QAbstractTableModel(parent)
 {
     connect(&TagList::sGetInstance(), &TagList::tagCreated, this, &TagListTableModel::onTagCreated);
     connect(&TagList::sGetInstance(), &TagList::valueChangedAtIndex, this, &TagListTableModel::onTagValueChanged);

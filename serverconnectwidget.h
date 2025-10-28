@@ -23,7 +23,7 @@ private slots:
     void onAccepted();
 
 private:
-    Ui::ServerConnectWidget *ui;
+    Ui::ServerConnectWidget *ui_;
 };
 
 #endif // SERVERCONNECTWIDGET_H

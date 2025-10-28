@@ -39,13 +39,13 @@ int TagSocketList::getNumberOfTagSockets() const
     return tagSocketList_.size();
 }
 
-bool TagSocketList::addTagSocket(TagSocket *aTagSocket)
+bool TagSocketList::addTagSocket(TagSocket *tagSocket)
 {
-    if(!aTagSocket)
+    if(!tagSocket)
         return false;
-    tagSocketList_.push_back(aTagSocket);
-    tagSocketByName_[aTagSocket->getFullName()] = aTagSocket;
-    connect(aTagSocket, qOverload<TagSocket*>(&TagSocket::valueChanged), this, &TagSocketList::tagSocketValueChanged);
+    tagSocketList_.push_back(tagSocket);
+    tagSocketByName_[tagSocket->getFullName()] = tagSocket;
+    connect(tagSocket, qOverload<TagSocket*>(&TagSocket::valueChanged), this, &TagSocketList::tagSocketValueChanged);
 
     if(autoSave_)
         onTagSocketAdded();
@@ -54,27 +54,27 @@ bool TagSocketList::addTagSocket(TagSocket *aTagSocket)
     return true;
 }
 
-void TagSocketList::removeTagSocket(TagSocket *aTagSocket)
+void TagSocketList::removeTagSocket(TagSocket *tagSocket)
 {
-    tagSocketByName_.remove(aTagSocket->getFullName());
-    tagSocketList_.removeAll(aTagSocket);
+    tagSocketByName_.remove(tagSocket->getFullName());
+    tagSocketList_.removeAll(tagSocket);
     emit tagSocketRemoved();
 }
 
 
-TagSocket* TagSocketList::getTagSocketByIndex(int aIndex)
+TagSocket* TagSocketList::getTagSocketByIndex(int index)
 {
-    if(aIndex < 0 || aIndex > tagSocketList_.size())
+    if(index < 0 || index > tagSocketList_.size())
         return nullptr;
 
-    return tagSocketList_.at(aIndex);
+    return tagSocketList_.at(index);
 }
 
-TagSocket *TagSocketList::getTagSocketByName(const QString &aName) const
+TagSocket *TagSocketList::getTagSocketByName(const QString &name) const
 {
-    if(tagSocketByName_.contains(aName))
+    if(tagSocketByName_.contains(name))
     {
-        return tagSocketByName_[aName];
+        return tagSocketByName_[name];
     }
     return nullptr;
 }
@@ -93,9 +93,9 @@ TagSocket *TagSocketList::findTagSocketByName(const QString &subsystem, const QS
  * The name is used in the path for save and load tagsocket
  * binding list.
  */
-void TagSocketList::setApplicationName(QString aName)
+void TagSocketList::setApplicationName(QString name)
 {
-    applicationName_ = aName;
+    applicationName_ = name;
 }
 
 void TagSocketList::setAutoSave()

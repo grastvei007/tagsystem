@@ -53,11 +53,11 @@ private slots:
     void onSelectClicked(bool);
 
 private:
-    Ui::TagSelectView *ui;
+    Ui::TagSelectView *ui_;
 
-    std::unique_ptr<TagListTableModel> mTagListTableModel;
-    Tag *mSelectedTag;
-    std::unique_ptr<QItemSelectionModel> mItemSelectionModel;
+    std::unique_ptr<TagListTableModel> tagListTableModel_;
+    Tag *selectedTag_;
+    std::unique_ptr<QItemSelectionModel> itemSelectionModel_;
    std::unique_ptr<TagTypeSortFilterProxyModel> tagListSortFilterProxyModel_;
 };
 

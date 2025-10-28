@@ -25,28 +25,28 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "ui_tagsocketlistview.h"
 
 TagSocketListView::TagSocketListView(QWidget *parent) : QWidget(parent),
-    mUi(new Ui::TagSocketListView)
+    ui_(new Ui::TagSocketListView)
 {
-    mUi->setupUi(this);
+    ui_->setupUi(this);
 
-    mTagSocketListTableModel = new TagSocketListTableModel();
-    mUi->mTable->setModel(mTagSocketListTableModel);
-    mUi->mTable->horizontalHeader()->setStretchLastSection(true);
-    mUi->mTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tagSocketListTableModel_ = new TagSocketListTableModel();
+    ui_->mTable->setModel(tagSocketListTableModel_);
+    ui_->mTable->horizontalHeader()->setStretchLastSection(true);
+    ui_->mTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    connect(mUi->mTable, &QTableView::doubleClicked, this, &TagSocketListView::onDoubleClick);
+    connect(ui_->mTable, &QTableView::doubleClicked, this, &TagSocketListView::onDoubleClick);
 
-    connect(mUi->mClose, &QPushButton::clicked, this, &TagSocketListView::onCloseClicked);
-    connect(mUi->mOk, &QPushButton::clicked, this, &TagSocketListView::onOkClicked);
-    connect(mUi->mSave, &QPushButton::clicked, this, &TagSocketListView::onSaveClicked);
+    connect(ui_->mClose, &QPushButton::clicked, this, &TagSocketListView::onCloseClicked);
+    connect(ui_->mOk, &QPushButton::clicked, this, &TagSocketListView::onOkClicked);
+    connect(ui_->mSave, &QPushButton::clicked, this, &TagSocketListView::onSaveClicked);
 }
 
 
 
 
-void TagSocketListView::onDoubleClick(const QModelIndex &aIndex)
+void TagSocketListView::onDoubleClick(const QModelIndex &index)
 {
-    if(aIndex.column() != TagSocketListTableModel::eTagName)
+    if(index.column() != TagSocketListTableModel::eTagName)
         return;
 
     TagSelectView tagSelect;
@@ -54,26 +54,26 @@ void TagSocketListView::onDoubleClick(const QModelIndex &aIndex)
     if(tagSelect.exec() == QDialog::Accepted)
     {        Tag *tag = tagSelect.getSelectedTag();
         if(tag)
-            mUi->mTable->model()->setData(aIndex, tag->getFullName(), Qt::EditRole);
+            ui_->mTable->model()->setData(index, tag->getFullName(), Qt::EditRole);
 
     }
 
  }
 
 
-void TagSocketListView::onCloseClicked(bool /*aChecked*/)
+void TagSocketListView::onCloseClicked(bool /*checked*/)
 {
     hide();
 }
 
 
-void TagSocketListView::onOkClicked(bool /*aChecked*/)
+void TagSocketListView::onOkClicked(bool /*checked*/)
 {
 
 }
 
 
-void TagSocketListView::onSaveClicked(bool /*aCkecked*/)
+void TagSocketListView::onSaveClicked(bool /*ckecked*/)
 {
-    mTagSocketListTableModel->saveTagSocketBindings();
+    tagSocketListTableModel_->saveTagSocketBindings();
 }

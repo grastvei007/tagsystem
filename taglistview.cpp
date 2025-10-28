@@ -26,11 +26,11 @@ TagListView::TagListView(QWidget *parent) : QWidget(parent),
 {
     ui_->setupUi(this);
 
-    mTableView.reset(ui_->tableView);
-    mTableView->setSortingEnabled(true);
-    mTableView->horizontalHeader()->setSectionsClickable(true);
-    mTableView->horizontalHeader()->setStretchLastSection(true);
-    mTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tableView_.reset(ui_->tableView);
+    tableView_->setSortingEnabled(true);
+    tableView_->horizontalHeader()->setSectionsClickable(true);
+    tableView_->horizontalHeader()->setStretchLastSection(true);
+    tableView_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
 
     auto updateComboBoxItem = [this](int){
@@ -50,11 +50,11 @@ TagListView::TagListView(QWidget *parent) : QWidget(parent),
     tagListSortFilterProxyModel_ = std::make_unique<QSortFilterProxyModel>(this);
     tagListSortFilterProxyModel_->setFilterKeyColumn(TagListTableModel::eTagName);
 
-    mTagListTableModel = new TagListTableModel();
+    tagListTableModel_ = new TagListTableModel();
 
-    tagListSortFilterProxyModel_->setSourceModel(mTagListTableModel);
-    mTableView->setModel(tagListSortFilterProxyModel_.get());
-    mTableView->setSortingEnabled(true);
+    tagListSortFilterProxyModel_->setSourceModel(tagListTableModel_);
+    tableView_->setModel(tagListSortFilterProxyModel_.get());
+    tableView_->setSortingEnabled(true);
 
 }
 

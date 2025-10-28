@@ -36,14 +36,14 @@ public:
 
 
 private slots:
-    void onDoubleClick(const QModelIndex &aIndex);
-    void onCloseClicked(bool aChecked);
-    void onOkClicked(bool aChecked);
-    void onSaveClicked(bool aCkecked);
+    void onDoubleClick(const QModelIndex &index);
+    void onCloseClicked(bool checked);
+    void onOkClicked(bool checked);
+    void onSaveClicked(bool ckecked);
 
 private:
-    Ui::TagSocketListView *mUi;
-    TagSocketListTableModel *mTagSocketListTableModel;
+    Ui::TagSocketListView *ui_;
+    TagSocketListTableModel *tagSocketListTableModel_;
 };
 
 #endif // TAGSOCKETLISTVIEW_H

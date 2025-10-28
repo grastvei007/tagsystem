@@ -39,8 +39,8 @@ private slots:
     void onCurrentTextChanged(const QString &text);
 private:
     Ui::TagListView *ui_;
-    TagListTableModel *mTagListTableModel;
-    std::unique_ptr<QTableView> mTableView;
+    TagListTableModel *tagListTableModel_;
+    std::unique_ptr<QTableView> tableView_;
     std::unique_ptr<QSortFilterProxyModel> tagListSortFilterProxyModel_;
 
     bool blockUpdate_ = false;

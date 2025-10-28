@@ -20,8 +20,8 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QNetworkInterface>
 #include <QStringList>
 
-ClientInformation::ClientInformation(const QString &aName) :
-    clientName_(aName)
+ClientInformation::ClientInformation(const QString &name) :
+    clientName_(name)
 {
 
 }

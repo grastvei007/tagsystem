@@ -27,21 +27,21 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 TagSelectView::TagSelectView(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::TagSelectView),
-    mSelectedTag(nullptr)
+    ui_(new Ui::TagSelectView),
+    selectedTag_(nullptr)
 {
-    ui->setupUi(this);
+    ui_->setupUi(this);
 
-    mTagListTableModel.reset(new TagListTableModel());
-    mItemSelectionModel.reset(new QItemSelectionModel());
+    tagListTableModel_.reset(new TagListTableModel());
+    itemSelectionModel_.reset(new QItemSelectionModel());
     tagListSortFilterProxyModel_ = std::make_unique<TagTypeSortFilterProxyModel>(this);
 
-    tagListSortFilterProxyModel_->setSourceModel(mTagListTableModel.get());
+    tagListSortFilterProxyModel_->setSourceModel(tagListTableModel_.get());
 
-    ui->mTableview->setModel(tagListSortFilterProxyModel_.get());
-    ui->mTableview->setSortingEnabled(true);
-    connect(ui->mCancel, &QPushButton::clicked, this, &TagSelectView::onCancelClicked);
-    connect(ui->mSelect, &QPushButton::clicked, this, &TagSelectView::onSelectClicked);
+    ui_->mTableview->setModel(tagListSortFilterProxyModel_.get());
+    ui_->mTableview->setSortingEnabled(true);
+    connect(ui_->mCancel, &QPushButton::clicked, this, &TagSelectView::onCancelClicked);
+    connect(ui_->mSelect, &QPushButton::clicked, this, &TagSelectView::onSelectClicked);
 
 
   //  connect( ui->mTableView, &QTableView::selectionChanged, this, &TagSelectView::onCurrentRowChanged);
@@ -49,7 +49,7 @@ TagSelectView::TagSelectView(QWidget *parent) :
 
 TagSelectView::~TagSelectView()
 {
-    delete ui;
+    delete ui_;
 }
 
 void TagSelectView::setFilterTagTypeCompatibleWithTagSocketType(TagSocket::Type type)
@@ -65,9 +65,9 @@ void TagSelectView::onCancelClicked(bool)
 
 void TagSelectView::onSelectClicked(bool)
 {
-    mSelectedTag = ui->mTableview->getSelectedTag();
+    selectedTag_ = ui_->mTableview->getSelectedTag();
 
-    if(mSelectedTag)
+    if(selectedTag_)
         emit accept();
     else    // nothing selected.
         emit reject();
@@ -76,7 +76,7 @@ void TagSelectView::onSelectClicked(bool)
 
 Tag* TagSelectView::getSelectedTag() const
 {
-    return mSelectedTag;
+    return selectedTag_;
 }
 
 

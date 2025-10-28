@@ -33,17 +33,17 @@ public:
 
     int getNumberOfTagSockets() const;
 
-    TagSocket* getTagSocketByIndex(int aIndex);
-    TagSocket* getTagSocketByName(const QString& aName) const;
+    TagSocket* getTagSocketByIndex(int index);
+    TagSocket* getTagSocketByName(const QString& name) const;
     TagSocket* findTagSocketByName(const QString& subsystem, const QString& name) const;
 
-    bool addTagSocket(TagSocket *aTagSocket);
-    void removeTagSocket(TagSocket *aTagSocket);
+    bool addTagSocket(TagSocket *tagSocket);
+    void removeTagSocket(TagSocket *tagSocket);
 
     void saveBindingList();
     void loadBindingList();
 
-    void setApplicationName(QString aName); ///< set the appplication name, used in path for config files.
+    void setApplicationName(QString name); ///< set the appplication name, used in path for config files.
     void setAutoSave();
 
     QJsonArray toJsonArray() const;

@@ -36,25 +36,25 @@ public:
 
     int getNumberOfTags() const;
 
-    Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType);
-    Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue);
-    Tag* createTag(const QString &aSubSystem, const QString &aName, Tag::Type aType, QVariant initValue, const QString& description);
+    Tag* createTag(const QString &subSystem, const QString &name, Tag::Type type);
+    Tag* createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue);
+    Tag* createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue, const QString& description);
 
     Tag* findByTagName(const QString &fullName);
     Tag* findByTagName(const QString &subsystem, const QString &name);
     std::vector<Tag *> findTagsInSubsystem(const QString &subsystem) const;
 
-    Tag* getTagByIndex(int aIndex);
+    Tag* getTagByIndex(int index);
     const QStringList& subsystems();
     const QString& clientName() const;
     const QString& adress() const;
 
     QJsonArray toJson(bool onlyUpdated = false) const;
 
-    void connectToServer(const QString &aAdress, qint16 aPort);
+    void connectToServer(const QString &adress, qint16 port);
     void disconnectFromServer();
     bool tryToAutoConnect();
-    void setClientName(const QString &aName);
+    void setClientName(const QString &name);
     void reconnect();
 
     // server sync
@@ -65,7 +65,7 @@ signals:
     void valueChangedAtIndex(int);
     void tagCreated(int); // index
 
-    void error(QString aError);
+    void error(QString error);
     void serverDisconnected();
     void connected();
 
@@ -74,8 +74,8 @@ signals:
 private slots:
     void onConnected();
     void onDisconnected();
-    void onBinaryDataRecieved(QByteArray aMsg);
-    void onTagValueChanged(Tag *aTag);
+    void onBinaryDataRecieved(QByteArray msg);
+    void onTagValueChanged(Tag *tag);
 
     void syncTags();
 

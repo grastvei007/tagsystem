@@ -23,7 +23,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 class TAGSYSTEMSHARED_EXPORT ClientInformation
 {
 public:
-    ClientInformation(const QString &mName);
+    ClientInformation(const QString &name);
 
     QString getInfo() const;
 private:

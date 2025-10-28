@@ -37,14 +37,14 @@ public:
         eTime
     };
     ///< construct a new tagsocket.
-    static TagSocket* createTagSocket(QString aSubSystem, QString aName, Type aType);
+    static TagSocket* createTagSocket(QString subSystem, QString name, Type type);
     static TagSocket* createFromJson(const QJsonObject &json);
 
 
     ~TagSocket();
 
-    bool hookupTag(Tag *aTag);
-    bool hookupTag(QString aTagSubsytem, QString aTagName);
+    bool hookupTag(Tag *tag);
+    bool hookupTag(QString tagSubsytem, QString tagName);
     bool disconnectTag();
     bool isHookedUp() const;
     bool isWaitingForTag() const;
@@ -59,11 +59,11 @@ public:
 
     void setScaleValue(double scale); //< only for double socket
 
-    void writeValue(double aValue);
-    void writeValue(bool aValue);
-    void writeValue(int aValue);
-    void writeValue(QString aValue);
-    void writeValue(QDateTime aValue);
+    void writeValue(double value);
+    void writeValue(bool value);
+    void writeValue(int value);
+    void writeValue(QString value);
+    void writeValue(QDateTime value);
 
     bool readValue(double &rValue);
     bool readValue(bool &rValue);
@@ -73,7 +73,7 @@ public:
 
     QJsonObject toJson() const;
 
-    static Type typeFromString(const QString &aTypeString);
+    static Type typeFromString(const QString &typeString);
     static QString toString(const Type type);
     static Type typeMatchingTag(const Tag *tag);
 signals:
@@ -85,11 +85,11 @@ signals:
     void valueChanged(TagSocket*);
 
 private slots:
-    void onTagValueChanged(Tag* aTag);
+    void onTagValueChanged(Tag* tag);
     void onTagCreated(int index);
 
 private:
-    TagSocket(QString aSubSystem, QString aName, Type aType);
+    TagSocket(QString aSubSystem, QString name, Type type);
 
 private:
     Tag *tag_ = nullptr;
