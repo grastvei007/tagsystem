@@ -93,17 +93,14 @@ signals:
 public slots:
 
 private:
-    QString subSystem_ = QString();
-    QString name_ = QString();
+    QString subSystem_ = {};
+    QString name_ = {};
     Type type_ = Tag::eDouble;
-    QString description_ = QString();
+    QString description_ = {};
 
-    double doubleValue_ = 0.0;
-    int intValue_ = 0;
-    bool boolValue_ = false;
-    QString stringValue_ = QString();
+    // QTime is stored as qint64
+    QVariant value_;
 
-    qint64 timeValue_ = 0; ///< value for tag type time
     QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
     qint64 timeStamp_ = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc
 
