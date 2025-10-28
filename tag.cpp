@@ -17,6 +17,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tagsocket.h"
 
 #include "util/json.h"
+#include <QMetaType>
 
 Tag::Tag(QObject *parent) : QObject(parent)
 {
@@ -39,7 +40,7 @@ Tag::Tag(QString subSystem, QString name, Type type, QVariant initValue, const Q
     value_(initValue),
     description_(description)
 {
-    // setValue(initValue); ???
+    setValue(initValue);
 }
 
 void Tag::setEnumValues(const EnumMap &map)
@@ -52,10 +53,39 @@ void Tag::setEnumValues(const EnumMap &map)
     }
 }
 
-void Tag::setValue(double value, qint64 msSinceEpoc)
+void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 {
-    if(qFuzzyCompare(value, value_.toDouble()))
+    // validate value based on type
+    if(type_ == Tag::eDouble && value.metaType().id() == QMetaType::Double)
+    {
+        if(qFuzzyCompare(value.toDouble(), value_.toDouble()))
+            return;
+    }
+    else if(type_ == Tag::eInt && value.metaType().id() == QMetaType::Int)
+    {
+        if(value == value_)
+            return;
+    }
+    else if(type_ == Tag::eBool && value.metaType().id()  == QMetaType::Bool)
+    {
+        if(value == value_)
+            return;
+    }
+    else if(type_ == Tag::eString && value.metaType().id() == QMetaType::QString)
+    {
+        if(value == value_)
+            return;
+    }
+    else if(type_ == Tag::eTime && value.metaType().id() == QMetaType::LongLong)
+    {
+        if(value == value_)
+            return;
+    }
+    else
+    {
+        qWarning() << "Set invalid value type to tag";
         return;
+    }
 
     value_ = value;
     if(msSinceEpoc < 0)
@@ -65,74 +95,6 @@ void Tag::setValue(double value, qint64 msSinceEpoc)
     }
     else
         timeStamp_ = msSinceEpoc;
-    emit valueChanged(this);
-}
-
-
-void Tag::setValue(int value, qint64 msSinceEpoc)
-{
-    if(value == value_.toInt())
-        return;
-
-    value_ = value;
-    if(msSinceEpoc < 0)
-    {
-        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
-        isUpdated_ = true;
-    }
-    else
-        timeStamp_ = msSinceEpoc;
-    emit valueChanged(this);
-}
-
-
-void Tag::setValue(bool value, qint64 msSinceEpoc)
-{
-    if(value == value_.toBool())
-        return;
-
-    value_ = value;
-    if(msSinceEpoc < 0)
-    {
-        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
-        isUpdated_ = true;
-    }
-    else
-        timeStamp_ = msSinceEpoc;
-    emit valueChanged(this);
-}
-
-
-void Tag::setValue(QString value, qint64 msSinceEpoc)
-{
-    if(value == value)
-        return;
-
-    if(msSinceEpoc < 0)
-    {
-        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
-        isUpdated_ = true;
-    }
-    else
-        timeStamp_ = msSinceEpoc;
-    value_ = value;
-    emit valueChanged(this);
-}
-
-void Tag::setValue(QDateTime value, qint64 msSinceEpoc)
-{
-    qint64 msSinceEpoch = value.toMSecsSinceEpoch();
-    if(msSinceEpoch == value_)
-        return;
-    if(msSinceEpoc < 0)
-    {
-        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
-        isUpdated_ = true;
-    }
-    else
-        timeStamp_ = msSinceEpoc;
-
-    value_ = value;
     emit valueChanged(this);
 }
 

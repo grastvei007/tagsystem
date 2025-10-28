@@ -48,13 +48,8 @@ public:
     // config
     void setEnumValues(const EnumMap &map); // available if type is eInt
 
-
     // setters
-    void setValue(double value, qint64 msSinceEpoc=-1);
-    void setValue(int value, qint64 msSinceEpoc=-1);
-    void setValue(bool value, qint64 msSinceEpoc=-1);
-    void setValue(QString value, qint64 msSinceEpoc=-1);
-    void setValue(QDateTime value, qint64 msSinceEpoc=-1);
+    void setValue(QVariant value, qint64 msSinceEpoc = -1);
 
     // getters
     Type getType() const;
