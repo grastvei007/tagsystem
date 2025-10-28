@@ -43,11 +43,7 @@ public:
 
     Tag(QString subSystem, QString name, Type type);
 
-    Tag(QString subSystem, QString name, Type type, double initValue, const QString &description = QString());
-    Tag(QString subSystem, QString name, Type type, int initValue, const QString &description = QString());
-    Tag(QString subSystem, QString name, Type type, bool initValue, const QString &description = QString());
-    Tag(QString subSystem, QString name, Type type, QString initValue, const QString &description = QString());
-    Tag(QString subSystem, QString name, Type type, QDateTime initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, QVariant initValue, const QString &description = {});
 
     // config
     void setEnumValues(const EnumMap &map); // available if type is eInt

@@ -32,53 +32,14 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
 
 }
 
-Tag::Tag(QString subSystem, QString name, Tag::Type type, double initValue, const QString &description) :
+Tag::Tag(QString subSystem, QString name, Type type, QVariant initValue, const QString &description) :
     subSystem_(subSystem),
     name_(name),
     type_(type),
-    description_(description),
-    value_(initValue)
-{
-    setValue(initValue);
-}
-
-Tag::Tag(QString subSystem, QString name, Tag::Type type, int initValue, const QString &description) :
-    subSystem_(subSystem),
-    name_(name),
-    type_(type),
-    description_(description),
-    value_(initValue)
-{
-    setValue(initValue);
-}
-
-Tag::Tag(QString subSystem, QString name, Tag::Type type, bool initValue, const QString &description) :
-    subSystem_(subSystem),
-    name_(name),
-    type_(type),
-    description_(description),
-    value_(initValue)
-{
-    setValue(initValue);
-}
-
-Tag::Tag(QString subSystem, QString name, Tag::Type type, QString initValue, const QString &description) :
-    subSystem_(subSystem),
-    name_(name),
-    type_(type),
-    description_(description),
-    value_(initValue)
-{
-    setValue(initValue);
-}
-
-Tag::Tag(QString subSystem, QString name, Type type, QDateTime initValue, const QString &description) :
-    subSystem_(subSystem),
-    name_(name),
-    type_(type),
+    value_(initValue),
     description_(description)
 {
-    setValue(initValue);
+    // setValue(initValue); ???
 }
 
 void Tag::setEnumValues(const EnumMap &map)
