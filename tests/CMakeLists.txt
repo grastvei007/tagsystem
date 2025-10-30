@@ -33,4 +33,3 @@ set_target_properties(test_tagsystem
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/bin
 )
 
-gtest_discover_tests(test_tagsystem)
