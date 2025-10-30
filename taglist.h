@@ -60,6 +60,9 @@ public:
     // server sync
     Tag* UpdateOrCreateTag(const QJsonObject &json);
 
+    // for unittests, erase all tags.
+    void clear();
+
 signals:
     void tagValueChanged(Tag*);
     void valueChangedAtIndex(int);
