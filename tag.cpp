@@ -163,30 +163,40 @@ QString Tag::getTypeStr() const
 
 double Tag::getDoubleValue() const
 {
-    return value_.toDouble();
+    if(value_.metaType().id() == QMetaType::Double)
+        return value_.toDouble();
+    return 0.0;
 }
 
 
 int Tag::getIntValue() const
 {
-    return value_.toInt();
+    if(value_.metaType().id() == QMetaType::Int)
+        return value_.toInt();
+    return 0;
 }
 
 
 bool Tag::getBoolValue() const
 {
-    return value_.toBool();
+    if(value_.metaType().id() == QMetaType::Bool)
+        return value_.toBool();
+    return false;
 }
 
 
 QString Tag::getStringValue() const
 {
-    return value_.toString();
+    if(value_.metaType().id() == QMetaType::QString)
+        return value_.toString();
+    return {};
 }
 
 QDateTime Tag::getTimeValue() const
 {
-    return QDateTime::fromMSecsSinceEpoch(value_.toLongLong());
+    if(value_.metaType().id() == QMetaType::LongLong)
+        return QDateTime::fromMSecsSinceEpoch(value_.toLongLong());
+    return QDateTime::fromMSecsSinceEpoch(0);
 }
 
 QString Tag::enumValue(int value) const
