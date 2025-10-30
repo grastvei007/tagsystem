@@ -458,3 +458,15 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
         return createdTag;
     }
 }
+
+void TagList::clear()
+{
+    tagByName_.clear();
+    for(auto *tag : tags_)
+        tag->deleteLater();
+    tags_.clear();
+
+    isConnected_ = false;
+    initialTagBurstReceived_ = false;
+    subsystems_.clear();
+}
