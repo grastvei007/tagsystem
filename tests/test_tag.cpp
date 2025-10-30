@@ -5,7 +5,18 @@
 #include <tag.h>
 #include <taglist.h>
 
-TEST(TestTag, createTag)
+class TestTag : public ::testing::Test {
+protected:
+    void SetUp() override {
+
+    }
+
+    void TearDown() override {
+        TagList::sGetInstance().clear();
+    }
+};
+
+TEST_F(TestTag, createTag)
 {
     QString subsystem("testsubsystem");
     QString name("testname");
