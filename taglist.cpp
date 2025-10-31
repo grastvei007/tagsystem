@@ -393,31 +393,36 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
         break;
     }
     case Tag::eInt: {
+        Tag::EnumMap list;
+        if(json.contains("enumvalues"))
+        {
+            const auto array = json.value("enumvalues").toArray();
+            auto transform = [](const QJsonValue &value)
+            {
+                const QJsonObject &obj = value.toObject();
+                int key = obj.value("key").toInt();
+                QString str = obj.value("value").toString();
+                return std::pair<int, QString>{key, str};
+            };
+
+            for(const auto &elm : array)
+            {
+                list.insert(transform(elm));
+            }
+        }
         if (tag)
         {
-            if(json.contains("enumvalues"))
-            {
-                const auto array = json.value("enumvalues").toArray();
-                auto transform = [](const QJsonValue &value)
-                {
-                    QJsonObject obj = value.toObject();
-                    int key = obj.value("key").toInt();
-                    QString str = obj.value("value").toString();
-                    return std::pair<int, QString>{key, str};
-                };
-
-                Tag::EnumMap list;
-                for(const auto &elm : array)
-                {
-                    list.insert(transform(elm));
-                }
-                if(!list.empty())
-                    tag->setEnumValues(list);
-            }
             tag->setValue(value.toInt(), timestamp);
+            if(!list.empty())
+                tag->setEnumValues(list);
         }
         else
+        {
             createdTag = createTag(subsystem, name, Tag::eInt, value.toInt(), description);
+            if(!list.empty())
+                createdTag->setEnumValues(list);
+        }
+
         break;
     }
     case Tag::eBool: {
