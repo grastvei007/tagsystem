@@ -4,6 +4,9 @@
 #include <QDateTime>
 #include <QVariant>
 #include <QJsonObject>
+#include <QJsonArray>
+
+#include <map>
 
 #include <tag.h>
 #include <taglist.h>
@@ -17,20 +20,104 @@ protected:
     void TearDown() override {
         TagList::sGetInstance().clear();
     }
+
+    Tag* createIntTagWithValue(int value)
+    {
+        return TagList::sGetInstance().createTag(subsystem, name, type, value, desciption);
+    }
+
+    void setEnumNamesToTag(Tag *tag)
+    {
+        Tag::EnumMap map;
+        map.emplace(1, "one");
+        map.emplace(2, "two");
+        map.emplace(3, "three");
+        tag->setEnumValues(map);
+    }
+
+    void verifyEnumValuesArray(const QJsonArray &array)
+    {
+        EXPECT_EQ(array.size(), 3);
+
+        for(auto &ref : array)
+        {
+            const QJsonObject& enumValue = ref.toObject();
+            int key = enumValue.value("key").toInt();
+            if(key == 1)
+                EXPECT_EQ(enumValue.value("value").toString(), "one");
+            else if(key == 2)
+                EXPECT_EQ(enumValue.value("value").toString(), "two");
+            else if(key == 3)
+                EXPECT_EQ(enumValue.value("value").toString(), "three");
+            else
+                EXPECT_TRUE(false);
+        }
+    }
+
+    QString subsystem{"testsubsystem"};
+    QString name{"testname"};
+    Tag::Type type = Tag::eInt;
+    QString desciption{"description"};
 };
+
+
+TEST_F(TestTag, enumNames_toJson_verifyEnumValues)
+{
+    auto *tag = createIntTagWithValue(10);
+    setEnumNamesToTag(tag);
+
+    QJsonObject json = tag->toJson();
+    EXPECT_TRUE(json.contains("enumvalues"));
+
+    const QJsonArray enumValues = json.value("enumvalues").toArray();
+
+    verifyEnumValuesArray(enumValues);
+}
+
+TEST_F(TestTag, constructTagWithEnumValuesFromJson_verifyValuesIsCorrect)
+{
+    auto *tag = createIntTagWithValue(10);
+    setEnumNamesToTag(tag);
+
+    QJsonObject json = tag->toJson();
+    QString newName("something_new");
+    // replace tag name to force a new tag creation
+    json.insert("name", newName);
+
+    TagList::sGetInstance().UpdateOrCreateTag(json);
+
+    auto *newTag = TagList::sGetInstance().findByTagName(subsystem, newName);
+    EXPECT_TRUE(newTag);
+
+    QJsonObject newTagJson = newTag->toJson();
+    EXPECT_TRUE(newTagJson.contains("enumvalues"));
+
+    const QJsonArray enumValues = newTagJson.value("enumvalues").toArray();
+
+    verifyEnumValuesArray(enumValues);
+}
+
+TEST_F(TestTag, enumNamesForIntTag)
+{
+    auto *tag = createIntTagWithValue(1);
+    setEnumNamesToTag(tag);
+
+    EXPECT_TRUE(tag->enumValue(0).isEmpty());
+    EXPECT_EQ(tag->enumValue(1), "one");
+    EXPECT_EQ(tag->enumValue(2), "two");
+    EXPECT_EQ(tag->enumValue(3), "three");
+    EXPECT_TRUE(tag->enumValue(4).isEmpty());
+}
+
 
 TEST_F(TestTag, createTag)
 {
-    QString subsystem("testsubsystem");
-    QString name("testname");
-    Tag::Type type = Tag::eInt;
-    int value = 10;
-    QString desciption("description");
-    auto *tag = TagList::sGetInstance().createTag(subsystem, name, type, value, desciption);
+
+    auto *tag = createIntTagWithValue(10);
 
     EXPECT_EQ(subsystem, tag->getSubsystem());
     EXPECT_EQ(name, tag->getName());
-    EXPECT_EQ(value, tag->getIntValue());
+    EXPECT_EQ(10, tag->getIntValue());
     EXPECT_EQ(desciption, tag->getDescription());
 
     EXPECT_EQ(tag->getDoubleValue(), 0.0);
