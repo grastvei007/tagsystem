@@ -43,22 +43,13 @@ public:
 
     Tag(QString subSystem, QString name, Type type);
 
-    Tag(QString subSystem, QString name, Type type, double initValue, const QString &description = QString());
-    Tag(QString subSystem, QString name, Type type, int initValue, const QString &description = QString());
-    Tag(QString subSystem, QString name, Type type, bool initValue, const QString &description = QString());
-    Tag(QString subSystem, QString name, Type type, QString initValue, const QString &description = QString());
-    Tag(QString subSystem, QString name, Type type, QDateTime initValue, const QString &description = QString());
+    Tag(QString subSystem, QString name, Type type, QVariant initValue, const QString &description = {});
 
     // config
     void setEnumValues(const EnumMap &map); // available if type is eInt
 
-
     // setters
-    void setValue(double value, qint64 msSinceEpoc=-1);
-    void setValue(int value, qint64 msSinceEpoc=-1);
-    void setValue(bool value, qint64 msSinceEpoc=-1);
-    void setValue(QString value, qint64 msSinceEpoc=-1);
-    void setValue(QDateTime value, qint64 msSinceEpoc=-1);
+    void setValue(QVariant value, qint64 msSinceEpoc = -1);
 
     // getters
     Type getType() const;
@@ -93,17 +84,14 @@ signals:
 public slots:
 
 private:
-    QString subSystem_ = QString();
-    QString name_ = QString();
+    QString subSystem_ = {};
+    QString name_ = {};
     Type type_ = Tag::eDouble;
-    QString description_ = QString();
+    QString description_ = {};
 
-    double doubleValue_ = 0.0;
-    int intValue_ = 0;
-    bool boolValue_ = false;
-    QString stringValue_ = QString();
+    // QTime is stored as qint64
+    QVariant value_;
 
-    qint64 timeValue_ = 0; ///< value for tag type time
     QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
     qint64 timeStamp_ = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc
 

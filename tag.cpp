@@ -17,6 +17,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tagsocket.h"
 
 #include "util/json.h"
+#include <QMetaType>
 
 Tag::Tag(QObject *parent) : QObject(parent)
 {
@@ -32,50 +33,11 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
 
 }
 
-Tag::Tag(QString subSystem, QString name, Tag::Type type, double initValue, const QString &description) :
+Tag::Tag(QString subSystem, QString name, Type type, QVariant initValue, const QString &description) :
     subSystem_(subSystem),
     name_(name),
     type_(type),
-    description_(description),
-    doubleValue_(initValue)
-{
-    setValue(initValue);
-}
-
-Tag::Tag(QString subSystem, QString name, Tag::Type type, int initValue, const QString &description) :
-    subSystem_(subSystem),
-    name_(name),
-    type_(type),
-    description_(description),
-    intValue_(initValue)
-{
-    setValue(initValue);
-}
-
-Tag::Tag(QString subSystem, QString name, Tag::Type type, bool initValue, const QString &description) :
-    subSystem_(subSystem),
-    name_(name),
-    type_(type),
-    description_(description),
-    boolValue_(initValue)
-{
-    setValue(initValue);
-}
-
-Tag::Tag(QString subSystem, QString name, Tag::Type type, QString initValue, const QString &description) :
-    subSystem_(subSystem),
-    name_(name),
-    type_(type),
-    description_(description),
-    stringValue_(initValue)
-{
-    setValue(initValue);
-}
-
-Tag::Tag(QString subSystem, QString name, Type type, QDateTime initValue, const QString &description) :
-    subSystem_(subSystem),
-    name_(name),
-    type_(type),
+    value_(initValue),
     description_(description)
 {
     setValue(initValue);
@@ -91,12 +53,41 @@ void Tag::setEnumValues(const EnumMap &map)
     }
 }
 
-void Tag::setValue(double aValue, qint64 msSinceEpoc)
+void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 {
-    if(qFuzzyCompare(aValue, doubleValue_))
+    // validate value based on type
+    if(type_ == Tag::eDouble && value.metaType().id() == QMetaType::Double)
+    {
+        if(qFuzzyCompare(value.toDouble(), value_.toDouble()))
+            return;
+    }
+    else if(type_ == Tag::eInt && value.metaType().id() == QMetaType::Int)
+    {
+        if(value == value_)
+            return;
+    }
+    else if(type_ == Tag::eBool && value.metaType().id()  == QMetaType::Bool)
+    {
+        if(value == value_)
+            return;
+    }
+    else if(type_ == Tag::eString && value.metaType().id() == QMetaType::QString)
+    {
+        if(value == value_)
+            return;
+    }
+    else if(type_ == Tag::eTime && value.metaType().id() == QMetaType::LongLong)
+    {
+        if(value == value_)
+            return;
+    }
+    else
+    {
+        qWarning() << "Set invalid value type to tag";
         return;
+    }
 
-    doubleValue_ = aValue;
+    value_ = value;
     if(msSinceEpoc < 0)
     {
         timeStamp_ = QDateTime::currentMSecsSinceEpoch();
@@ -104,80 +95,12 @@ void Tag::setValue(double aValue, qint64 msSinceEpoc)
     }
     else
         timeStamp_ = msSinceEpoc;
-    emit valueChanged(this);
-}
-
-
-void Tag::setValue(int aValue, qint64 msSinceEpoc)
-{
-    if(aValue == intValue_)
-        return;
-
-    intValue_ = aValue;
-    if(msSinceEpoc < 0)
-    {
-        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
-        isUpdated_ = true;
-    }
-    else
-        timeStamp_ = msSinceEpoc;
-    emit valueChanged(this);
-}
-
-
-void Tag::setValue(bool aValue, qint64 msSinceEpoc)
-{
-    if(aValue == boolValue_)
-        return;
-
-    boolValue_ = aValue;
-    if(msSinceEpoc < 0)
-    {
-        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
-        isUpdated_ = true;
-    }
-    else
-        timeStamp_ = msSinceEpoc;
-    emit valueChanged(this);
-}
-
-
-void Tag::setValue(QString aValue, qint64 msSinceEpoc)
-{
-    if(stringValue_ == aValue)
-        return;
-
-    if(msSinceEpoc < 0)
-    {
-        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
-        isUpdated_ = true;
-    }
-    else
-        timeStamp_ = msSinceEpoc;
-    stringValue_ = aValue;
-    emit valueChanged(this);
-}
-
-void Tag::setValue(QDateTime aValue, qint64 msSinceEpoc)
-{
-    qint64 value = aValue.toMSecsSinceEpoch();
-    if(value == timeValue_)
-        return;
-    if(msSinceEpoc < 0)
-    {
-        timeStamp_ = QDateTime::currentMSecsSinceEpoch();
-        isUpdated_ = true;
-    }
-    else
-        timeStamp_ = msSinceEpoc;
-
-    timeValue_ = value;
     emit valueChanged(this);
 }
 
 QString Tag::getFullName() const
 {
-    return QString("%1.%2").arg(subSystem_).arg(name_);
+    return QString("%1.%2").arg(subSystem_, name_);
 }
 
 QString Tag::getSubsystem() const
@@ -240,30 +163,40 @@ QString Tag::getTypeStr() const
 
 double Tag::getDoubleValue() const
 {
-    return doubleValue_;
+    if(value_.metaType().id() == QMetaType::Double)
+        return value_.toDouble();
+    return 0.0;
 }
 
 
 int Tag::getIntValue() const
 {
-    return intValue_;
+    if(value_.metaType().id() == QMetaType::Int)
+        return value_.toInt();
+    return 0;
 }
 
 
 bool Tag::getBoolValue() const
 {
-    return boolValue_;
+    if(value_.metaType().id() == QMetaType::Bool)
+        return value_.toBool();
+    return false;
 }
 
 
 QString Tag::getStringValue() const
 {
-    return stringValue_;
+    if(value_.metaType().id() == QMetaType::QString)
+        return value_.toString();
+    return {};
 }
 
 QDateTime Tag::getTimeValue() const
 {
-    return QDateTime::fromMSecsSinceEpoch(timeValue_);
+    if(value_.metaType().id() == QMetaType::LongLong)
+        return QDateTime::fromMSecsSinceEpoch(value_.toLongLong());
+    return QDateTime::fromMSecsSinceEpoch(0);
 }
 
 QString Tag::enumValue(int value) const
@@ -350,7 +283,7 @@ QByteArray Tag::toMessage()
            float f;
            char byte[4];
         }u;
-        u.f = (float)doubleValue_;
+        u.f = (float)value_.toDouble();
         ba.append(u.byte, 4);
     }
     else if(type_ == eInt)
@@ -360,13 +293,13 @@ QByteArray Tag::toMessage()
             int i;
             char byte[4];
         }u;
-        u.i = intValue_;
+        u.i = value_.toInt();
         ba.append(u.byte, 4);
     }
     else if(type_ == eBool)
     {
         ba.append(":b");
-        ba.append(boolValue_ ? char(1) : char(0));
+        ba.append(value_.toBool() ? char(1) : char(0));
     }
     else
         Q_UNREACHABLE();
@@ -384,7 +317,7 @@ const QJsonObject &Tag::toJson()
 
     switch (type_) {
         case eDouble:
-            jsonObject_.insert("value", doubleValue_);
+            jsonObject_.insert("value", value_.toDouble());
             break;
         case eInt:
             if(!enumValues_.empty())
@@ -400,19 +333,19 @@ const QJsonObject &Tag::toJson()
 
                 jsonObject_.insert("enumvalues", util::json::toJsonArray(enumValues_, transform));
             }
-            jsonObject_.insert("value", intValue_);
+            jsonObject_.insert("value", value_.toInt());
             break;
         case eBool:
-            jsonObject_.insert("value", boolValue_);
+            jsonObject_.insert("value", value_.toBool());
             break;
         case eString:
-            jsonObject_.insert("value", stringValue_);
+            jsonObject_.insert("value", value_.toString());
             break;
         case eTime:
-            jsonObject_.insert("value", timeValue_);
+            jsonObject_.insert("value", value_.toLongLong());
             break;
         default:
-            jsonObject_.insert("value", QString());
+            jsonObject_.insert("value", {});
             break;
     }
 

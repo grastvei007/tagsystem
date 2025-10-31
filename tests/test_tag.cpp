@@ -150,3 +150,79 @@ TEST_P(TestTagParameter, TestParameter) {
     QJsonObject obj = tag->toJson();
     validateJsonWithTag(obj, tag);
 }
+
+TEST_P(TestTagParameter, setValueToTag_expectValuChanged)
+{
+    TagParam param = GetParam();
+    auto *tag = createTag(param);
+    tag->resetUpdateFlag();
+
+    switch (tag->getType())
+    {
+    case Tag::eBool:
+    {
+        bool currentValue = tag->getBoolValue();
+        tag->setValue(!currentValue);
+        EXPECT_EQ(!currentValue, tag->getBoolValue());
+
+        EXPECT_EQ(tag->getIntValue(), 0);
+        EXPECT_EQ(tag->getDoubleValue(), 0.0);
+        EXPECT_EQ(tag->getTimeValue(), QDateTime::fromMSecsSinceEpoch(0));
+        EXPECT_TRUE(tag->getStringValue().isEmpty());
+        break;
+    }
+    case Tag::eDouble:
+    {
+        double value = tag->getDoubleValue() + 10.0;
+        tag->setValue(value);
+        EXPECT_EQ(tag->getDoubleValue(), value);
+
+        EXPECT_EQ(tag->getIntValue(), 0);
+        EXPECT_FALSE(tag->getBoolValue());
+        EXPECT_EQ(tag->getTimeValue(), QDateTime::fromMSecsSinceEpoch(0));
+        EXPECT_TRUE(tag->getStringValue().isEmpty());
+        break;
+    }
+    case Tag::eInt:
+    {
+        int value = tag->getIntValue() + 10;
+        tag->setValue(value);
+        EXPECT_EQ(tag->getIntValue(), value);
+
+        EXPECT_EQ(tag->getDoubleValue(), 0.0);
+        EXPECT_FALSE(tag->getBoolValue());
+        EXPECT_EQ(tag->getTimeValue(), QDateTime::fromMSecsSinceEpoch(0));
+        EXPECT_TRUE(tag->getStringValue().isEmpty());
+        break;
+    }
+    case Tag::eString:
+    {
+        QString value("super");
+        tag->setValue(value);
+        EXPECT_EQ(tag->getStringValue(), value);
+
+        EXPECT_EQ(tag->getDoubleValue(), 0.0);
+        EXPECT_EQ(tag->getIntValue(), 0);
+        EXPECT_FALSE(tag->getBoolValue());
+        EXPECT_EQ(tag->getTimeValue(), QDateTime::fromMSecsSinceEpoch(0));
+        break;
+    }
+    case Tag::eTime:
+    {
+        qint64 now = QDateTime::currentMSecsSinceEpoch();
+        tag->setValue(now);
+        EXPECT_EQ(tag->getTimeValue().toMSecsSinceEpoch(), now);
+
+        EXPECT_EQ(tag->getDoubleValue(), 0.0);
+        EXPECT_EQ(tag->getIntValue(), 0);
+        EXPECT_FALSE(tag->getBoolValue());
+        EXPECT_TRUE(tag->getStringValue().isEmpty());
+        break;
+    }
+    defalut:
+        EXPECT_TRUE(false) << "Invalid tag type";
+        break;
+    }
+
+    EXPECT_TRUE(tag->isUpdated());
+}
