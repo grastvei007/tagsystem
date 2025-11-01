@@ -18,6 +18,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "util/json.h"
 #include <QMetaType>
+#include <QVariant>
 
 Tag::Tag(QObject *parent) : QObject(parent)
 {
@@ -83,11 +84,12 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
     }
     else
     {
-        qWarning() << "Set invalid value type to tag";
+        qWarning() << "Set invalid value type to tag: " << getFullName();
         return;
     }
 
     value_ = value;
+
     if(msSinceEpoc < 0)
     {
         timeStamp_ = QDateTime::currentMSecsSinceEpoch();

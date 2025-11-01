@@ -440,7 +440,7 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
         break;
     }
     case Tag::eTime: {
-        auto time = QDateTime::fromMSecsSinceEpoch(value.toInteger());
+        qint64 time = value.toInteger();
         if (tag)
             tag->setValue(time, timestamp);
         else
