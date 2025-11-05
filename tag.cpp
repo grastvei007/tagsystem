@@ -26,7 +26,7 @@ Tag::Tag(QObject *parent) : QObject(parent)
 }
 
 
-Tag::Tag(QString aSubSystem, QString aName, Type aType) :
+Tag::Tag(QString aSubSystem, QString aName, TagType aType) :
     subSystem_(aSubSystem),
     name_(aName),
     type_(aType)
@@ -34,7 +34,7 @@ Tag::Tag(QString aSubSystem, QString aName, Type aType) :
 
 }
 
-Tag::Tag(QString subSystem, QString name, Type type, QVariant initValue, const QString &description) :
+Tag::Tag(QString subSystem, QString name, TagType type, QVariant initValue, const QString &description) :
     subSystem_(subSystem),
     name_(name),
     type_(type),
@@ -46,7 +46,7 @@ Tag::Tag(QString subSystem, QString name, Type type, QVariant initValue, const Q
 
 void Tag::setEnumValues(const EnumMap &map)
 {
-    if(type_ != eInt)
+    if(type_ != TagType::eInt)
         return;
     for(auto &[key, value] : map)
     {
@@ -57,27 +57,27 @@ void Tag::setEnumValues(const EnumMap &map)
 void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 {
     // validate value based on type
-    if(type_ == Tag::eDouble && value.metaType().id() == QMetaType::Double)
+    if(type_ == TagType::eDouble && value.metaType().id() == QMetaType::Double)
     {
         if(qFuzzyCompare(value.toDouble(), value_.toDouble()))
             return;
     }
-    else if(type_ == Tag::eInt && value.metaType().id() == QMetaType::Int)
+    else if(type_ == TagType::eInt && value.metaType().id() == QMetaType::Int)
     {
         if(value == value_)
             return;
     }
-    else if(type_ == Tag::eBool && value.metaType().id()  == QMetaType::Bool)
+    else if(type_ == TagType::eBool && value.metaType().id()  == QMetaType::Bool)
     {
         if(value == value_)
             return;
     }
-    else if(type_ == Tag::eString && value.metaType().id() == QMetaType::QString)
+    else if(type_ == TagType::eString && value.metaType().id() == QMetaType::QString)
     {
         if(value == value_)
             return;
     }
-    else if(type_ == Tag::eTime && value.metaType().id() == QMetaType::LongLong)
+    else if(type_ == TagType::eTime && value.metaType().id() == QMetaType::LongLong)
     {
         if(value == value_)
             return;
@@ -137,7 +137,7 @@ qint64 Tag::getMsSinceEpoc() const
 }
 
 
-Tag::Type Tag::getType() const
+TagType Tag::getType() const
 {
     return type_;
 }
@@ -145,17 +145,17 @@ Tag::Type Tag::getType() const
 QString Tag::getTypeStr() const
 {
     switch (type_) {
-    case eDouble:
+    case TagType::eDouble:
         return "Double";
-    case eInt:
+    case TagType::eInt:
         return "Int";
-    case eBool:
+    case TagType::eBool:
         return "Bool";
-    case eString:
+    case TagType::eString:
         return "String";
-    case eTime:
+    case TagType::eTime:
         return "Time";
-    case eUnknown:
+    case TagType::eUnknown:
         return "Unknown";
     }
 
@@ -208,57 +208,57 @@ QString Tag::enumValue(int value) const
     return {};
 }
 
-Tag::Type Tag::typeMatchTagSocket(const TagSocket *tagsocket)
+TagType Tag::typeMatchTagSocket(const TagSocket *tagsocket)
 {
     if(!tagsocket)
-        return eUnknown;
+        return TagType::eUnknown;
     switch (tagsocket->getType()) {
     case TagSocket::eBool:
-        return eBool;
+        return TagType::eBool;
     case TagSocket::eDouble:
-        return eDouble;
+        return TagType::eDouble;
     case TagSocket::eInt:
-        return eInt;
+        return TagType::eInt;
     case TagSocket::eString:
-        return eString;
+        return TagType::eString;
     case TagSocket::eTime:
-        return eTime;
+        return TagType::eTime;
     case TagSocket::eNone:
-        return eUnknown;
+        return TagType::eUnknown;
     default:
-        return eUnknown;
+        return TagType::eUnknown;
     }
     Q_UNREACHABLE();
 }
 
-Tag::Type Tag::typeFromString(const QString &aTypeString)
+TagType Tag::typeFromString(const QString &aTypeString)
 {
     if(aTypeString.compare(QString("Int"), Qt::CaseInsensitive) == 0)
-        return eInt;
+        return TagType::eInt;
     else if(aTypeString.compare(QString("Bool"), Qt::CaseInsensitive) == 0)
-        return eBool;
+        return TagType::eBool;
     else if(aTypeString.compare(QString("Double"), Qt::CaseInsensitive) == 0)
-        return eDouble;
+        return TagType::eDouble;
     else if(aTypeString.compare(QString("String"), Qt::CaseInsensitive) == 0)
-        return eString;
+        return TagType::eString;
     else if(aTypeString.compare(QString("Time"), Qt::CaseInsensitive) == 0)
-        return eTime;
+        return TagType::eTime;
     else
-        return eUnknown;
+        return TagType::eUnknown;
 }
 
-QString Tag::toString(Tag::Type aType)
+QString Tag::toString(TagType aType)
 {
     switch (aType) {
-        case eInt:
+        case TagType::eInt:
             return "Int";
-        case eBool:
+        case TagType::eBool:
             return "Bool";
-        case eDouble:
+        case TagType::eDouble:
             return "Double";
-        case eString:
+        case TagType::eString:
             return "String";
-        case eTime:
+        case TagType::eTime:
             return "Time";
         default:
             break;
@@ -278,7 +278,7 @@ QByteArray Tag::toMessage()
 {
     QByteArray ba;
     ba.append(name_.toLatin1());
-    if(type_ == eDouble)
+    if(type_ == TagType::eDouble)
     {
         ba.append(":f");
         union U{
@@ -288,7 +288,7 @@ QByteArray Tag::toMessage()
         u.f = (float)value_.toDouble();
         ba.append(u.byte, 4);
     }
-    else if(type_ == eInt)
+    else if(type_ == TagType::eInt)
     {
         ba.append(":i");
         union U{
@@ -298,7 +298,7 @@ QByteArray Tag::toMessage()
         u.i = value_.toInt();
         ba.append(u.byte, 4);
     }
-    else if(type_ == eBool)
+    else if(type_ == TagType::eBool)
     {
         ba.append(":b");
         ba.append(value_.toBool() ? char(1) : char(0));
@@ -318,10 +318,10 @@ const QJsonObject &Tag::toJson()
     jsonObject_.insert("timestamp", timeStamp_);
 
     switch (type_) {
-        case eDouble:
+        case TagType::eDouble:
             jsonObject_.insert("value", value_.toDouble());
             break;
-        case eInt:
+        case TagType::eInt:
             if(!enumValues_.empty())
             {
                 auto transform = [](const auto& value)
@@ -337,13 +337,13 @@ const QJsonObject &Tag::toJson()
             }
             jsonObject_.insert("value", value_.toInt());
             break;
-        case eBool:
+        case TagType::eBool:
             jsonObject_.insert("value", value_.toBool());
             break;
-        case eString:
+        case TagType::eString:
             jsonObject_.insert("value", value_.toString());
             break;
-        case eTime:
+        case TagType::eTime:
             jsonObject_.insert("value", value_.toLongLong());
             break;
         default:

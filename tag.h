@@ -25,25 +25,27 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 class TagSocket;
 
+enum class TagType{
+    eUnknown,
+    eDouble,
+    eInt,
+    eBool,
+    eString,
+    eTime
+};
+
 
 class TAGSYSTEMSHARED_EXPORT Tag : public QObject
 {
     Q_OBJECT
 public:
-    enum Type{
-        eUnknown,
-        eDouble,
-        eInt,
-        eBool,
-        eString,
-        eTime
-    };
+
     explicit Tag(QObject *parent = nullptr);
     using EnumMap = std::map<int, QString>;
 
-    Tag(QString subSystem, QString name, Type type);
+    Tag(QString subSystem, QString name, TagType type);
 
-    Tag(QString subSystem, QString name, Type type, QVariant initValue, const QString &description = {});
+    Tag(QString subSystem, QString name, TagType type, QVariant initValue, const QString &description = {});
 
     // config
     void setEnumValues(const EnumMap &map); // available if type is eInt
@@ -52,7 +54,7 @@ public:
     void setValue(QVariant value, qint64 msSinceEpoc = -1);
 
     // getters
-    Type getType() const;
+    TagType getType() const;
     QString getTypeStr() const;
     QString getFullName() const;
     QString getSubsystem() const;
@@ -70,9 +72,9 @@ public:
     QString enumValue(int value) const;
 
     // other
-    static Type typeFromString(const QString &typeString);
-    static Type typeMatchTagSocket(const TagSocket *tagsocket);
-    static QString toString(Type type);
+    static TagType typeFromString(const QString &typeString);
+    static TagType typeMatchTagSocket(const TagSocket *tagsocket);
+    static QString toString(TagType type);
     QByteArray toMessage();
     const QJsonObject& toJson();
 
@@ -86,7 +88,7 @@ public slots:
 private:
     QString subSystem_ = {};
     QString name_ = {};
-    Type type_ = Tag::eDouble;
+    TagType type_ = TagType::eDouble;
     QString description_ = {};
 
     // QTime is stored as qint64

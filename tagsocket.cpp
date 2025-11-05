@@ -125,23 +125,23 @@ bool TagSocket::hookupTag(Tag *tag)
 
     if(type_ == eDouble)
     {
-        if(tag->getType() != Tag::eDouble)
+        if(tag->getType() != TagType::eDouble)
             return false;
         tag_ = tag;
     }
     else if(type_ == eBool)
     {
-        if(tag->getType() != Tag::eBool)
+        if(tag->getType() != TagType::eBool)
             return false;
         tag_ = tag;
     }
     else if(type_ == eInt)
     {
-        if(auto tagType = tag->getType(); tagType == Tag::eInt)
+        if(auto tagType = tag->getType(); tagType == TagType::eInt)
         {
             tag_ = tag;
         }
-        else if(tagType == Tag::eBool)
+        else if(tagType == TagType::eBool)
         {
             tag_ = tag;
         }
@@ -150,13 +150,13 @@ bool TagSocket::hookupTag(Tag *tag)
     }
     else if(type_ == eString)
     {
-        if(tag->getType() != Tag::eString)
+        if(tag->getType() != TagType::eString)
             return false;
         tag_ = tag;
     }
     else if(type_ == eTime)
     {
-        if(tag->getType() != Tag::eTime)
+        if(tag->getType() != TagType::eTime)
             return false;
         tag_ = tag;
     }
@@ -362,15 +362,15 @@ TagSocket::Type TagSocket::typeMatchingTag(const Tag *tag)
     if(!tag)
         return eNone;
     switch (tag->getType()) {
-    case Tag::eBool:
+    case TagType::eBool:
         return eBool;
-    case Tag::eDouble:
+    case TagType::eDouble:
         return eDouble;
-    case Tag::eInt:
+    case TagType::eInt:
         return eInt;
-    case Tag::eString:
+    case TagType::eString:
         return eString;
-    case Tag::eTime:
+    case TagType::eTime:
         return eTime;
     default:
         return eNone;
@@ -390,7 +390,7 @@ void TagSocket::onTagValueChanged(Tag* tag)
     }
     else if(type_ == eInt)
     {
-        if(tag->getType() == Tag::eBool)
+        if(tag->getType() == TagType::eBool)
         {
             int value = tag->getBoolValue();
             emit valueChanged(value);

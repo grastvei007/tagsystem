@@ -53,22 +53,22 @@ bool TagListTableModel::setData(const QModelIndex &index, const QVariant &value,
         {
             Tag *tag = TagList::sGetInstance().getTagByIndex(index.row());
             switch (tag->getType()) {
-            case Tag::eDouble:
+            case TagType::eDouble:
                 tag->setValue(value.toDouble());
                 return true;
-            case Tag::eInt:
+            case TagType::eInt:
                 tag->setValue(value.toInt());
                 return true;
-            case Tag::eBool:
+            case TagType::eBool:
                 tag->setValue(value.toBool());
                 return true;
-            case Tag::eString:
+            case TagType::eString:
                 tag->setValue(value.toString());
                 return true;
-            case Tag::eTime:
+            case TagType::eTime:
                 tag->setValue(value.toDateTime());
                 return true;
-            case Tag::eUnknown:
+            case TagType::eUnknown:
                 break;
 
             }
@@ -103,9 +103,9 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
         }
         case eValue:
         {
-            if(tag->getType() == Tag::eDouble)
+            if(tag->getType() == TagType::eDouble)
                 return tag->getDoubleValue();
-            else if(tag->getType() == Tag::eInt)
+            else if(tag->getType() == TagType::eInt)
             {
                 int value = tag->getIntValue();
                 QString enumStr = tag->enumValue(value);
@@ -114,11 +114,11 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
 
                 return value;
             }
-            else if(tag->getType() == Tag::eBool)
+            else if(tag->getType() == TagType::eBool)
                 return tag->getBoolValue();
-            else if(tag->getType() == Tag::eString)
+            else if(tag->getType() == TagType::eString)
                 return tag->getStringValue();
-            else if(tag->getType() == Tag::eTime)
+            else if(tag->getType() == TagType::eTime)
                 return tag->getTimeValue().toString(tag->getTimeStampFormat());
             else
                 Q_UNREACHABLE();

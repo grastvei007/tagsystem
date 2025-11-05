@@ -6,7 +6,7 @@
 
 namespace util
 {
-bool isTagCompatibleWithTagSocket(Tag::Type tagType, TagSocket::Type tagSocketType);
+bool isTagCompatibleWithTagSocket(TagType tagType, TagSocket::Type tagSocketType);
 
 } // end namespace
 

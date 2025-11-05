@@ -2,21 +2,21 @@
 
 namespace util {
 
-bool isTagCompatibleWithTagSocket(Tag::Type tagType, TagSocket::Type tagSocketType)
+bool isTagCompatibleWithTagSocket(TagType tagType, TagSocket::Type tagSocketType)
 {
-    if(tagType == Tag::Type::eBool && tagSocketType == TagSocket::Type::eBool)
+    if(tagType == TagType::eBool && tagSocketType == TagSocket::Type::eBool)
         return true;
 
-    if(tagType == Tag::Type::eDouble && tagSocketType == TagSocket::Type::eDouble)
+    if(tagType == TagType::eDouble && tagSocketType == TagSocket::Type::eDouble)
         return true;
 
-    if(tagType == Tag::Type::eInt && tagSocketType == TagSocket::Type::eInt)
+    if(tagType == TagType::eInt && tagSocketType == TagSocket::Type::eInt)
         return true;
 
-    if(tagType == Tag::Type::eString && tagSocketType == TagSocket::Type::eString)
+    if(tagType == TagType::eString && tagSocketType == TagSocket::Type::eString)
         return true;
 
-    if(tagType == Tag::Type::eTime && tagSocketType == TagSocket::Type::eTime)
+    if(tagType == TagType::eTime && tagSocketType == TagSocket::Type::eTime)
         return true;
 
     return false;

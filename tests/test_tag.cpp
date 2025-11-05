@@ -56,7 +56,7 @@ protected:
 
     QString subsystem{"testsubsystem"};
     QString name{"testname"};
-    Tag::Type type = Tag::eInt;
+    TagType type = TagType::eInt;
     QString desciption{"description"};
 };
 
@@ -131,7 +131,7 @@ TEST_F(TestTag, createTag)
 
 struct TagParam
 {
-    Tag::Type type;
+    TagType type;
     QString subsystem;
     QString name;
     QVariant value;
@@ -164,15 +164,15 @@ protected:
     {
         switch(param.type)
         {
-        case Tag::eBool:
+        case TagType::eBool:
             return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toBool(), param.description);
-        case Tag::eDouble:
+        case TagType::eDouble:
             return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toDouble(), param.description);
-        case Tag::eInt:
+        case TagType::eInt:
             return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toInt(), param.description);
-        case Tag::eString:
+        case TagType::eString:
             return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toString(), param.description);
-        case Tag::eTime:
+        case TagType::eTime:
             return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toTime(), param.description);
         }
 
@@ -187,27 +187,27 @@ protected:
         EXPECT_EQ(json.value("description").toString(), tag->getDescription());
         switch(tag->getType())
         {
-        case Tag::eBool:
+        case TagType::eBool:
         {
             EXPECT_EQ(json.value("value").toBool(), tag->getBoolValue());
             break;
         }
-        case Tag::eDouble:
+        case TagType::eDouble:
         {
             EXPECT_EQ(json.value("value").toDouble(), tag->getDoubleValue());
             break;
         }
-        case Tag::eInt:
+        case TagType::eInt:
         {
             EXPECT_EQ(json.value("value").toInt(), tag->getIntValue());
             break;
         }
-        case Tag::eString:
+        case TagType::eString:
         {
             EXPECT_EQ(json.value("value").toString(), tag->getStringValue());
             break;
         }
-        case Tag::eTime:
+        case TagType::eTime:
         {
             EXPECT_EQ(json.value("value").toInteger(), tag->getTimeValue().toMSecsSinceEpoch());
             break;
@@ -220,11 +220,11 @@ protected:
 
 
 INSTANTIATE_TEST_SUITE_P(TagTypeParameters, TestTagParameter,
-    ::testing::Values(  TagParam{.type = Tag::eBool, .subsystem = "subsystem", .name = "name", .value = true, .description = "desc"},
-                        TagParam{.type = Tag::eDouble, .subsystem = "subsystem", .name = "name", .value = 10.0, .description = "desc"},
-                        TagParam{.type = Tag::eInt, .subsystem = "subsystem", .name = "name", .value = 11, .description = "desc"},
-                        TagParam{.type = Tag::eString, .subsystem = "subsystem", .name = "name", .value = QString("test"), .description = "desc"},
-                        TagParam{.type = Tag::eTime, .subsystem = "subsystem", .name = "name", .value = QDateTime::currentDateTime(), .description = "desc"}),
+    ::testing::Values(  TagParam{.type = TagType::eBool, .subsystem = "subsystem", .name = "name", .value = true, .description = "desc"},
+                        TagParam{.type = TagType::eDouble, .subsystem = "subsystem", .name = "name", .value = 10.0, .description = "desc"},
+                        TagParam{.type = TagType::eInt, .subsystem = "subsystem", .name = "name", .value = 11, .description = "desc"},
+                        TagParam{.type = TagType::eString, .subsystem = "subsystem", .name = "name", .value = QString("test"), .description = "desc"},
+                        TagParam{.type = TagType::eTime, .subsystem = "subsystem", .name = "name", .value = QDateTime::currentDateTime(), .description = "desc"}),
                          TestTagParameter::PrintToStringParamName());
 
 
@@ -246,7 +246,7 @@ TEST_P(TestTagParameter, setValueToTag_expectValuChanged)
 
     switch (tag->getType())
     {
-    case Tag::eBool:
+    case TagType::eBool:
     {
         bool currentValue = tag->getBoolValue();
         tag->setValue(!currentValue);
@@ -258,7 +258,7 @@ TEST_P(TestTagParameter, setValueToTag_expectValuChanged)
         EXPECT_TRUE(tag->getStringValue().isEmpty());
         break;
     }
-    case Tag::eDouble:
+    case TagType::eDouble:
     {
         double value = tag->getDoubleValue() + 10.0;
         tag->setValue(value);
@@ -270,7 +270,7 @@ TEST_P(TestTagParameter, setValueToTag_expectValuChanged)
         EXPECT_TRUE(tag->getStringValue().isEmpty());
         break;
     }
-    case Tag::eInt:
+    case TagType::eInt:
     {
         int value = tag->getIntValue() + 10;
         tag->setValue(value);
@@ -282,7 +282,7 @@ TEST_P(TestTagParameter, setValueToTag_expectValuChanged)
         EXPECT_TRUE(tag->getStringValue().isEmpty());
         break;
     }
-    case Tag::eString:
+    case TagType::eString:
     {
         QString value("super");
         tag->setValue(value);
@@ -294,7 +294,7 @@ TEST_P(TestTagParameter, setValueToTag_expectValuChanged)
         EXPECT_EQ(tag->getTimeValue(), QDateTime::fromMSecsSinceEpoch(0));
         break;
     }
-    case Tag::eTime:
+    case TagType::eTime:
     {
         qint64 now = QDateTime::currentMSecsSinceEpoch();
         tag->setValue(now);

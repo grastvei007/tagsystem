@@ -39,7 +39,7 @@ int TagList::getNumberOfTags() const
     return tagByName_.size();
 }
 
-Tag* TagList::createTag(const QString &subSystem, const QString &name, Tag::Type type)
+Tag* TagList::createTag(const QString &subSystem, const QString &name, TagType type)
 {
     Tag *tag = findByTagName(QString("%1.%2").arg(subSystem, name));
     if(tag)
@@ -60,13 +60,13 @@ Tag* TagList::createTag(const QString &subSystem, const QString &name, Tag::Type
 }
 
 
-Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue)
+Tag *TagList::createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue)
 {
     return createTag(subSystem, name, type, initValue, QString());
 }
 
 
-Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue, const QString &description)
+Tag *TagList::createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue, const QString &description)
 {
     auto *tag = findByTagName(QString("%1.%2").arg(subSystem, name));
     if(tag)
@@ -74,31 +74,31 @@ Tag *TagList::createTag(const QString &subSystem, const QString &name, Tag::Type
 
     switch(type)
     {
-        case Tag::eDouble:
+        case TagType::eDouble:
         {
             double value = initValue.toDouble();
             tag = new Tag(subSystem, name, type, value, description);
             break;
         }
-        case Tag::eInt:
+        case TagType::eInt:
         {
             auto value = initValue.toInt();
             tag = new Tag(subSystem, name, type, value, description);
             break;
         }
-        case Tag::eBool:
+        case TagType::eBool:
         {
             auto value = initValue.toBool();
             tag = new Tag(subSystem, name, type, value, description);
             break;
         }
-        case Tag::eString:
+        case TagType::eString:
         {
             auto value = initValue.toString();
             tag = new Tag(subSystem, name, type, value, description);
             break;
         }
-        case Tag::eTime:
+        case TagType::eTime:
         {
             auto value = initValue.toDateTime();
             tag = new Tag(subSystem, name, type, value, description);
@@ -385,14 +385,14 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
     Tag *createdTag = nullptr;
 
     switch (type) {
-    case Tag::eDouble: {
+    case TagType::eDouble: {
         if (tag)
             tag->setValue(value.toDouble(), timestamp);
         else
-            createdTag = createTag(subsystem, name, Tag::eDouble, value.toDouble(), description);
+            createdTag = createTag(subsystem, name, TagType::eDouble, value.toDouble(), description);
         break;
     }
-    case Tag::eInt: {
+    case TagType::eInt: {
         Tag::EnumMap list;
         if(json.contains("enumvalues"))
         {
@@ -418,33 +418,33 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
         }
         else
         {
-            createdTag = createTag(subsystem, name, Tag::eInt, value.toInt(), description);
+            createdTag = createTag(subsystem, name, TagType::eInt, value.toInt(), description);
             if(!list.empty())
                 createdTag->setEnumValues(list);
         }
 
         break;
     }
-    case Tag::eBool: {
+    case TagType::eBool: {
         if (tag)
             tag->setValue(value.toBool(), timestamp);
         else
-            createdTag = createTag(subsystem, name, Tag::eBool, value.toBool(), description);
+            createdTag = createTag(subsystem, name, TagType::eBool, value.toBool(), description);
         break;
     }
-    case Tag::eString: {
+    case TagType::eString: {
         if (tag)
             tag->setValue(value.toString(), timestamp);
         else
-            createdTag = createTag(subsystem, name, Tag::eString, value.toString(), description);
+            createdTag = createTag(subsystem, name, TagType::eString, value.toString(), description);
         break;
     }
-    case Tag::eTime: {
+    case TagType::eTime: {
         qint64 time = value.toInteger();
         if (tag)
             tag->setValue(time, timestamp);
         else
-            createdTag = createTag(subsystem, name, Tag::eTime, time, description);
+            createdTag = createTag(subsystem, name, TagType::eTime, time, description);
         break;
     }
     default:

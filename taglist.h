@@ -36,9 +36,9 @@ public:
 
     int getNumberOfTags() const;
 
-    Tag* createTag(const QString &subSystem, const QString &name, Tag::Type type);
-    Tag* createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue);
-    Tag* createTag(const QString &subSystem, const QString &name, Tag::Type type, QVariant initValue, const QString& description);
+    Tag* createTag(const QString &subSystem, const QString &name, TagType type);
+    Tag* createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue);
+    Tag* createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue, const QString& description);
 
     Tag* findByTagName(const QString &fullName);
     Tag* findByTagName(const QString &subsystem, const QString &name);
