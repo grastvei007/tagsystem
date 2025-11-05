@@ -26,13 +26,55 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 class TagSocket;
 
 enum class TagType{
-    eUnknown,
+    eUnknown = 0,
     eDouble,
     eInt,
     eBool,
     eString,
     eTime
 };
+
+template<TagType V>
+struct TagTypeType;
+
+template<>
+struct TagTypeType<TagType::eUnknown>
+{
+    using type = bool;
+};
+
+template<>
+struct TagTypeType<TagType::eInt>
+{
+    using type = int;
+};
+
+template<>
+struct TagTypeType<TagType::eDouble>
+{
+    using type = double;
+};
+
+template<>
+struct TagTypeType<TagType::eBool>
+{
+    using type = bool;
+};
+
+template<>
+struct TagTypeType<TagType::eString>
+{
+    using type = QString;
+};
+
+template<>
+struct TagTypeType<TagType::eTime>
+{
+    using type = qint64;
+};
+
+template<TagType... Vs>
+using TagTypeVariant = std::variant<typename TagTypeType<Vs>::type...>;
 
 
 class TAGSYSTEMSHARED_EXPORT Tag : public QObject
@@ -88,11 +130,11 @@ public slots:
 private:
     QString subSystem_ = {};
     QString name_ = {};
-    TagType type_ = TagType::eDouble;
+    TagType type_ = TagType::eUnknown;
     QString description_ = {};
 
     // QTime is stored as qint64
-    QVariant value_;
+    TagTypeVariant<TagType::eUnknown, TagType::eDouble, TagType::eInt, TagType::eBool, TagType::eString, TagType::eTime> value_;
 
     QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
     qint64 timeStamp_ = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc

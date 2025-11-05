@@ -38,7 +38,6 @@ Tag::Tag(QString subSystem, QString name, TagType type, QVariant initValue, cons
     subSystem_(subSystem),
     name_(name),
     type_(type),
-    value_(initValue),
     description_(description)
 {
     setValue(initValue);
@@ -59,36 +58,100 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
     // validate value based on type
     if(type_ == TagType::eDouble && value.metaType().id() == QMetaType::Double)
     {
-        if(qFuzzyCompare(value.toDouble(), value_.toDouble()))
-            return;
+        try
+        {
+            double val = std::get<(int)TagType::eDouble>(value_);
+            if(qFuzzyCompare(value.toDouble(), val))
+                return;
+        }
+        catch(std::bad_variant_access const& ex)
+        {
+
+        }
+
+        value_.emplace<(int)TagType::eDouble>(value.toDouble());
     }
     else if(type_ == TagType::eInt && value.metaType().id() == QMetaType::Int)
     {
-        if(value == value_)
-            return;
+        try
+        {
+            int val = std::get<(int)TagType::eInt>(value_);
+            if(value == val)
+                return;
+        }
+        catch(std::bad_variant_access const& ex)
+        {
+
+        }
+
+        value_.emplace<(int)TagType::eInt>(value.toInt());
     }
     else if(type_ == TagType::eBool && value.metaType().id()  == QMetaType::Bool)
     {
-        if(value == value_)
-            return;
+        try
+        {
+            bool val = std::get<(int)TagType::eBool>(value_);
+            if(value == val)
+                return;
+        }
+        catch(std::bad_variant_access const& ex)
+        {
+
+        }
+
+        value_.emplace<(int)TagType::eBool>(value.toBool());
     }
     else if(type_ == TagType::eString && value.metaType().id() == QMetaType::QString)
     {
-        if(value == value_)
-            return;
+        try
+        {
+            QString val = std::get<(int)TagType::eString>(value_);
+            if(value == val)
+                return;
+        }
+        catch(std::bad_variant_access const& ex)
+        {
+
+        }
+
+        value_.emplace<(int)TagType::eString>(value.toString());
     }
     else if(type_ == TagType::eTime && value.metaType().id() == QMetaType::LongLong)
     {
-        if(value == value_)
-            return;
+        try
+        {
+            qint64 val = std::get<(int)TagType::eTime>(value_);
+            if(value.toLongLong() == val)
+                return;
+        }
+        catch(std::bad_variant_access const& ex)
+        {
+
+        }
+
+        value_.emplace<(int)TagType::eTime>(value.toLongLong());
+    }
+    else if(type_ == TagType::eTime && value.metaType().id() == QMetaType::QDateTime)
+    {
+        value = value.toLongLong();
+        try
+        {
+            qint64 val = std::get<(int)TagType::eTime>(value_);
+            if(value.toLongLong() == val)
+                return;
+        }
+        catch(std::bad_variant_access const& ex)
+        {
+
+        }
+
+        value_.emplace<(int)TagType::eTime>(value.toLongLong());
     }
     else
     {
-        qWarning() << "Set invalid value type to tag: " << getFullName();
+        qWarning() << "Set invalid value type to tag: " << getFullName() << " meta data: " << value.metaType().name();
         return;
     }
-
-    value_ = value;
 
     if(msSinceEpoc < 0)
     {
@@ -165,39 +228,39 @@ QString Tag::getTypeStr() const
 
 double Tag::getDoubleValue() const
 {
-    if(value_.metaType().id() == QMetaType::Double)
-        return value_.toDouble();
+    if(type_ == TagType::eDouble)
+        return std::get<(int)TagType::eDouble>(value_);
     return 0.0;
 }
 
 
 int Tag::getIntValue() const
 {
-    if(value_.metaType().id() == QMetaType::Int)
-        return value_.toInt();
+    if(type_ == TagType::eInt)
+        return std::get<(int)TagType::eInt>(value_);
     return 0;
 }
 
 
 bool Tag::getBoolValue() const
 {
-    if(value_.metaType().id() == QMetaType::Bool)
-        return value_.toBool();
+    if(type_ == TagType::eBool)
+        return std::get<(int)TagType::eBool>(value_);
     return false;
 }
 
 
 QString Tag::getStringValue() const
 {
-    if(value_.metaType().id() == QMetaType::QString)
-        return value_.toString();
+    if(type_ == TagType::eString)
+        return std::get<(int)TagType::eString>(value_);
     return {};
 }
 
 QDateTime Tag::getTimeValue() const
 {
-    if(value_.metaType().id() == QMetaType::LongLong)
-        return QDateTime::fromMSecsSinceEpoch(value_.toLongLong());
+    if(type_ == TagType::eTime)
+        return QDateTime::fromMSecsSinceEpoch(std::get<(int)TagType::eTime>(value_));
     return QDateTime::fromMSecsSinceEpoch(0);
 }
 
@@ -260,6 +323,8 @@ QString Tag::toString(TagType aType)
             return "String";
         case TagType::eTime:
             return "Time";
+        case TagType::eUnknown:
+            return "Unknown";
         default:
             break;
     }
@@ -285,7 +350,7 @@ QByteArray Tag::toMessage()
            float f;
            char byte[4];
         }u;
-        u.f = (float)value_.toDouble();
+        u.f = (float)std::get<(int)TagType::eDouble>(value_);
         ba.append(u.byte, 4);
     }
     else if(type_ == TagType::eInt)
@@ -295,13 +360,13 @@ QByteArray Tag::toMessage()
             int i;
             char byte[4];
         }u;
-        u.i = value_.toInt();
+        u.i = std::get<(int)TagType::eInt>(value_);
         ba.append(u.byte, 4);
     }
     else if(type_ == TagType::eBool)
     {
         ba.append(":b");
-        ba.append(value_.toBool() ? char(1) : char(0));
+        ba.append(std::get<(int)TagType::eBool>(value_) ? char(1) : char(0));
     }
     else
         Q_UNREACHABLE();
@@ -319,7 +384,7 @@ const QJsonObject &Tag::toJson()
 
     switch (type_) {
         case TagType::eDouble:
-            jsonObject_.insert("value", value_.toDouble());
+            jsonObject_.insert("value", std::get<(int)TagType::eDouble>(value_));
             break;
         case TagType::eInt:
             if(!enumValues_.empty())
@@ -335,16 +400,16 @@ const QJsonObject &Tag::toJson()
 
                 jsonObject_.insert("enumvalues", util::json::toJsonArray(enumValues_, transform));
             }
-            jsonObject_.insert("value", value_.toInt());
+            jsonObject_.insert("value", std::get<(int)TagType::eInt>(value_));
             break;
         case TagType::eBool:
-            jsonObject_.insert("value", value_.toBool());
+            jsonObject_.insert("value", std::get<(int)TagType::eBool>(value_));
             break;
         case TagType::eString:
-            jsonObject_.insert("value", value_.toString());
+            jsonObject_.insert("value", std::get<(int)TagType::eString>(value_));
             break;
         case TagType::eTime:
-            jsonObject_.insert("value", value_.toLongLong());
+            jsonObject_.insert("value", std::get<(int)TagType::eTime>(value_));
             break;
         default:
             jsonObject_.insert("value", {});
