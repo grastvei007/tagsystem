@@ -3,7 +3,7 @@ project(test_tagsystem)
 
 include(GoogleTest)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 
 set_target_properties(PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
 link_directories(${CMAKE_BINARY_DIR}/$<CONFIG>/lib)
@@ -19,7 +19,8 @@ include_directories(${gtest_INCLUDE_DIRS})
 add_executable(test_tagsystem
     main.cpp
     test_tag.cpp
-    test_taglist.cpp)
+    test_taglist.cpp
+    test_tag2.cpp)
 
 
 target_link_libraries(test_tagsystem ${gtest_LIBRARIES} tagsystem)

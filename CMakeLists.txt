@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(tagsystem)
 
+set(CMAKE_CXX_STANDARD 20)
+
 set(CMAKE_INCLUDE_CURRENT_DIR "YES")
 set(CMAKE_AUTOMOC "YES")
 set(CMAKE_AUTOUIC "YES")
@@ -12,6 +14,7 @@ endif()
 find_package(Qt6 COMPONENTS Core REQUIRED)
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
 find_package(Qt6 COMPONENTS WebSockets REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
 qt_add_library(tagsystem SHARED
     serverconnectwidget.ui
@@ -55,6 +58,8 @@ qt_add_library(tagsystem SHARED
     ui/tagtypesortfilterproxymodel.h
     ui/tagtypesortfilterproxymodel.cpp
     util/tagutil.h
+    tag2.h tag2.cpp
+    private/tagtemplate.h private/tagtemplate.cpp
 )
 
 target_link_libraries(tagsystem Qt6::Core)
