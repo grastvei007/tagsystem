@@ -83,6 +83,7 @@ signals:
     void valueChanged(QString);
     void valueChanged(QDateTime);
     void valueChanged(TagSocket*);
+    void hookedUp();
 
 private slots:
     void onTagValueChanged(Tag* tag);
