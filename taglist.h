@@ -57,7 +57,9 @@ public:
     void setClientName(const QString &name);
     void reconnect();
 
-    // server sync
+	void setReconnectIfServerCloseConnection();
+
+	// server sync
     Tag* UpdateOrCreateTag(const QJsonObject &json);
 
     // for unittests, erase all tags.
@@ -102,8 +104,9 @@ private:
 
     bool isConnected_ = false;
     bool initialTagBurstReceived_ = false;
+	bool shouldReconnecIfConnectionIsClosed_ = false;
 
-    QStringList subsystems_;
+	QStringList subsystems_;
 };
 
 #endif // TAGLIST_H
