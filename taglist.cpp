@@ -192,22 +192,29 @@ void TagList::connectToServer(const QString &adress, qint16 port)
     port_ = port;
     QUrl url(QString("ws://%1:%2").arg(adress, QString::number(port)));
     qDebug() << "Connect to: " << url;
-    webSocket_ = new QWebSocket;
-    connect(webSocket_, &QWebSocket::connected, this, &TagList::onConnected);
-    connect(webSocket_, &QWebSocket::disconnected, this, &TagList::onDisconnected);
-    connect(webSocket_, static_cast<void(QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::errorOccurred), this, &TagList::onError);
-    webSocket_->open(url);
+	if (!webSocket_)
+	{
+		webSocket_ = new QWebSocket;
+		connect(webSocket_, &QWebSocket::connected, this, &TagList::onConnected);
+		connect(webSocket_, &QWebSocket::disconnected, this, &TagList::onDisconnected);
+		connect(webSocket_,
+				static_cast<void (QWebSocket::*)(QAbstractSocket::SocketError)>(
+					&QWebSocket::errorOccurred),
+				this,
+				&TagList::onError);
+	}
+	webSocket_->open(url);
 }
 
 void TagList::disconnectFromServer()
 {
     if(!webSocket_)
         return;
-    webSocket_->disconnect();
-    webSocket_->deleteLater();
-    webSocket_ = nullptr;
-    emit serverDisconnected();
-    isConnected_ = false;
+	isConnected_ = false; // make flag ready before to close the connection.
+	webSocket_->disconnect();
+	webSocket_->deleteLater();
+	webSocket_ = nullptr;
+	emit serverDisconnected();
 }
 
 bool TagList::tryToAutoConnect()
@@ -232,6 +239,10 @@ void TagList::reconnect()
     connectToServer(adress_, port_);
 }
 
+void TagList::setReconnectIfServerCloseConnection()
+{
+	shouldReconnecIfConnectionIsClosed_ = true;
+}
 
 void TagList::setClientName(const QString &name)
 {
@@ -316,8 +327,19 @@ void TagList::onConnected()
 
 void TagList::onDisconnected()
 {
-    isConnected_ = false;
-    emit serverDisconnected();
+	if (isConnected_ && shouldReconnecIfConnectionIsClosed_)
+	{
+		isConnected_ = false;
+		if (!adress_.isEmpty() && port_ > 0)
+		{
+			connectToServer(adress_, port_);
+		}
+	}
+	else
+	{
+		isConnected_ = false;
+	}
+	emit serverDisconnected();
 }
 
 
