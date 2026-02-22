@@ -19,7 +19,8 @@ include_directories(${gtest_INCLUDE_DIRS})
 add_executable(test_tagsystem
     main.cpp
     test_tag.cpp
-    test_taglist.cpp)
+    test_taglist.cpp
+    test_util_time.cpp)
 
 
 target_link_libraries(test_tagsystem ${gtest_LIBRARIES} tagsystem)
