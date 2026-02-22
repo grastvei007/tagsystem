@@ -49,6 +49,8 @@ qt_add_library(tagsystem SHARED
     util/json.h
     util/json.cpp
     util/path.h
+    util/time.h
+    util/time.cpp
     util/util.h
     util/util.cpp
 
