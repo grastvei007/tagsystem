@@ -46,6 +46,8 @@ qt_add_library(tagsystem SHARED
     tagsocketlistview.h
     clientinformation.h
 
+    util/date.h
+    util/date.cpp
     util/json.h
     util/json.cpp
     util/path.h
