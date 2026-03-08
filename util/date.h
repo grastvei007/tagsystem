@@ -13,6 +13,7 @@ enum class DayOfWeek {
 	eSunday = 7,
 };
 
+DayOfWeek currentDay();
 } // namespace util::date
 
 #endif // DATE_H
