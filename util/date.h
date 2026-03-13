@@ -13,7 +13,24 @@ enum class DayOfWeek {
 	eSunday = 7,
 };
 
+enum class Month {
+	eJanuary = 1,
+	eFebruary = 2,
+	eMarch = 3,
+	eApril = 4,
+	eMay = 5,
+	eJune = 6,
+	eJuly = 7,
+	eAugust = 8,
+	eSeptember = 9,
+	eOctober = 10,
+	eNovember = 11,
+	eDecember = 12
+};
+
 DayOfWeek currentDay();
+Month currentMonth();
+
 } // namespace util::date
 
 #endif // DATE_H
