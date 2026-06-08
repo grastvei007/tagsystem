@@ -208,6 +208,26 @@ QString Tag::enumValue(int value) const
     return {};
 }
 
+QString Tag::getValueAsString() const
+{
+    switch (type_)
+    {
+    case TagType::eInt:
+        return QString::number(getIntValue());
+    case TagType::eBool:
+        return getBoolValue() ? "True" : "False";
+    case TagType::eDouble:
+        return QString::number(getDoubleValue());
+    case TagType::eString:
+        return getStringValue();
+    case TagType::eTime:
+        return getTimeValue().toString();
+    default:
+        break;
+    }
+    Q_UNREACHABLE();
+}
+
 TagType Tag::typeMatchTagSocket(const TagSocket *tagsocket)
 {
     if(!tagsocket)

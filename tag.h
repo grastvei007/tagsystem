@@ -70,6 +70,7 @@ public:
     QString getStringValue() const;
     QDateTime getTimeValue() const;
     QString enumValue(int value) const;
+    QString getValueAsString() const;
 
     // other
     static TagType typeFromString(const QString &typeString);
