@@ -26,6 +26,14 @@ ClientInformation::ClientInformation(const QString &name) :
 
 }
 
+void ClientInformation::setListenToTags(const std::initializer_list<QString> &tagSet)
+{
+	for(const auto &tag : tagSet)
+	{
+		tagSet_.push_back(tag);
+	}
+}
+
 
 QString ClientInformation::getInfo() const
 {

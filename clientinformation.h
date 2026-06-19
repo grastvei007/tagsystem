@@ -19,16 +19,20 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "tagsystem_global.h"
 #include <QObject>
 #include <QString>
+#include <initializer_list>
 
 class TAGSYSTEMSHARED_EXPORT ClientInformation
 {
 public:
     ClientInformation(const QString &name);
 
+  void setListenToTags(const std::initializer_list<QString> &tagSet);
+
     QString getInfo() const;
 private:
     QString clientName_;
     QString clientIp_;
+	QStringList tagSet_;
 };
 
 #endif // CLIENTINFORMATION_H
