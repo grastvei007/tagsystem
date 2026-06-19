@@ -15,7 +15,9 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "clientinformation.h"
 
-#include <QXmlStreamWriter>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QHostAddress>
 #include <QNetworkInterface>
 #include <QStringList>
@@ -43,16 +45,16 @@ QString ClientInformation::getInfo() const
              ips.push_back(address.toString());
     }
 
-    QString str;
-    QXmlStreamWriter stream(&str);
-    stream.setAutoFormatting(true);
-    stream.writeStartDocument();
-    stream.writeStartElement("client");
-    stream.writeTextElement("name", clientName_);
-    stream.writeTextElement("ip", ips.first());
-    stream.writeEndElement();
-    stream.writeEndDocument();
+	QJsonObject json;
+	json.insert("name", clientName_);
+	json.insert("ip", ips.first());
 
+	if(!tagSet_.isEmpty())
+	{
+		json.insert("tag_set", QJsonArray::fromStringList(tagSet_));
+	}
 
-    return str;
+	QJsonDocument doc(json);
+
+	return QString(doc.toJson());
 }
