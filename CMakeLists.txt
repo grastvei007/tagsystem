@@ -59,6 +59,7 @@ qt_add_library(tagsystem SHARED
     ui/tagtypesortfilterproxymodel.h
     ui/tagtypesortfilterproxymodel.cpp
     util/tagutil.h
+    global/victron.h
 )
 
 target_link_libraries(tagsystem Qt6::Core)
