@@ -43,15 +43,20 @@ public:
     explicit Tag(QObject *parent = nullptr);
     using EnumMap = std::map<int, QString>;
 
-    Tag(QString subSystem, QString name, TagType type);
+	Tag(QString subSystem, QString name, TagType type, bool isArray = false);
 
-    Tag(QString subSystem, QString name, TagType type, QVariant initValue, const QString &description = {});
+	Tag(QString subSystem, QString name, TagType type, QVariant initValue, const QString &description = {}, bool isArray = false);
 
     // config
     void setEnumValues(const EnumMap &map); // available if type is eInt
 
     // setters
     void setValue(QVariant value, qint64 msSinceEpoc = -1);
+
+	//setters for array
+	void insert(unsigned int pos, QVariant value);
+	void push_back(QVariant value);
+	void syncArray();
 
     // getters
     TagType getType() const;
@@ -71,6 +76,10 @@ public:
     QDateTime getTimeValue() const;
     QString enumValue(int value) const;
     QString getValueAsString() const;
+
+	// getters for array
+	unsigned int size() const;
+
 
     // other
     static TagType typeFromString(const QString &typeString);
@@ -94,6 +103,7 @@ private:
 
     // QTime is stored as qint64
     QVariant value_;
+	bool isArray_ = false;
 
     QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
     qint64 timeStamp_ = QDateTime::currentMSecsSinceEpoch(); ///< msSinceEpoc

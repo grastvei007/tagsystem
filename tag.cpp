@@ -26,21 +26,32 @@ Tag::Tag(QObject *parent) : QObject(parent)
 }
 
 
-Tag::Tag(QString aSubSystem, QString aName, TagType aType) :
+Tag::Tag(QString aSubSystem, QString aName, TagType aType, bool isArray) :
     subSystem_(aSubSystem),
     name_(aName),
-    type_(aType)
+	type_(aType),
+	isArray_(isArray)
 {
-
+	if(isArray_)
+	{
+		QList<QVariant> list;
+		value_ = list;
+	}
 }
 
-Tag::Tag(QString subSystem, QString name, TagType type, QVariant initValue, const QString &description) :
+Tag::Tag(QString subSystem, QString name, TagType type, QVariant initValue, const QString &description, bool isArray) :
     subSystem_(subSystem),
     name_(name),
     type_(type),
     value_(initValue),
-    description_(description)
+	description_(description),
+	isArray_(isArray)
 {
+	if(isArray_)
+	{
+		QList<QVariant> list;
+		value_ = list;
+	}
     setValue(initValue);
 }
 
@@ -88,7 +99,14 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
         return;
     }
 
-    value_ = value;
+	if(!isArray_)
+	{
+		value_ = value;
+	}
+	else
+	{
+		value_.toList().push_back(value);
+	}
 
     if(msSinceEpoc < 0)
     {
@@ -98,6 +116,30 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
     else
         timeStamp_ = msSinceEpoc;
     emit valueChanged(this);
+}
+
+void Tag::insert(unsigned int pos, QVariant value)
+{
+	if(isArray_)
+	{
+		value_.toList().insert(pos, value);
+	}
+}
+
+void Tag::push_back(QVariant value)
+{
+	if(isArray_)
+	{
+		value_.toList().push_back(value);
+	}
+}
+
+void Tag::syncArray()
+{
+	timeStamp_ = QDateTime::currentMSecsSinceEpoch();
+	isUpdated_ = true;
+
+	emit valueChanged(this);
 }
 
 QString Tag::getFullName() const
@@ -226,6 +268,15 @@ QString Tag::getValueAsString() const
         break;
     }
     Q_UNREACHABLE();
+}
+
+unsigned int Tag::size() const
+{
+	if(isArray_)
+	{
+		return value_.toList().size();
+	}
+	return 0;
 }
 
 TagType Tag::typeMatchTagSocket(const TagSocket *tagsocket)
