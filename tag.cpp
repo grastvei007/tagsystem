@@ -387,10 +387,23 @@ const QJsonObject &Tag::toJson()
     jsonObject_.insert("type", Tag::toString(type_));
     jsonObject_.insert("description", description_);
     jsonObject_.insert("timestamp", timeStamp_);
+	jsonObject_.insert("isarray", isArray_);
 
     switch (type_) {
         case TagType::eDouble:
-            jsonObject_.insert("value", value_.toDouble());
+			if(isArray_)
+			{
+				QJsonArray array;
+				for(const auto &val : value_.toList())
+				{
+					array.append(val.toDouble());
+				}
+				jsonObject_.insert("arrayvalues", array);
+			}
+			else
+			{
+				jsonObject_.insert("value", value_.toDouble());
+			}
             break;
         case TagType::eInt:
             if(!enumValues_.empty())
@@ -406,16 +419,64 @@ const QJsonObject &Tag::toJson()
 
                 jsonObject_.insert("enumvalues", util::json::toJsonArray(enumValues_, transform));
             }
-            jsonObject_.insert("value", value_.toInt());
+			if(isArray_)
+			{
+				QJsonArray array;
+				for(const auto &val : value_.toList())
+				{
+					array.append(val.toInt());
+				}
+				jsonObject_.insert("arrayvalues", array);
+			}
+			else
+			{
+				jsonObject_.insert("value", value_.toInt());
+			}
             break;
         case TagType::eBool:
-            jsonObject_.insert("value", value_.toBool());
+			if(isArray_)
+			{
+				QJsonArray array;
+				for(const auto &val : value_.toList())
+				{
+					array.append(val.toBool());
+				}
+				jsonObject_.insert("arrayvalues", array);
+			}
+			else
+			{
+				jsonObject_.insert("value", value_.toBool());
+			}
             break;
         case TagType::eString:
-            jsonObject_.insert("value", value_.toString());
+			if(isArray_)
+			{
+				QJsonArray array;
+				for(const auto &val : value_.toList())
+				{
+					array.append(val.toString());
+				}
+				jsonObject_.insert("arrayvalues", array);
+			}
+			else
+			{
+				jsonObject_.insert("value", value_.toString());
+			}
             break;
         case TagType::eTime:
-            jsonObject_.insert("value", value_.toLongLong());
+			if(isArray_)
+			{
+				QJsonArray array;
+				for(const auto &val : value_.toList())
+				{
+					array.append(val.toLongLong());
+				}
+				jsonObject_.insert("arrayvalues", array);
+			}
+			else
+			{
+				jsonObject_.insert("value", value_.toLongLong());
+			}
             break;
         default:
             jsonObject_.insert("value", {});
