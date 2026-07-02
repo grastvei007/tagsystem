@@ -23,16 +23,9 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include <QDateTime>
 #include <QJsonObject>
 
-class TagSocket;
+#include "tagvalue.h"
 
-enum class TagType{
-    eUnknown,
-    eDouble,
-    eInt,
-    eBool,
-    eString,
-    eTime
-};
+class TagSocket;
 
 
 class TAGSYSTEMSHARED_EXPORT Tag : public QObject
@@ -102,7 +95,8 @@ private:
     QString description_ = {};
 
     // QTime is stored as qint64
-    QVariant value_;
+	using tagValue_t = TagValueVariant<TagType::eDouble, TagType::eInt, TagType::eBool, TagType::eString, TagType::eTime>;
+	std::vector<tagValue_t> tagValue_;
 	bool isArray_ = false;
 
     QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
@@ -113,6 +107,8 @@ private:
     bool isUpdated_ = true; ///< local update, indicate ready to be synced with server
 
     EnumMap enumValues_;
+
+	void updateJsonObject();
 };
 
 

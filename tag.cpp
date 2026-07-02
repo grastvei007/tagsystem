@@ -15,14 +15,23 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 
 #include "tag.h"
 #include "tagsocket.h"
+#include "tagvalue.h"
 
 #include "util/json.h"
 #include <QMetaType>
 #include <QVariant>
+#include <variant>
+
+template<typename ... Ts>                                                 // (7)
+struct Overload : Ts ... {
+	using Ts::operator() ...;
+};
+template<class... Ts> Overload(Ts...) -> Overload<Ts...>;
+
 
 Tag::Tag(QObject *parent) : QObject(parent)
 {
-
+	tagValue_.push_back(0);
 }
 
 
@@ -32,26 +41,17 @@ Tag::Tag(QString aSubSystem, QString aName, TagType aType, bool isArray) :
 	type_(aType),
 	isArray_(isArray)
 {
-	if(isArray_)
-	{
-		QList<QVariant> list;
-		value_ = list;
-	}
+	tagValue_.push_back(0);
 }
 
 Tag::Tag(QString subSystem, QString name, TagType type, QVariant initValue, const QString &description, bool isArray) :
     subSystem_(subSystem),
     name_(name),
     type_(type),
-    value_(initValue),
 	description_(description),
 	isArray_(isArray)
 {
-	if(isArray_)
-	{
-		QList<QVariant> list;
-		value_ = list;
-	}
+	tagValue_.push_back(0);
     setValue(initValue);
 }
 
@@ -70,43 +70,80 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
     // validate value based on type
     if(type_ == TagType::eDouble && value.metaType().id() == QMetaType::Double)
     {
-        if(qFuzzyCompare(value.toDouble(), value_.toDouble()))
+		double newValue = value.toDouble();
+		if(!std::holds_alternative<double>(tagValue_[0]))
+		{
+			tagValue_[0] = newValue;
+		}
+		else if(qFuzzyCompare(std::get<double>(tagValue_[0]), newValue))
             return;
+		else
+		{
+			tagValue_[0] = newValue;
+		}
     }
     else if(type_ == TagType::eInt && value.metaType().id() == QMetaType::Int)
     {
-        if(value == value_)
+		int newValue = value.toInt();
+		if(!std::holds_alternative<int>(tagValue_[0]))
+		{
+			tagValue_[0] = newValue;
+		}
+		else if(std::get<int>(tagValue_[0]) == newValue)
             return;
+		else
+		{
+			tagValue_[0] = newValue;
+		}
     }
     else if(type_ == TagType::eBool && value.metaType().id()  == QMetaType::Bool)
     {
-        if(value == value_)
+		bool newValue = value.toBool();
+		if(!std::holds_alternative<bool>(tagValue_[0]))
+		{
+			tagValue_[0] = newValue;
+		}
+		else if(std::get<bool>(tagValue_[0]) == newValue)
             return;
+		else
+		{
+			tagValue_[0] = newValue;
+		}
     }
     else if(type_ == TagType::eString && value.metaType().id() == QMetaType::QString)
     {
-        if(value == value_)
+		QString newValue = value.toString();
+		if(!std::holds_alternative<QString>(tagValue_[0]))
+		{
+			tagValue_[0] = newValue;
+		}
+		else if(std::get<QString>(tagValue_[0]) == newValue)
             return;
+		else
+		{
+			tagValue_[0] = newValue;
+		}
     }
-    else if(type_ == TagType::eTime && value.metaType().id() == QMetaType::LongLong)
+	else if(type_ == TagType::eTime
+		&& (value.metaType().id() == QMetaType::LongLong || value.metaType().id() == QMetaType::QDateTime))
     {
-        if(value == value_)
+		qint64 newValue = static_cast<qint64>(value.toLongLong());
+		if(!std::holds_alternative<qint64>(tagValue_[0]))
+		{
+			tagValue_[0] = newValue;
+		}
+		else if(std::get<qint64>(tagValue_[0]) == newValue)
             return;
+		else
+		{
+			tagValue_[0] = newValue;
+		}
     }
     else
     {
         qWarning() << "Set invalid value type to tag: " << getFullName();
         return;
     }
-
-	if(!isArray_)
-	{
-		value_ = value;
-	}
-	else
-	{
-		value_.toList().push_back(value);
-	}
 
     if(msSinceEpoc < 0)
     {
@@ -122,7 +159,7 @@ void Tag::insert(unsigned int pos, QVariant value)
 {
 	if(isArray_)
 	{
-		value_.toList().insert(pos, value);
+		//value_.toList().insert(pos, value);
 	}
 }
 
@@ -130,7 +167,7 @@ void Tag::push_back(QVariant value)
 {
 	if(isArray_)
 	{
-		value_.toList().push_back(value);
+		//value_.toList().push_back(value);
 	}
 }
 
@@ -178,7 +215,6 @@ qint64 Tag::getMsSinceEpoc() const
     return timeStamp_;
 }
 
-
 TagType Tag::getType() const
 {
     return type_;
@@ -197,8 +233,8 @@ QString Tag::getTypeStr() const
         return "String";
     case TagType::eTime:
         return "Time";
-    case TagType::eUnknown:
-        return "Unknown";
+	case TagType::eUnknown:
+		return "Unknown";
     }
 
     Q_UNREACHABLE();
@@ -207,40 +243,61 @@ QString Tag::getTypeStr() const
 
 double Tag::getDoubleValue() const
 {
-    if(value_.metaType().id() == QMetaType::Double)
-        return value_.toDouble();
-    return 0.0;
+	try{
+		return std::get<double>(tagValue_[0]);
+	}catch(const std::bad_variant_access& ex){
+		qDebug() << ex.what();
+		return 0.0;
+	}
 }
 
 
 int Tag::getIntValue() const
 {
-    if(value_.metaType().id() == QMetaType::Int)
-        return value_.toInt();
-    return 0;
+	try{
+		int v = std::get<int>(tagValue_[0]);
+		return v;
+	}catch(const std::bad_variant_access& ex){
+		qDebug() << ex.what();
+		return 0;
+	}
 }
 
 
 bool Tag::getBoolValue() const
 {
-    if(value_.metaType().id() == QMetaType::Bool)
-        return value_.toBool();
-    return false;
+	try{
+		return std::get<bool>(tagValue_[0]);
+	}
+	catch(const std::bad_variant_access& ex)
+	{
+		qDebug() << ex.what();
+		return false;
+	}
 }
 
 
 QString Tag::getStringValue() const
 {
-    if(value_.metaType().id() == QMetaType::QString)
-        return value_.toString();
-    return {};
+	try{
+		return std::get<QString>(tagValue_[0]);
+	}
+	catch(const std::bad_variant_access& ex)
+	{
+		qDebug() << ex.what();
+		return {};
+	}
 }
 
 QDateTime Tag::getTimeValue() const
 {
-    if(value_.metaType().id() == QMetaType::LongLong)
-        return QDateTime::fromMSecsSinceEpoch(value_.toLongLong());
-    return QDateTime::fromMSecsSinceEpoch(0);
+	try{
+		qint64 time = std::get<qint64>(tagValue_[0]);
+		return QDateTime::fromMSecsSinceEpoch(time);
+	}catch(const std::bad_variant_access& ex){
+		qDebug() << ex.what();
+		return QDateTime::fromMSecsSinceEpoch(0);
+	}
 }
 
 QString Tag::enumValue(int value) const
@@ -274,7 +331,7 @@ unsigned int Tag::size() const
 {
 	if(isArray_)
 	{
-		return value_.toList().size();
+		return tagValue_.size();
 	}
 	return 0;
 }
@@ -356,7 +413,7 @@ QByteArray Tag::toMessage()
            float f;
            char byte[4];
         }u;
-        u.f = (float)value_.toDouble();
+		u.f = (float)std::get<double>(tagValue_[0]);
         ba.append(u.byte, 4);
     }
     else if(type_ == TagType::eInt)
@@ -366,13 +423,13 @@ QByteArray Tag::toMessage()
             int i;
             char byte[4];
         }u;
-        u.i = value_.toInt();
+		u.i = std::get<int>(tagValue_[0]);
         ba.append(u.byte, 4);
     }
     else if(type_ == TagType::eBool)
     {
         ba.append(":b");
-        ba.append(value_.toBool() ? char(1) : char(0));
+		ba.append(std::get<bool>(tagValue_[0]) ? char(1) : char(0));
     }
     else
         Q_UNREACHABLE();
@@ -394,15 +451,15 @@ const QJsonObject &Tag::toJson()
 			if(isArray_)
 			{
 				QJsonArray array;
-				for(const auto &val : value_.toList())
+				/*or(const auto &val : value_.toList())
 				{
 					array.append(val.toDouble());
-				}
+				}*/
 				jsonObject_.insert("arrayvalues", array);
 			}
 			else
 			{
-				jsonObject_.insert("value", value_.toDouble());
+				jsonObject_.insert("value", getDoubleValue());
 			}
             break;
         case TagType::eInt:
@@ -422,60 +479,60 @@ const QJsonObject &Tag::toJson()
 			if(isArray_)
 			{
 				QJsonArray array;
-				for(const auto &val : value_.toList())
+				/*for(const auto &val : value_.toList())
 				{
 					array.append(val.toInt());
-				}
+				}*/
 				jsonObject_.insert("arrayvalues", array);
 			}
 			else
 			{
-				jsonObject_.insert("value", value_.toInt());
+				jsonObject_.insert("value", getIntValue());
 			}
             break;
         case TagType::eBool:
 			if(isArray_)
 			{
 				QJsonArray array;
-				for(const auto &val : value_.toList())
+				/*for(const auto &val : value_.toList())
 				{
 					array.append(val.toBool());
-				}
+				}*/
 				jsonObject_.insert("arrayvalues", array);
 			}
 			else
 			{
-				jsonObject_.insert("value", value_.toBool());
+				jsonObject_.insert("value", getBoolValue());
 			}
             break;
         case TagType::eString:
 			if(isArray_)
 			{
 				QJsonArray array;
-				for(const auto &val : value_.toList())
+				/*for(const auto &val : value_.toList())
 				{
 					array.append(val.toString());
-				}
+				}*/
 				jsonObject_.insert("arrayvalues", array);
 			}
 			else
 			{
-				jsonObject_.insert("value", value_.toString());
+				jsonObject_.insert("value", getStringValue());
 			}
             break;
         case TagType::eTime:
 			if(isArray_)
 			{
 				QJsonArray array;
-				for(const auto &val : value_.toList())
+				/*for(const auto &val : value_.toList())
 				{
 					array.append(val.toLongLong());
-				}
+				}*/
 				jsonObject_.insert("arrayvalues", array);
 			}
 			else
 			{
-				jsonObject_.insert("value", value_.toLongLong());
+				jsonObject_.insert("value", std::get<qint64>(tagValue_[0]));
 			}
             break;
         default:
