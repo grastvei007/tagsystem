@@ -157,17 +157,79 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 
 void Tag::insert(unsigned int pos, QVariant value)
 {
-	if(isArray_)
+	if(!isArray_)
 	{
-		//value_.toList().insert(pos, value);
+		return;
+	}
+	switch (type_) {
+		case TagType::eInt:
+			tagValue_.insert(tagValue_.begin() + pos, value.toInt());
+			break;
+		case TagType::eDouble:
+			tagValue_.insert(tagValue_.begin() + pos, value.toDouble());
+			break;
+		case TagType::eBool:
+			tagValue_.insert(tagValue_.begin() + pos, value.toBool());
+			break;
+		case TagType::eString:
+			tagValue_.insert(tagValue_.begin() + pos, value.toString());
+			break;
+		case TagType::eTime:
+			if (value.metaType().id() == QMetaType::LongLong) {
+				qint64 newValue = value.toLongLong();
+				tagValue_.insert(tagValue_.begin() + pos, newValue);
+			}
+			else if (value.metaType().id() == QMetaType::QDateTime) {
+				QDateTime newTime = value.toDateTime();
+				tagValue_.insert(tagValue_.begin() + pos, newTime.toMSecsSinceEpoch());
+			}
+			break;
+		default:
+			qWarning() << "Insert invalid value type to tag: " << getFullName();
+			return;
 	}
 }
 
+
+
 void Tag::push_back(QVariant value)
 {
-	if(isArray_)
+	if(!isArray_)
 	{
-		//value_.toList().push_back(value);
+		return;
+	}
+	switch (type_) {
+	case TagType::eInt:
+		tagValue_.push_back(value.toInt());
+		break;
+	case TagType::eDouble:
+		tagValue_.push_back(value.toDouble());
+		break;
+	case TagType::eBool:
+		tagValue_.push_back(value.toBool());
+		break;
+	case TagType::eString:
+		tagValue_.push_back(value.toString());
+		break;
+	case TagType::eTime:
+		if (value.metaType().id() == QMetaType::LongLong) {
+			qint64 newValue = value.toLongLong();
+			tagValue_.push_back(newValue);
+		} else if (value.metaType().id() == QMetaType::QDateTime) {
+			QDateTime newTime = value.toDateTime();
+			if (!newTime.isValid()) {
+				qWarning() << "Invalid time format for tag: " << getFullName();
+				return;
+			}
+			tagValue_.push_back(newTime.toMSecsSinceEpoch());
+		} else {
+			qWarning() << "Push back invalid value type to tag: " << getFullName();
+			return;
+		}
+		break;
+	default:
+		qWarning() << "Push back invalid value type to tag: " << getFullName();
+		return;
 	}
 }
 
@@ -439,6 +501,22 @@ QByteArray Tag::toMessage()
 
 const QJsonObject &Tag::toJson()
 {
+	QJsonArray tagValueArray;
+
+	auto toJsonArray = Overload([&tagValueArray](int val) { tagValueArray.append(val); },
+						 [&tagValueArray](double val) { tagValueArray.append(val); },
+						 [&tagValueArray](bool val) { tagValueArray.append(val ? 1 : 0); },
+						 [&tagValueArray](QString val){tagValueArray.append(val);},
+						 [&tagValueArray](qint64 val){ tagValueArray.append(val); }
+						);
+
+	auto crateJsonArray = [&toJsonArray](const auto &tagValueList){
+		for(const auto &val : tagValueList)
+		{
+			std::visit(toJsonArray, val);
+		}
+	};
+
     jsonObject_.insert("name", name_);
     jsonObject_.insert("subsystem", subSystem_);
     jsonObject_.insert("type", Tag::toString(type_));
@@ -446,16 +524,13 @@ const QJsonObject &Tag::toJson()
     jsonObject_.insert("timestamp", timeStamp_);
 	jsonObject_.insert("isarray", isArray_);
 
+
     switch (type_) {
         case TagType::eDouble:
 			if(isArray_)
 			{
-				QJsonArray array;
-				/*or(const auto &val : value_.toList())
-				{
-					array.append(val.toDouble());
-				}*/
-				jsonObject_.insert("arrayvalues", array);
+				crateJsonArray(tagValue_);
+				jsonObject_.insert("arrayvalues", tagValueArray);
 			}
 			else
 			{
@@ -478,12 +553,8 @@ const QJsonObject &Tag::toJson()
             }
 			if(isArray_)
 			{
-				QJsonArray array;
-				/*for(const auto &val : value_.toList())
-				{
-					array.append(val.toInt());
-				}*/
-				jsonObject_.insert("arrayvalues", array);
+				crateJsonArray(tagValue_);
+				jsonObject_.insert("arrayvalues", tagValueArray);
 			}
 			else
 			{
@@ -493,12 +564,8 @@ const QJsonObject &Tag::toJson()
         case TagType::eBool:
 			if(isArray_)
 			{
-				QJsonArray array;
-				/*for(const auto &val : value_.toList())
-				{
-					array.append(val.toBool());
-				}*/
-				jsonObject_.insert("arrayvalues", array);
+				crateJsonArray(tagValue_);
+				jsonObject_.insert("arrayvalues", tagValueArray);
 			}
 			else
 			{
@@ -508,12 +575,8 @@ const QJsonObject &Tag::toJson()
         case TagType::eString:
 			if(isArray_)
 			{
-				QJsonArray array;
-				/*for(const auto &val : value_.toList())
-				{
-					array.append(val.toString());
-				}*/
-				jsonObject_.insert("arrayvalues", array);
+				crateJsonArray(tagValue_);
+				jsonObject_.insert("arrayvalues", tagValueArray);
 			}
 			else
 			{
@@ -523,12 +586,8 @@ const QJsonObject &Tag::toJson()
         case TagType::eTime:
 			if(isArray_)
 			{
-				QJsonArray array;
-				/*for(const auto &val : value_.toList())
-				{
-					array.append(val.toLongLong());
-				}*/
-				jsonObject_.insert("arrayvalues", array);
+				crateJsonArray(tagValue_);
+				jsonObject_.insert("arrayvalues", tagValueArray);
 			}
 			else
 			{
