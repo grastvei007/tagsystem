@@ -173,7 +173,7 @@ protected:
         case TagType::eString:
             return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toString(), param.description);
         case TagType::eTime:
-            return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toTime(), param.description);
+			return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toDateTime(), param.description);
         }
 
         return nullptr;
