@@ -23,7 +23,7 @@ protected:
 
     Tag* createIntTagWithValue(int value)
     {
-        return TagList::sGetInstance().createTag(subsystem, name, type, value, desciption);
+		return TagList::sGetInstance().createTag(subsystem, name, type, value, desciption, false);
     }
 
     void setEnumNamesToTag(Tag *tag)
@@ -165,15 +165,15 @@ protected:
         switch(param.type)
         {
         case TagType::eBool:
-            return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toBool(), param.description);
+			return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toBool(), param.description, false);
         case TagType::eDouble:
-            return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toDouble(), param.description);
+			return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toDouble(), param.description, false);
         case TagType::eInt:
-            return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toInt(), param.description);
+			return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toInt(), param.description, false);
         case TagType::eString:
-            return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toString(), param.description);
+			return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toString(), param.description, false);
         case TagType::eTime:
-			return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toDateTime(), param.description);
+			return TagList::sGetInstance().createTag(param.subsystem, param.name, param.type, param.value.toDateTime(), param.description, false);
         }
 
         return nullptr;
