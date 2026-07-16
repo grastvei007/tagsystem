@@ -36,9 +36,9 @@ public:
 
     int getNumberOfTags() const;
 
-    Tag* createTag(const QString &subSystem, const QString &name, TagType type);
-    Tag* createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue);
-    Tag* createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue, const QString& description);
+	Tag* createTag(const QString &subSystem, const QString &name, TagType type, bool isArray);
+	Tag* createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue, bool isArray);
+	Tag* createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue, const QString& description, bool isArray);
 
     Tag* findByTagName(const QString &fullName);
     Tag* findByTagName(const QString &subsystem, const QString &name);
@@ -87,7 +87,7 @@ private slots:
     void onError();
 
 private:
-    TagList() = default;
+	TagList();
 
 private:
     QMap<QString, Tag*> tagByName_;
@@ -108,5 +108,7 @@ private:
 
 	QStringList subsystems_;
 };
+
+inline TagList::TagList() = default;
 
 #endif // TAGLIST_H

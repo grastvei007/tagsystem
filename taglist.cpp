@@ -39,7 +39,7 @@ int TagList::getNumberOfTags() const
     return tagByName_.size();
 }
 
-Tag* TagList::createTag(const QString &subSystem, const QString &name, TagType type)
+Tag* TagList::createTag(const QString &subSystem, const QString &name, TagType type, bool isArray)
 {
     Tag *tag = findByTagName(QString("%1.%2").arg(subSystem, name));
     if(tag)
@@ -47,7 +47,7 @@ Tag* TagList::createTag(const QString &subSystem, const QString &name, TagType t
         return tag;
     }
     // tag does not exist, create it.
-    tag = new Tag(subSystem, name, type);
+	tag = new Tag(subSystem, name, type, isArray);
     tagByName_[tag->getFullName()] = tag;
     tags_.push_back(tag);
     connect(tag, &Tag::valueChanged, this, &TagList::tagValueChanged);
@@ -60,13 +60,13 @@ Tag* TagList::createTag(const QString &subSystem, const QString &name, TagType t
 }
 
 
-Tag *TagList::createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue)
+Tag *TagList::createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue, bool isArray)
 {
-    return createTag(subSystem, name, type, initValue, QString());
+	return createTag(subSystem, name, type, initValue, QString(), isArray);
 }
 
 
-Tag *TagList::createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue, const QString &description)
+Tag *TagList::createTag(const QString &subSystem, const QString &name, TagType type, QVariant initValue, const QString &description, bool isArray)
 {
     auto *tag = findByTagName(QString("%1.%2").arg(subSystem, name));
     if(tag)
@@ -367,6 +367,7 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
     auto type = Tag::typeFromString(json.value("type").toString());
     auto timestamp = json.value("timestamp").toInteger();
     auto value = json.value("value");
+	auto isArray = json.value("isarray").toBool();
 
     auto *tag = findByTagName(QString("%1.%2").arg(subsystem, name));
     Tag *createdTag = nullptr;
@@ -376,7 +377,7 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
         if (tag)
             tag->setValue(value.toDouble(), timestamp);
         else
-            createdTag = createTag(subsystem, name, TagType::eDouble, value.toDouble(), description);
+			createdTag = createTag(subsystem, name, TagType::eDouble, value.toDouble(), description, isArray);
         break;
     }
     case TagType::eInt: {
@@ -405,7 +406,7 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
         }
         else
         {
-            createdTag = createTag(subsystem, name, TagType::eInt, value.toInt(), description);
+			createdTag = createTag(subsystem, name, TagType::eInt, value.toInt(), description, isArray);
             if(!list.empty())
                 createdTag->setEnumValues(list);
         }
@@ -416,14 +417,14 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
         if (tag)
             tag->setValue(value.toBool(), timestamp);
         else
-            createdTag = createTag(subsystem, name, TagType::eBool, value.toBool(), description);
+			createdTag = createTag(subsystem, name, TagType::eBool, value.toBool(), description, isArray);
         break;
     }
     case TagType::eString: {
         if (tag)
             tag->setValue(value.toString(), timestamp);
         else
-            createdTag = createTag(subsystem, name, TagType::eString, value.toString(), description);
+			createdTag = createTag(subsystem, name, TagType::eString, value.toString(), description, isArray);
         break;
     }
     case TagType::eTime: {
@@ -431,7 +432,7 @@ Tag* TagList::UpdateOrCreateTag(const QJsonObject &json)
         if (tag)
             tag->setValue(time, timestamp);
         else
-            createdTag = createTag(subsystem, name, TagType::eTime, time, description);
+			createdTag = createTag(subsystem, name, TagType::eTime, time, description, isArray);
         break;
     }
     default:

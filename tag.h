@@ -61,6 +61,7 @@ public:
     const QString& getDescription() const;
     const QString& getTimeStampFormat() const;
     qint64 getMsSinceEpoc() const;
+	bool isArray() const;
 
     double getDoubleValue() const;
     int getIntValue() const;
@@ -89,6 +90,7 @@ signals:
 public slots:
 
 private:
+  bool isEqual(const QVariantList &list) const;
     QString subSystem_ = {};
     QString name_ = {};
     TagType type_ = TagType::eDouble;
