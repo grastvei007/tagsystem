@@ -72,42 +72,7 @@ Tag *TagList::createTag(const QString &subSystem, const QString &name, TagType t
     if(tag)
         return tag;
 
-    switch(type)
-    {
-        case TagType::eDouble:
-        {
-            double value = initValue.toDouble();
-            tag = new Tag(subSystem, name, type, value, description);
-            break;
-        }
-        case TagType::eInt:
-        {
-            auto value = initValue.toInt();
-            tag = new Tag(subSystem, name, type, value, description);
-            break;
-        }
-        case TagType::eBool:
-        {
-            auto value = initValue.toBool();
-            tag = new Tag(subSystem, name, type, value, description);
-            break;
-        }
-        case TagType::eString:
-        {
-            auto value = initValue.toString();
-            tag = new Tag(subSystem, name, type, value, description);
-            break;
-        }
-        case TagType::eTime:
-        {
-            auto value = initValue.toDateTime();
-            tag = new Tag(subSystem, name, type, value, description);
-            break;
-        }
-        default:
-            tag = new Tag(subSystem, name, type);
-            break;
-    }
+	tag = new Tag(subSystem, name, type, initValue, description, isArray);
 
     tagByName_[tag->getFullName()] = tag;
     tags_.push_back(tag);
