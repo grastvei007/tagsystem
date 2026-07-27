@@ -20,13 +20,6 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.*/
 #include "util/json.h"
 #include <QMetaType>
 #include <QVariant>
-#include <variant>
-
-template<typename ... Ts>                                                 // (7)
-struct Overload : Ts ... {
-	using Ts::operator() ...;
-};
-template<class... Ts> Overload(Ts...) -> Overload<Ts...>;
 
 
 Tag::Tag(QObject *parent) : QObject(parent)
@@ -76,11 +69,17 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				auto list = value.toList();
 				for(auto &v : list)
 				{
-					tagValue_.push_back(v.toDouble());
+					Value val;
+					val.set<TagType::eDouble>(v.toDouble());
+					tagValue_.push_back(val);
 				}
 			}
 			else
-			tagValue_.push_back(value.toDouble());
+			{
+				Value val;
+				val.set<TagType::eDouble>(value.toDouble());
+				tagValue_.push_back(val);
+			}
 		}
 		else
 		{
@@ -93,15 +92,17 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				auto list = value.toList();
 				for(auto &v : list)
 				{
-					tagValue_.push_back(v.toDouble());
+					Value val;
+					val.set<TagType::eDouble>(v.toDouble());
+					tagValue_.push_back(val);
 				}
 			}
 			else
 			{
-				if(qFuzzyCompare(std::get<double>(tagValue_[0]), value.toDouble()))
+				if(tagValue_[0] == value.toDouble())
 					return;
 
-				tagValue_[0] = value.toDouble();
+				tagValue_[0].set<TagType::eDouble>(value.toDouble());
 			}
 		}
     }
@@ -115,13 +116,14 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				const auto list = value.toList();
 				for(const auto &v : list)
 				{
-					tagValue_.push_back(v.toInt());
+					tagValue_.push_back(Value());
+					tagValue_.back().set<TagType::eInt>(v.toInt());
 				}
 			}
 			else
 			{
-				int newValue = value.toInt();
-				tagValue_.push_back(newValue);
+				tagValue_.push_back(Value());
+				tagValue_.front().set<TagType::eInt>(value.toInt());
 			}
 		}
 		else
@@ -136,17 +138,18 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				tagValue_.clear();
 				for(const auto &v : list)
 				{
-					tagValue_.push_back(v.toInt());
+					tagValue_.push_back(Value());
+					tagValue_.back().set<TagType::eInt>(v.toInt());
 				}
 			}
 			else
 			{
 				int newValue = value.toInt();
-				if(std::get<int>(tagValue_[0]) == newValue)
+				if(tagValue_[0] == newValue)
 					return;
 				else
 				{
-					tagValue_[0] = newValue;
+					tagValue_[0].set<TagType::eInt>(newValue);
 				}
 			}
 		}
@@ -161,12 +164,14 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				const auto list = value.toList();
 				for(const auto &v : list)
 				{
-					tagValue_.push_back(v.toBool());
+					tagValue_.push_back(Value());
+					tagValue_.back().set<TagType::eBool>(v.toBool());
 				}
 			}
 			else
 			{
-				tagValue_.push_back(value.toBool());
+				tagValue_.push_back(Value());
+				tagValue_.front().set<TagType::eBool>(value.toBool());
 			}
 		}
 		else
@@ -179,15 +184,16 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				tagValue_.clear();
 				for(const auto &v : value.toList())
 				{
-					tagValue_.push_back(v.toBool());
+					tagValue_.push_back(Value());
+					tagValue_.back().set<TagType::eBool>(v.toBool());
 				}
 			}
 			else
 			{
-				if(std::get<bool>(tagValue_[0]) == value.toBool())
+				if(tagValue_[0] == value.toBool())
 					return;
 
-				tagValue_[0] = value.toBool();
+				tagValue_[0].set<TagType::eBool>(value.toBool());
 			}
 		}
     }
@@ -201,12 +207,14 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				const auto list = value.toList();
 				for(const auto &v : list)
 				{
-					tagValue_.push_back(v.toString());
+					tagValue_.push_back(Value());
+					tagValue_.back().set<TagType::eString>(v.toString());
 				}
 			}
 			else
 			{
-				tagValue_.push_back(value.toString());
+				tagValue_.push_back(Value());
+				tagValue_.front().set<TagType::eString>(value.toString());
 			}
 		}
 		else
@@ -219,15 +227,16 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				tagValue_.clear();
 				for(const auto &v : value.toList())
 				{
-					tagValue_.push_back(v.toString());
+					tagValue_.push_back(Value());
+					tagValue_.back().set<TagType::eString>(v.toString());
 				}
 			}
 			else
 			{
-				if(std::get<QString>(tagValue_[0]) == value.toString())
+				if(tagValue_[0] == value.toString())
 					return;
 
-				tagValue_[0] = value.toString();
+				tagValue_[0].set<TagType::eString>(value.toString());
 			}
 		}
     }
@@ -241,12 +250,14 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				const auto list = value.toList();
 				for(const auto &v : list)
 				{
-					tagValue_.push_back(v.toLongLong());
+					tagValue_.push_back(Value());
+					tagValue_.back().set<TagType::eTime>(v.toLongLong());
 				}
 			}
 			else
 			{
-				tagValue_.push_back(value.toLongLong());
+				tagValue_.push_back(Value());
+				tagValue_.front().set<TagType::eTime>(value.toLongLong());
 			}
 		}
 		else
@@ -259,15 +270,16 @@ void Tag::setValue(QVariant value, qint64 msSinceEpoc)
 				tagValue_.clear();
 				for(const auto &v : value.toList())
 				{
-					tagValue_.push_back(v.toLongLong());
+					tagValue_.push_back(Value());
+					tagValue_.back().set<TagType::eTime>(v.toLongLong());
 				}
 			}
 			else
 			{
-				if(std::get<qint64>(tagValue_[0]) == value.toLongLong())
+				if(tagValue_[0] == value.toLongLong())
 					return;
 
-				tagValue_[0] = value.toLongLong();
+				tagValue_[0].set<TagType::eTime>(value.toLongLong());
 			}
 		}
     }
@@ -295,27 +307,48 @@ void Tag::insert(unsigned int pos, QVariant value)
 	}
 	switch (type_) {
 		case TagType::eInt:
-			tagValue_.insert(tagValue_.begin() + pos, value.toInt());
-			break;
-		case TagType::eDouble:
-			tagValue_.insert(tagValue_.begin() + pos, value.toDouble());
-			break;
-		case TagType::eBool:
-			tagValue_.insert(tagValue_.begin() + pos, value.toBool());
-			break;
-		case TagType::eString:
-			tagValue_.insert(tagValue_.begin() + pos, value.toString());
-			break;
-		case TagType::eTime:
-			if (value.metaType().id() == QMetaType::LongLong) {
-				qint64 newValue = value.toLongLong();
+			{
+				Value newValue;
+				newValue.set<TagType::eInt>(value.toInt());
 				tagValue_.insert(tagValue_.begin() + pos, newValue);
+				break;
 			}
-			else if (value.metaType().id() == QMetaType::QDateTime) {
-				QDateTime newTime = value.toDateTime();
-				tagValue_.insert(tagValue_.begin() + pos, newTime.toMSecsSinceEpoch());
+		case TagType::eDouble:
+			{
+				Value newValue;
+				newValue.set<TagType::eDouble>(value.toDouble());
+				tagValue_.insert(tagValue_.begin() + pos, newValue);
+				break;
 			}
-			break;
+		case TagType::eBool:
+			{
+				Value newValue;
+				newValue.set<TagType::eBool>(value.toBool());
+				tagValue_.insert(tagValue_.begin() + pos, newValue);
+				break;
+			}
+		case TagType::eString:
+			{
+				Value newValue;
+				newValue.set<TagType::eString>(value.toString());
+				tagValue_.insert(tagValue_.begin() + pos, newValue);
+				break;
+			}
+		case TagType::eTime:
+			{
+				if (value.metaType().id() == QMetaType::LongLong) {
+					Value newValue;
+					newValue.set<TagType::eTime>(value.toLongLong());
+					tagValue_.insert(tagValue_.begin() + pos, newValue);
+				}
+				else if (value.metaType().id() == QMetaType::QDateTime) {
+					QDateTime newTime = value.toDateTime();
+					Value newValue;
+					newValue.set<TagType::eTime>(newTime.toMSecsSinceEpoch());
+					tagValue_.insert(tagValue_.begin() + pos, newValue);
+				}
+				break;
+			}
 		default:
 			qWarning() << "Insert invalid value type to tag: " << getFullName();
 			return;
@@ -332,28 +365,34 @@ void Tag::push_back(QVariant value)
 	}
 	switch (type_) {
 	case TagType::eInt:
-		tagValue_.push_back(value.toInt());
+		tagValue_.push_back(Value());
+		tagValue_.back().set<TagType::eInt>(value.toInt());
 		break;
 	case TagType::eDouble:
-		tagValue_.push_back(value.toDouble());
+		tagValue_.push_back(Value());
+		tagValue_.back().set<TagType::eDouble>(value.toDouble());
 		break;
 	case TagType::eBool:
-		tagValue_.push_back(value.toBool());
+		tagValue_.push_back(Value());
+		tagValue_.back().set<TagType::eBool>(value.toBool());
 		break;
 	case TagType::eString:
-		tagValue_.push_back(value.toString());
+		tagValue_.push_back(Value());
+		tagValue_.back().set<TagType::eString>(value.toString());
 		break;
 	case TagType::eTime:
 		if (value.metaType().id() == QMetaType::LongLong) {
 			qint64 newValue = value.toLongLong();
-			tagValue_.push_back(newValue);
+			tagValue_.push_back(Value());
+			tagValue_.back().set<TagType::eTime>(newValue);
 		} else if (value.metaType().id() == QMetaType::QDateTime) {
 			QDateTime newTime = value.toDateTime();
 			if (!newTime.isValid()) {
 				qWarning() << "Invalid time format for tag: " << getFullName();
 				return;
 			}
-			tagValue_.push_back(newTime.toMSecsSinceEpoch());
+			tagValue_.push_back(Value());
+			tagValue_.back().set<TagType::eTime>(newTime.toMSecsSinceEpoch());
 		} else {
 			qWarning() << "Push back invalid value type to tag: " << getFullName();
 			return;
@@ -445,12 +484,11 @@ double Tag::getDoubleValue() const
 {
 	if(tagValue_.empty())
 		return 0.0;
-	try{
-		return std::get<double>(tagValue_[0]);
-	}catch(const std::bad_variant_access& ex){
-		qDebug() << ex.what();
+
+	if(!tagValue_[0].is<TagType::eDouble>())
 		return 0.0;
-	}
+
+	return tagValue_[0].get<TagType::eDouble>();
 }
 
 
@@ -458,13 +496,11 @@ int Tag::getIntValue() const
 {
 	if(tagValue_.empty())
 		return 0;
-	try{
-		int v = std::get<int>(tagValue_[0]);
-		return v;
-	}catch(const std::bad_variant_access& ex){
-		qDebug() << ex.what();
+
+	if(!tagValue_[0].is<TagType::eInt>())
 		return 0;
-	}
+
+	return tagValue_[0].get<TagType::eInt>();
 }
 
 
@@ -472,14 +508,11 @@ bool Tag::getBoolValue() const
 {
 	if(tagValue_.empty())
 		return false;
-	try{
-		return std::get<bool>(tagValue_[0]);
-	}
-	catch(const std::bad_variant_access& ex)
-	{
-		qDebug() << ex.what();
+
+	if(!tagValue_[0].is<TagType::eBool>())
 		return false;
-	}
+
+	return tagValue_[0].get<TagType::eBool>();
 }
 
 
@@ -487,28 +520,24 @@ QString Tag::getStringValue() const
 {
 	if(tagValue_.empty())
 		return {};
-	try{
-		return std::get<QString>(tagValue_[0]);
-	}
-	catch(const std::bad_variant_access& ex)
-	{
-		qDebug() << ex.what();
+
+	if(!tagValue_[0].is<TagType::eString>())
 		return {};
-	}
+
+	return tagValue_[0].get<TagType::eString>();
 }
 
 QDateTime Tag::getTimeValue() const
 {
 	if(tagValue_.empty())
 		return QDateTime::fromMSecsSinceEpoch(0);
-	try{
-		qint64 time = std::get<qint64>(tagValue_[0]);
-		return QDateTime::fromMSecsSinceEpoch(time);
-	}catch(const std::bad_variant_access& ex){
-		qDebug() << ex.what();
+
+	if(!tagValue_[0].is<TagType::eTime>())
 		return QDateTime::fromMSecsSinceEpoch(0);
-	}
+
+	return QDateTime::fromMSecsSinceEpoch(tagValue_[0].get<TagType::eTime>());
 }
+
 
 QString Tag::enumValue(int value) const
 {
@@ -623,7 +652,7 @@ QByteArray Tag::toMessage()
            float f;
            char byte[4];
         }u;
-		u.f = (float)std::get<double>(tagValue_[0]);
+		u.f = (float)tagValue_[0].get<TagType::eDouble>();
         ba.append(u.byte, 4);
     }
     else if(type_ == TagType::eInt)
@@ -633,13 +662,13 @@ QByteArray Tag::toMessage()
             int i;
             char byte[4];
         }u;
-		u.i = std::get<int>(tagValue_[0]);
+		u.i = tagValue_[0].get<TagType::eInt>();
         ba.append(u.byte, 4);
     }
     else if(type_ == TagType::eBool)
     {
         ba.append(":b");
-		ba.append(std::get<bool>(tagValue_[0]) ? char(1) : char(0));
+		ba.append(tagValue_[0].get<TagType::eBool>() ? char(1) : char(0));
     }
     else
         Q_UNREACHABLE();
@@ -651,17 +680,30 @@ const QJsonObject &Tag::toJson()
 {
 	QJsonArray tagValueArray;
 
-	auto toJsonArray = Overload([&tagValueArray](int val) { tagValueArray.append(val); },
-						 [&tagValueArray](double val) { tagValueArray.append(val); },
-						 [&tagValueArray](bool val) { tagValueArray.append(val ? 1 : 0); },
-						 [&tagValueArray](QString val){tagValueArray.append(val);},
-						 [&tagValueArray](qint64 val){ tagValueArray.append(val); }
-						);
 
-	auto crateJsonArray = [&toJsonArray](const auto &tagValueList){
-		for(const auto &val : tagValueList)
+	auto crateJsonArray = [&tagValueArray](const auto &tagValueList){
+		for(const Value &val : tagValueList)
 		{
-			std::visit(toJsonArray, val);
+			if(val.is<TagType::eDouble>())
+			{
+				tagValueArray.append(val.get<TagType::eDouble>());
+			}
+			else if(val.is<TagType::eInt>())
+			{
+				tagValueArray.append(val.get<TagType::eInt>());
+			}
+			else if(val.is<TagType::eBool>())
+			{
+				tagValueArray.append(val.get<TagType::eBool>() ? 1 : 0);
+			}
+			else if(val.is<TagType::eString>())
+			{
+				tagValueArray.append(QString(val.get<TagType::eString>()));
+			}
+			else if(val.is<TagType::eTime>())
+			{
+				tagValueArray.append(val.get<TagType::eTime>());
+			}
 		}
 	};
 
@@ -760,27 +802,27 @@ bool Tag::isEqual(const QVariantList &list) const
 	{
 		if(type_ == TagType::eInt)
 		{
-			if(std::get<int>(tagValue_[i++]) != value.toInt())
+			if(tagValue_[i++] != value.toInt())
 				return false;
 		}
 		else if(type_ == TagType::eDouble)
 		{
-			if(!qFuzzyCompare(std::get<double>(tagValue_[i++]), value.toDouble()))
+			if((tagValue_[i++] != value.toDouble()))
 				return false;
 		}
 		else if(type_ == TagType::eBool)
 		{
-			if(std::get<bool>(tagValue_[i++]) != value.toBool())
+			if(tagValue_[i++] != value.toBool())
 				return false;
 		}
 		else if(type_ == TagType::eString)
 		{
-			if(std::get<QString>(tagValue_[i++]) != value.toString())
+			if(tagValue_[i++] != value.toString())
 				return false;
 		}
 		else if(type_ == TagType::eTime)
 		{
-			if(std::get<qint64>(tagValue_[i++]) != value.toLongLong())
+			if(tagValue_[i++] != value.toLongLong())
 				return false;
 		}
 	}

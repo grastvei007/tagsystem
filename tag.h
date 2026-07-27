@@ -97,8 +97,7 @@ private:
     QString description_ = {};
 
     // QTime is stored as qint64
-	using tagValue_t = TagValueVariant<TagType::eDouble, TagType::eInt, TagType::eBool, TagType::eString, TagType::eTime>;
-	std::vector<tagValue_t> tagValue_;
+	std::vector<Value> tagValue_;
 	bool isArray_ = false;
 
     QString timeStampFormat_ = "dd.MM.yyyy hh:mm:ss.zzz";
