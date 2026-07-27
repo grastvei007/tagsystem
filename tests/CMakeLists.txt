@@ -22,7 +22,8 @@ add_executable(test_tagsystem
     test_taglist.cpp
     test_util_time.cpp
     test_clientinformation.cpp
-    test_tagarray.cpp)
+    test_tagarray.cpp
+    test_tagvalue.cpp)
 
 
 target_link_libraries(test_tagsystem ${gtest_LIBRARIES} tagsystem)
