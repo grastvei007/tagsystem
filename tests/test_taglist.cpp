@@ -20,16 +20,16 @@ protected:
 
     int createTags()
     {
-        TagList::sGetInstance().createTag("subsystem1", "name1", TagType::eInt, 10, "test1");
-        TagList::sGetInstance().createTag("subsystem1", "name2", TagType::eInt, 20, "test2");
-        TagList::sGetInstance().createTag("subsystem1", "name3", TagType::eInt, 30, "test3");
-        TagList::sGetInstance().createTag("subsystem1", "name4", TagType::eInt, 40, "test4");
-        TagList::sGetInstance().createTag("subsystem2", "name5", TagType::eInt, 50, "test5");
-        TagList::sGetInstance().createTag("subsystem2", "name6", TagType::eInt, 60, "test6");
-        TagList::sGetInstance().createTag("subsystem2", "name7", TagType::eInt, 70, "test7");
-        TagList::sGetInstance().createTag("subsystem3", "name8", TagType::eInt, 80, "test8");
-        TagList::sGetInstance().createTag("subsystem3", "name9", TagType::eInt, 90, "test9");
-        TagList::sGetInstance().createTag("subsystem3", "name10", TagType::eInt, 100, "test10");
+		TagList::sGetInstance().createTag("subsystem1", "name1", TagType::eInt, 10, "test1", false);
+		TagList::sGetInstance().createTag("subsystem1", "name2", TagType::eInt, 20, "test2", false);
+		TagList::sGetInstance().createTag("subsystem1", "name3", TagType::eInt, 30, "test3", false);
+		TagList::sGetInstance().createTag("subsystem1", "name4", TagType::eInt, 40, "test4", false);
+		TagList::sGetInstance().createTag("subsystem2", "name5", TagType::eInt, 50, "test5", false);
+		TagList::sGetInstance().createTag("subsystem2", "name6", TagType::eInt, 60, "test6", false);
+		TagList::sGetInstance().createTag("subsystem2", "name7", TagType::eInt, 70, "test7", false);
+		TagList::sGetInstance().createTag("subsystem3", "name8", TagType::eInt, 80, "test8", false);
+		TagList::sGetInstance().createTag("subsystem3", "name9", TagType::eInt, 90, "test9", false);
+		TagList::sGetInstance().createTag("subsystem3", "name10", TagType::eInt, 100, "test10", false);
 
         return 10; // number of tags created
     }

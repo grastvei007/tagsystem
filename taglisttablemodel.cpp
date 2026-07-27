@@ -99,7 +99,10 @@ QVariant TagListTableModel::data(const QModelIndex &index, int role) const
         }
         case eType:
         {
-            return tag->getTypeStr();
+			if(tag->isArray())
+				return "[" + tag->getTypeStr() + "]";
+			else
+				return tag->getTypeStr();
         }
         case eValue:
         {
